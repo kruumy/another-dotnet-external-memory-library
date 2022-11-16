@@ -22,9 +22,6 @@ namespace AnotherExternalMemoryLibrary
         public ProcessEx(Process targetProcess)
         {
             BaseProcess = targetProcess;
-            if (Is64Bit != PointerEx.Is64Bit)
-                Console.Error.WriteLine("Warning: Mismatching Architectures");
-
         }
         #region Read&Write
         public byte[] Read(PointerEx addr, PointerEx NumOfBytes)
