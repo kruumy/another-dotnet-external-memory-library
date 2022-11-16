@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,6 +35,26 @@ namespace AnotherExternalMemoryLibrary
                 }
             }
             return Encoding.Default.GetString(bytes, 0, length);
+        }
+        public static string GetHexString(this byte[] bytes)
+        {
+            StringBuilder hex = new StringBuilder(bytes.Length * 2);
+            foreach (byte b in bytes)
+            {
+                hex.AppendFormat("{0:x2} ", b);
+            }
+            return hex.ToString();
+        }
+        public static ProcessModule GetByName(this ProcessModuleCollection modules, string name)
+        {
+            foreach (ProcessModule item in modules)
+                if (item.ModuleName == name)
+                    return item;
+            throw new Exception("Name Did Not Match Any ModuleNames");
+        }
+        public static PointerEx ToPointerEx(this IntPtr ip)
+        {
+            return new PointerEx(ip);
         }
     }
 }

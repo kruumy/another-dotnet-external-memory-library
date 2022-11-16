@@ -17,6 +17,13 @@ namespace AnotherExternalMemoryLibrary
         {
             IntPtr = value;
         }
+        public PointerEx(UIntPtr value)
+        {
+            if (Is64Bit)
+                IntPtr = (IntPtr)(long)(ulong)value;
+            else
+                IntPtr = (IntPtr)(int)(uint)value;
+        }
         public PointerEx(long value)
         {
             IntPtr = new IntPtr(value);
@@ -24,6 +31,13 @@ namespace AnotherExternalMemoryLibrary
         public PointerEx(int value)
         {
             IntPtr = new IntPtr(value);
+        }
+        public override string ToString()
+        {
+            if (Is64Bit)
+                return IntPtr.ToInt64().ToString($"X{IntPtr.Size * 2}");
+            else
+                return IntPtr.ToInt32().ToString($"X{IntPtr.Size}");
         }
         #region Operators
         public static PointerEx operator +(PointerEx px, PointerEx pxo)
@@ -48,19 +62,32 @@ namespace AnotherExternalMemoryLibrary
         {
             return px.IntPtr != pxo.IntPtr;
         }
-        #endregion
-        public override string ToString()
+        public static bool operator >(PointerEx px, PointerEx pxo)
         {
             if (Is64Bit)
-                return IntPtr.ToInt64().ToString($"X{IntPtr.Size * 2}");
+                return px.IntPtr.ToInt64() > pxo.IntPtr.ToInt64();
             else
-                return IntPtr.ToInt32().ToString($"X{IntPtr.Size}");
+                return px.IntPtr.ToInt32() > pxo.IntPtr.ToInt32();
         }
-
+        public static bool operator <(PointerEx px, PointerEx pxo)
+        {
+            if (Is64Bit)
+                return px.IntPtr.ToInt64() < pxo.IntPtr.ToInt64();
+            else
+                return px.IntPtr.ToInt32() < pxo.IntPtr.ToInt32();
+        }
+        #endregion
         #region Type Conversion
         public static implicit operator IntPtr(PointerEx px)
         {
             return px.IntPtr;
+        }
+        public static implicit operator UIntPtr(PointerEx px)
+        {
+            if (Is64Bit)
+                return new UIntPtr(((ulong)px.IntPtr.ToInt64()));
+            else
+                return new UIntPtr(((uint)px.IntPtr.ToInt32()));
         }
         public static implicit operator PointerEx(IntPtr ip)
         {
@@ -83,12 +110,12 @@ namespace AnotherExternalMemoryLibrary
 
         public static implicit operator int(PointerEx px)
         {
-            return (int)px.IntPtr.ToInt64();
+            return (int)px.IntPtr.ToInt32();
         }
 
         public static implicit operator uint(PointerEx px)
         {
-            return (uint)px.IntPtr.ToInt64();
+            return (uint)px.IntPtr.ToInt32();
         }
 
         public static implicit operator long(PointerEx px)

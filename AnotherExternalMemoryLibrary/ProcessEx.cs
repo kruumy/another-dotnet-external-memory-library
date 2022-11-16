@@ -9,6 +9,8 @@ namespace AnotherExternalMemoryLibrary
     {
         public Process BaseProcess { get; private set; }
         public PointerEx BaseAddress => BaseProcess.MainModule?.BaseAddress ?? IntPtr.Zero;
+        public PointerEx Handle => BaseProcess.Handle;
+        public ProcessModuleCollection Modules => BaseProcess.Modules;
         public bool Is64Bit
         {
             get
@@ -34,10 +36,11 @@ namespace AnotherExternalMemoryLibrary
         }
         public T Read<T>(PointerEx addr)
         {
-            if (typeof(T) == typeof(string)) return (dynamic)Read(addr, 1023).GetString();
-            if (typeof(T) == typeof(char[])) return (dynamic)Read(addr, 1023).GetString().ToCharArray();
-
-            PointerEx size = Marshal.SizeOf(typeof(T));
+            PointerEx size = IntPtr.Zero;
+            if (typeof(T) == typeof(string) || typeof(T) == typeof(char[]))
+                size = 1023;
+            else
+                size = Marshal.SizeOf(typeof(T));
             byte[] data = Read(addr, size);
 
             if (typeof(T) == typeof(PointerEx) || typeof(T) == typeof(IntPtr))
@@ -53,6 +56,8 @@ namespace AnotherExternalMemoryLibrary
             if (typeof(T) == typeof(short)) return (dynamic)BitConverter.ToInt16(data);
             if (typeof(T) == typeof(ushort)) return (dynamic)BitConverter.ToUInt16(data);
             if (typeof(T) == typeof(bool)) return (dynamic)BitConverter.ToBoolean(data);
+            if (typeof(T) == typeof(string)) return (dynamic)data.GetString();
+            if (typeof(T) == typeof(char[])) return (dynamic)data.GetString().ToCharArray();
             if (typeof(T) == typeof(char)) return (dynamic)Convert.ToChar(data[0]);
             if (typeof(T) == typeof(byte)) return (dynamic)data[0];
             if (typeof(T) == typeof(sbyte)) return (dynamic)data[0];
@@ -64,6 +69,7 @@ namespace AnotherExternalMemoryLibrary
             Imports.VirtualProtectEx(BaseProcess.Handle, addr, bytes.Length, Imports.MemoryProtection.ExecuteReadWrite, out int oldProtection);
             Imports.WriteProcessMemory(BaseProcess.Handle, addr, bytes, bytes.Length, ref bytesWritten);
             Imports.VirtualProtectEx(BaseProcess.Handle, addr, bytes.Length, (Imports.MemoryProtection)oldProtection, out int _);
+            Console.WriteLine(oldProtection);
         }
         public void Write<T>(PointerEx addr, T value)
         {
@@ -86,6 +92,22 @@ namespace AnotherExternalMemoryLibrary
             else if (value is byte[] ba) data = ba;
             else throw new Exception($"Invalid Type {typeof(T)}");
             Write(addr, data);
+        }
+        #endregion
+        #region Misc
+        public PointerEx this[PointerEx BaseOffset]
+        {
+            get
+            {
+                return BaseAddress + BaseOffset;
+            }
+        }
+        public ProcessModule this[string name]
+        {
+            get
+            {
+                return Modules.GetByName(name);
+            }
         }
         #endregion
     }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static AnotherExternalMemoryLibrary.Imports;
 
 namespace AnotherExternalMemoryLibrary
 {
@@ -19,6 +21,34 @@ namespace AnotherExternalMemoryLibrary
         public static byte[] NOP(PointerEx NumOfBytes)
         {
             return Enumerable.Repeat((byte)0x90, NumOfBytes).ToArray();
+        }
+        public static void DumpProcessMemory(ProcessEx mem, string? path = null)
+        {
+            path ??= $"{mem.BaseProcess.ProcessName}_{mem.BaseProcess.UserProcessorTime.ToString().Replace(':', '_')}.dmp";
+            if (File.Exists(path)) File.Delete(path);
+
+            Imports.SYSTEM_INFO sys_info = new Imports.SYSTEM_INFO();
+            Imports.GetSystemInfo(out sys_info);
+
+            PointerEx proc_min_address = mem.BaseAddress;
+            PointerEx proc_max_address = mem.BaseProcess.WorkingSet64 + proc_min_address;
+
+            PointerEx i = proc_min_address;
+            MEMORY_BASIC_INFORMATION memInfo = new MEMORY_BASIC_INFORMATION();
+            while (i < proc_max_address)
+            {
+                VirtualQueryEx(mem.BaseProcess.Handle, sys_info.lpMinimumApplicationAddress, out memInfo, new UIntPtr(sys_info.dwPageSize));
+
+                byte[] bytes = mem.Read(i, memInfo.RegionSize);
+                AppendAllBytes(path, bytes);
+
+                i += memInfo.RegionSize;
+            }
+        }
+        public static void AppendAllBytes(string path, byte[] bytes)
+        {
+            using var stream = new FileStream(path, FileMode.Append);
+            stream.Write(bytes, 0, bytes.Length);
         }
     }
 }
