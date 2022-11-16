@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using static AnotherExternalMemoryLibrary.Win32;
@@ -70,6 +71,11 @@ namespace AnotherExternalMemoryLibrary
             tkpPrivileges.Attributes = (uint)SE_PRIVILEGE.ENABLED;
             AdjustTokenPrivileges(hToken, false, ref tkpPrivileges, 0, IntPtr.Zero, IntPtr.Zero);
             CloseHandle(hToken);
+        }
+        public static bool IsAdministrator()
+        {
+            return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
+                      .IsInRole(WindowsBuiltInRole.Administrator);
         }
     }
 }
