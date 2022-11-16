@@ -50,5 +50,27 @@ namespace AnotherExternalMemoryLibrary
             using var stream = new FileStream(path, FileMode.Append);
             stream.Write(bytes, 0, bytes.Length);
         }
+        public static void GoDebugPriv()
+        {
+            PointerEx hToken;
+            LUID luidSEDebugNameValue;
+            TOKEN_PRIVILEGES tkpPrivileges;
+
+            if (!OpenProcessToken(GetCurrentProcess(), (uint)(Privileges.TOKEN_ADJUST_PRIVILEGES | Privileges.TOKEN_QUERY), out hToken))
+            {
+                return;
+            }
+            if (!LookupPrivilegeValue(null, "SeDebugPrivilege", out luidSEDebugNameValue))
+            {
+                CloseHandle(hToken);
+                return;
+            }
+            tkpPrivileges.PrivilegeCount = 1;
+            tkpPrivileges.Luid = luidSEDebugNameValue;
+            tkpPrivileges.Attributes = (uint)SE_PRIVILEGE.ENABLED;
+            AdjustTokenPrivileges(hToken, false, ref tkpPrivileges, 0, IntPtr.Zero, IntPtr.Zero);
+            CloseHandle(hToken);
+        }
     }
 }
+
