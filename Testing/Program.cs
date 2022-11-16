@@ -13,11 +13,14 @@ namespace Testing
 
             //mem.Read<float>(mem.BaseAddress + 0x5FFCBA0);
             //Console.WriteLine(mem.Read<string>(mem.BaseAddress + 0x5EE27A0));
-            Console.WriteLine(mem.BaseAddress.ToString());
-            Console.WriteLine(mem.Modules.GetByName("UnityPlayer.dll").BaseAddress.ToPointerEx().ToString());
-            Console.WriteLine(mem["UnityPlayer.dll"].BaseAddress.ToPointerEx().ToString());
-            Console.WriteLine(mem[0xF].ToString());
-            Console.WriteLine(mem[0xF].ToString());
+
+            int ttt = 3456;
+            Console.WriteLine(BitConverter.ToString(BitConverter.GetBytes(ttt)));
+            PointerEx[] result = mem.Scan<int>(3456, mem.BaseProcess.MainModule);
+            foreach (var item in result)
+            {
+                Console.WriteLine(item.ToString());
+            }
         }
 
     }

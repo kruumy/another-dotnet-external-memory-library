@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using static AnotherExternalMemoryLibrary.Imports;
+using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
 {
@@ -27,8 +27,8 @@ namespace AnotherExternalMemoryLibrary
             path ??= $"{mem.BaseProcess.ProcessName}_{mem.BaseProcess.UserProcessorTime.ToString().Replace(':', '_')}.dmp";
             if (File.Exists(path)) File.Delete(path);
 
-            Imports.SYSTEM_INFO sys_info = new Imports.SYSTEM_INFO();
-            Imports.GetSystemInfo(out sys_info);
+            Win32.SYSTEM_INFO sys_info = new Win32.SYSTEM_INFO();
+            Win32.GetSystemInfo(out sys_info);
 
             PointerEx proc_min_address = mem.BaseAddress;
             PointerEx proc_max_address = mem.BaseProcess.WorkingSet64 + proc_min_address;

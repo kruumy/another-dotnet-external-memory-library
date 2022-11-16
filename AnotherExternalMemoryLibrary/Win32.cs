@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AnotherExternalMemoryLibrary
 {
-    public static class Imports
+    public static class Win32
     {
         public enum ProcessAccess
         {

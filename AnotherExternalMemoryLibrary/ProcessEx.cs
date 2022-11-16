@@ -15,7 +15,7 @@ namespace AnotherExternalMemoryLibrary
         {
             get
             {
-                Imports.IsWow64Process(BaseProcess.Handle, out bool _Is32Bit);
+                Win32.IsWow64Process(BaseProcess.Handle, out bool _Is32Bit);
                 return !_Is32Bit;
             }
         }
@@ -28,7 +28,7 @@ namespace AnotherExternalMemoryLibrary
         {
             byte[] data = new byte[NumOfBytes];
             PointerEx bytesRead = IntPtr.Zero;
-            Imports.ReadProcessMemory(BaseProcess.Handle, addr, data, NumOfBytes, ref bytesRead);
+            Win32.ReadProcessMemory(BaseProcess.Handle, addr, data, NumOfBytes, ref bytesRead);
             return data;
         }
         public T Read<T>(PointerEx addr)
@@ -46,6 +46,7 @@ namespace AnotherExternalMemoryLibrary
                 else
                     return (dynamic)(PointerEx)BitConverter.ToInt32(data);
             if (typeof(T) == typeof(float)) return (dynamic)BitConverter.ToSingle(data);
+            if (typeof(T) == typeof(double)) return (dynamic)BitConverter.ToDouble(data);
             if (typeof(T) == typeof(long)) return (dynamic)BitConverter.ToInt64(data);
             if (typeof(T) == typeof(ulong)) return (dynamic)BitConverter.ToUInt64(data);
             if (typeof(T) == typeof(int)) return (dynamic)BitConverter.ToInt32(data);
@@ -63,9 +64,9 @@ namespace AnotherExternalMemoryLibrary
         public void Write(PointerEx addr, byte[] bytes)
         {
             PointerEx bytesWritten = IntPtr.Zero;
-            Imports.VirtualProtectEx(BaseProcess.Handle, addr, bytes.Length, Imports.MemoryProtection.ExecuteReadWrite, out int oldProtection);
-            Imports.WriteProcessMemory(BaseProcess.Handle, addr, bytes, bytes.Length, ref bytesWritten);
-            Imports.VirtualProtectEx(BaseProcess.Handle, addr, bytes.Length, (Imports.MemoryProtection)oldProtection, out int _);
+            Win32.VirtualProtectEx(BaseProcess.Handle, addr, bytes.Length, Win32.MemoryProtection.ExecuteReadWrite, out int oldProtection);
+            Win32.WriteProcessMemory(BaseProcess.Handle, addr, bytes, bytes.Length, ref bytesWritten);
+            Win32.VirtualProtectEx(BaseProcess.Handle, addr, bytes.Length, (Win32.MemoryProtection)oldProtection, out int _);
             Console.WriteLine(oldProtection);
         }
         public void Write<T>(PointerEx addr, T value)
@@ -74,6 +75,7 @@ namespace AnotherExternalMemoryLibrary
             if (value is IntPtr ip) data = !Is64Bit ? BitConverter.GetBytes(ip.ToInt32()) : BitConverter.GetBytes(ip.ToInt64());
             else if (value is PointerEx ipx) data = !Is64Bit ? BitConverter.GetBytes(ipx.IntPtr.ToInt32()) : BitConverter.GetBytes(ipx.IntPtr.ToInt64());
             else if (value is float f) data = BitConverter.GetBytes(f);
+            else if (value is double d) data = BitConverter.GetBytes(d);
             else if (value is long l) data = BitConverter.GetBytes(l);
             else if (value is ulong ul) data = BitConverter.GetBytes(ul);
             else if (value is int i) data = BitConverter.GetBytes(i);
@@ -89,6 +91,78 @@ namespace AnotherExternalMemoryLibrary
             else if (value is byte[] ba) data = ba;
             else throw new Exception($"Invalid Type {typeof(T)}");
             Write(addr, data);
+        }
+        #endregion
+        #region Scanning
+        public PointerEx[] Scan(byte[] arrPattern, ProcessModule? targetModule = null)
+        {
+            List<ProcessModule> processModules = new List<ProcessModule>();
+            if (targetModule == null)
+                foreach (ProcessModule pm in Modules)
+                    processModules.Add(pm);
+            else
+                processModules.Add(targetModule);
+
+            List<PointerEx> result = new List<PointerEx>();
+            foreach (ProcessModule item in processModules)
+            {
+                PointerEx g_lpModuleBase = item.BaseAddress;
+                byte[] g_arrModuleBuffer = Read(g_lpModuleBase, item.ModuleMemorySize);
+
+                for (int nModuleIndex = 0; nModuleIndex < g_arrModuleBuffer.Length; nModuleIndex++)
+                {
+                    if (g_arrModuleBuffer[nModuleIndex] != arrPattern[0])
+                        continue;
+
+                    bool PatternCheck(int nOffset, byte[] arrPattern)
+                    {
+                        for (int i = 0; i < arrPattern.Length; i++)
+                        {
+                            if (arrPattern[i] == 0x0)
+                                continue;
+
+                            if (arrPattern[i] != g_arrModuleBuffer[nOffset + i])
+                                return false;
+                        }
+
+                        return true;
+                    }
+                    if (PatternCheck(nModuleIndex, arrPattern))
+                    {
+
+                        result.Add(g_lpModuleBase + nModuleIndex);
+                    }
+                }
+            }
+            return result.ToArray();
+
+        }
+        public PointerEx[] Scan(string query, ProcessModule? targetModule = null)
+        {
+            List<byte> patternbytes = new List<byte>();
+            foreach (var szByte in query.Split(' '))
+                patternbytes.Add(szByte == "?" ? (byte)0x0 : Convert.ToByte(szByte, 16));
+            return Scan(patternbytes.ToArray(), targetModule);
+        }
+        public PointerEx[] Scan<T>(T value, ProcessModule? targetModule = null)
+        {
+            if (value is IntPtr ip) return !Is64Bit ? Scan(BitConverter.GetBytes(ip.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ip.ToInt64()), targetModule);
+            else if (value is PointerEx ipx) return !Is64Bit ? Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt64()), targetModule);
+            else if (value is string str) return Scan(str.ToByteArray(), targetModule);
+            else if (value is int i) return Scan(BitConverter.GetBytes(i), targetModule);
+            else if (value is uint ui) return Scan(BitConverter.GetBytes(ui), targetModule);
+            else if (value is long l) return Scan(BitConverter.GetBytes(l), targetModule);
+            else if (value is ulong ul) return Scan(BitConverter.GetBytes(ul), targetModule);
+            else if (value is float f) return Scan(BitConverter.GetBytes(f), targetModule);
+            else if (value is short s) return Scan(BitConverter.GetBytes(s), targetModule);
+            else if (value is ushort us) return Scan(BitConverter.GetBytes(us), targetModule);
+            else if (value is bool bo) return Scan(BitConverter.GetBytes(bo), targetModule);
+            else if (value is char c) return Scan(BitConverter.GetBytes(c), targetModule);
+            else if (value is double d) return Scan(BitConverter.GetBytes(d), targetModule);
+            else if (value is byte b) return Scan(new byte[] { b }, targetModule);
+            else if (value is sbyte sb) return Scan(new byte[] { (byte)sb }, targetModule);
+            else if (value is byte[] ba) return Scan(ba, targetModule);
+            else throw new Exception($"Invalid Type {typeof(T)}");
         }
         #endregion
         #region Misc
