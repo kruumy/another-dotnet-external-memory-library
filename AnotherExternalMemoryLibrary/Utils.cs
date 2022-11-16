@@ -37,7 +37,7 @@ namespace AnotherExternalMemoryLibrary
             MEMORY_BASIC_INFORMATION memInfo = new MEMORY_BASIC_INFORMATION();
             while (i < proc_max_address)
             {
-                VirtualQueryEx(mem.BaseProcess.Handle, sys_info.lpMinimumApplicationAddress, out memInfo, new UIntPtr(sys_info.dwPageSize));
+                VirtualQueryEx(mem.BaseProcess.Handle, sys_info.lpMinimumApplicationAddress, out memInfo, sys_info.dwPageSize);
 
                 byte[] bytes = mem.Read(i, memInfo.RegionSize);
                 AppendAllBytes(path, bytes);
