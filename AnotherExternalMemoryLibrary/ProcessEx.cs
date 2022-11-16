@@ -11,14 +11,6 @@ namespace AnotherExternalMemoryLibrary
         public PointerEx BaseAddress => BaseProcess.MainModule?.BaseAddress ?? IntPtr.Zero;
         public PointerEx Handle => BaseProcess.Handle;
         public ProcessModuleCollection Modules => BaseProcess.Modules;
-        public bool Is64Bit
-        {
-            get
-            {
-                Win32.IsWow64Process(BaseProcess.Handle, out bool _Is32Bit);
-                return !_Is32Bit;
-            }
-        }
         public ProcessEx(Process targetProcess)
         {
             BaseProcess = targetProcess;
