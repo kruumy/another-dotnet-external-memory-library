@@ -1,9 +1,6 @@
-﻿using System.Diagnostics;
-using System.Reflection.Metadata;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
-using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
 {
@@ -18,7 +15,7 @@ namespace AnotherExternalMemoryLibrary
             BaseProcess = targetProcess;
         }
         #region Read&Write
-        public byte[] Read(PointerEx addr, PointerEx NumOfBytes)
+        public byte[] Read(PointerEx addr, int NumOfBytes)
         {
             byte[] data = new byte[NumOfBytes];
             PointerEx bytesRead = IntPtr.Zero;
@@ -49,11 +46,21 @@ namespace AnotherExternalMemoryLibrary
             if (typeof(T) == typeof(ushort)) return (dynamic)BitConverter.ToUInt16(data);
             if (typeof(T) == typeof(bool)) return (dynamic)BitConverter.ToBoolean(data);
             if (typeof(T) == typeof(string)) return (dynamic)data.GetString();
-            if (typeof(T) == typeof(char[])) return (dynamic)data.GetString().ToCharArray();
             if (typeof(T) == typeof(char)) return (dynamic)Convert.ToChar(data[0]);
             if (typeof(T) == typeof(byte)) return (dynamic)data[0];
             if (typeof(T) == typeof(sbyte)) return (dynamic)data[0];
             throw new Exception($"Invalid Type {typeof(T)}");
+        }
+        public T[] Read<T>(PointerEx addr, int NumOfItems)
+        {
+            T[] arr = new T[NumOfItems];
+            int size = Marshal.SizeOf(typeof(T));
+            IEnumerable<byte> data = Read(addr, arr.Length * size);
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = data.Skip(i * size).Take(size).ToArray().ToStruct<T>();
+            }
+            return arr;
         }
         public void Write(PointerEx addr, byte[] bytes)
         {
@@ -78,13 +85,22 @@ namespace AnotherExternalMemoryLibrary
             else if (value is ushort u) data = BitConverter.GetBytes(u);
             else if (value is bool bo) data = BitConverter.GetBytes(bo);
             else if (value is char c) data = BitConverter.GetBytes(c);
-            else if (value is char[] ca) data = ca.ToByteArray();
             else if (value is string str) data = str.ToByteArray();
             else if (value is byte b) data = new byte[] { b };
             else if (value is sbyte sb) data = new byte[] { (byte)sb };
             else if (value is byte[] ba) data = ba;
             else throw new Exception($"Invalid Type {typeof(T)}");
             Write(addr, data);
+        }
+        public void Write<T>(PointerEx addr, T[] array)
+        {
+            int size = Marshal.SizeOf(typeof(T));
+            byte[] writeData = new byte[size * array.Length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i].ToByteArray().CopyTo(writeData, i * size);
+            }
+            Write(addr, writeData);
         }
         #endregion
         #region Scanning
