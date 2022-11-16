@@ -8,7 +8,7 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class Utils
     {
-        public static PointerEx OffsetCalculator(Memory mem, PointerEx baseAddr, PointerEx baseOffset, PointerEx[] offsets)
+        public static PointerEx OffsetCalculator(ProcessEx mem, PointerEx baseAddr, PointerEx baseOffset, PointerEx[] offsets)
         {
             PointerEx result = baseAddr + baseOffset;
             foreach (PointerEx offset in offsets)

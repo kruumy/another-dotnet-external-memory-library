@@ -5,21 +5,26 @@ using System.Text;
 
 namespace AnotherExternalMemoryLibrary
 {
-    public class Memory
+    public class ProcessEx
     {
         public Process BaseProcess { get; private set; }
-        public PointerEx BaseAddress { get; private set; }
-        public bool Is64Bit { get; private set; }
-        public Memory(Process targetProcess)
+        public PointerEx BaseAddress => BaseProcess.MainModule?.BaseAddress ?? IntPtr.Zero;
+        public bool Is64Bit
+        {
+            get
+            {
+                Imports.IsWow64Process(BaseProcess.Handle, out bool _Is32Bit);
+                return !_Is32Bit;
+            }
+        }
+        public ProcessEx(Process targetProcess)
         {
             BaseProcess = targetProcess;
-            BaseAddress = BaseProcess.MainModule?.BaseAddress ?? IntPtr.Zero;
-            Imports.IsWow64Process(BaseProcess.Handle, out bool _Is32Bit);
-            Is64Bit = !_Is32Bit;
             if (Is64Bit != PointerEx.Is64Bit)
-                Console.Error.WriteLine("Warning: Target Process Architecture != Process Architecture");
+                Console.Error.WriteLine("Warning: Mismatching Architectures");
 
         }
+        #region Read&Write
         public byte[] Read(PointerEx addr, PointerEx NumOfBytes)
         {
             byte[] data = new byte[NumOfBytes];
@@ -73,6 +78,6 @@ namespace AnotherExternalMemoryLibrary
             else throw new Exception($"Invalid Type {typeof(T)}");
             Write(addr, data);
         }
-
+        #endregion
     }
 }
