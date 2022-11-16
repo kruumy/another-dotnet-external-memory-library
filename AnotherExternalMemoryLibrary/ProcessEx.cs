@@ -72,8 +72,8 @@ namespace AnotherExternalMemoryLibrary
         public void Write<T>(PointerEx addr, T value)
         {
             byte[] data = Array.Empty<byte>();
-            if (value is IntPtr ip) data = !Is64Bit ? BitConverter.GetBytes(ip.ToInt32()) : BitConverter.GetBytes(ip.ToInt64());
-            else if (value is PointerEx ipx) data = !Is64Bit ? BitConverter.GetBytes(ipx.IntPtr.ToInt32()) : BitConverter.GetBytes(ipx.IntPtr.ToInt64());
+            if (value is IntPtr ip) data = !PointerEx.Is64Bit ? BitConverter.GetBytes(ip.ToInt32()) : BitConverter.GetBytes(ip.ToInt64());
+            else if (value is PointerEx ipx) data = !PointerEx.Is64Bit ? BitConverter.GetBytes(ipx.IntPtr.ToInt32()) : BitConverter.GetBytes(ipx.IntPtr.ToInt64());
             else if (value is float f) data = BitConverter.GetBytes(f);
             else if (value is double d) data = BitConverter.GetBytes(d);
             else if (value is long l) data = BitConverter.GetBytes(l);
@@ -146,8 +146,8 @@ namespace AnotherExternalMemoryLibrary
         }
         public PointerEx[] Scan<T>(T value, ProcessModule? targetModule = null)
         {
-            if (value is IntPtr ip) return !Is64Bit ? Scan(BitConverter.GetBytes(ip.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ip.ToInt64()), targetModule);
-            else if (value is PointerEx ipx) return !Is64Bit ? Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt64()), targetModule);
+            if (value is IntPtr ip) return !PointerEx.Is64Bit ? Scan(BitConverter.GetBytes(ip.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ip.ToInt64()), targetModule);
+            else if (value is PointerEx ipx) return !PointerEx.Is64Bit ? Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt64()), targetModule);
             else if (value is string str) return Scan(str.ToByteArray(), targetModule);
             else if (value is int i) return Scan(BitConverter.GetBytes(i), targetModule);
             else if (value is uint ui) return Scan(BitConverter.GetBytes(ui), targetModule);
