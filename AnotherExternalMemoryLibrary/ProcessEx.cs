@@ -191,12 +191,12 @@ namespace AnotherExternalMemoryLibrary
             else throw new Exception($"Invalid Type {typeof(T)}");
         }
         #endregion
-        #region Misc
+        #region Indexers
         /// <summary>
         /// Adds Offset To BaseAddress
         /// </summary>
-        /// <param name="BaseOffset">Offset</param>
-        /// <returns>Absolute Address</returns>
+        /// <param name="BaseOffset">Offset for BaseAddress</param>
+        /// <returns>Pointer</returns>
         public PointerEx this[PointerEx BaseOffset]
         {
             get
@@ -205,15 +205,44 @@ namespace AnotherExternalMemoryLibrary
             }
         }
         /// <summary>
-        /// Gets Module in BaseProcess that matches name
+        /// Adds Offsets to get Pointer
+        /// Uses Utils.OffsetCalculator()
         /// </summary>
-        /// <param name="name">Module Name</param>
-        /// <returns>ProcessModule Object</returns>
-        public ProcessModule this[string name]
+        /// <param name="BaseOffset">Offset for BaseAddress</param>
+        /// <param name="Offsets">Offsets for Pointer</param>
+        /// <returns>Pointer</returns>
+        public PointerEx this[PointerEx BaseOffset, PointerEx[] Offsets]
         {
             get
             {
-                return BaseProcess.Modules.GetByName(name);
+                return Utils.OffsetCalculator(Handle, BaseAddress, BaseOffset, Offsets);
+            }
+        }
+        /// <summary>
+        /// Adds Offsets to get Pointer
+        /// Uses Utils.OffsetCalculator()
+        /// </summary>
+        /// <param name="ModuleName">Name of target module</param>
+        /// <param name="ModuleOffset">Offset for ModuleAddress</param>
+        /// <param name="Offsets">Offsets for Pointer</param>
+        /// <returns>Pointer</returns>
+        public PointerEx this[string ModuleName, PointerEx ModuleOffset, PointerEx[] Offsets]
+        {
+            get
+            {
+                return Utils.OffsetCalculator(Handle, this[ModuleName], ModuleOffset, Offsets);
+            }
+        }
+        /// <summary>
+        /// Gets Module Address in BaseProcess that matches name
+        /// </summary>
+        /// <param name="ModuleName">Module Name</param>
+        /// <returns>Module BaseAddress</returns>
+        public PointerEx this[string ModuleName]
+        {
+            get
+            {
+                return BaseProcess.Modules.GetByName(ModuleName).BaseAddress;
             }
         }
         #endregion
