@@ -9,7 +9,6 @@ namespace AnotherExternalMemoryLibrary
             PROCESS_CREATE_THREAD = 0x02,
             PROCESS_ACCESS = PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_CREATE_THREAD | 0x0040,
             PROCESS_QUERY_INFORMATION = 0x0400,
-            PAGE_READWRITE = 0x04,
             PROCESS_VM_READ = 0x0010,
             PROCESS_VM_WRITE = 0x0020,
             PROCESS_VM_OPERATION = 0x0008
@@ -216,6 +215,8 @@ namespace AnotherExternalMemoryLibrary
         public static extern PointerEx WaitForSingleObject(PointerEx handle, PointerEx milliseconds);
         [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true)]
         public static extern PointerEx GetProcAddress(PointerEx hModule, string procName);
+        [DllImport("kernel32")]
+        public static extern bool VirtualFree(PointerEx lpAddress, PointerEx dwSize, AllocationType dwFreeType);
 
 
     }
