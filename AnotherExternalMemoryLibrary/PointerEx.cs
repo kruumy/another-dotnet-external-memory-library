@@ -4,6 +4,7 @@
     {
         public static bool Is32Bit => IntPtr.Size == sizeof(int);
         public static bool Is64Bit => IntPtr.Size == sizeof(long);
+        public static int Size => IntPtr.Size;
 
         public IntPtr IntPtr { get; set; }
         public PointerEx(IntPtr value)
@@ -16,14 +17,6 @@
                 IntPtr = (IntPtr)(long)(ulong)value;
             else
                 IntPtr = (IntPtr)(int)(uint)value;
-        }
-        public PointerEx(long value)
-        {
-            IntPtr = new IntPtr(value);
-        }
-        public PointerEx(int value)
-        {
-            IntPtr = new IntPtr(value);
         }
         public override string ToString()
         {
@@ -120,6 +113,7 @@
         {
             return (ulong)px.IntPtr.ToInt64();
         }
+
 
         public static implicit operator PointerEx(int i)
         {

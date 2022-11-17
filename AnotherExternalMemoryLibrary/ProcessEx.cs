@@ -17,16 +17,7 @@ namespace AnotherExternalMemoryLibrary
             Handle = Win32.OpenProcess(Win32.ProcessAccess.PROCESS_ACCESS, false, BaseProcess.Id);
         }
         #region Read&Write
-        /// <summary>
-        /// Read<byte>() Is Preferred.
-        /// </summary>
-        private byte[] Read(PointerEx addr, int NumOfBytes)
-        {
-            byte[] data = new byte[NumOfBytes];
-            PointerEx bytesRead = IntPtr.Zero;
-            Win32.ReadProcessMemory(BaseProcess.Handle, addr, data, NumOfBytes, ref bytesRead);
-            return data;
-        }
+
         /// <summary>
         /// Reads Process Memory (Value)
         /// </summary>
@@ -71,27 +62,16 @@ namespace AnotherExternalMemoryLibrary
         /// <returns>Array of Type</returns>
         public T[] Read<T>(PointerEx addr, int NumOfItems)
         {
-            if (typeof(T) == typeof(byte)) { return (dynamic)Read(addr, NumOfItems); }
+            if (typeof(T) == typeof(byte)) { return (dynamic)Win32.ReadProcessMemory(Handle, addr, NumOfItems); }
 
             T[] arr = new T[NumOfItems];
             int size = Marshal.SizeOf(typeof(T));
-            IEnumerable<byte> data = Read(addr, arr.Length * size);
+            IEnumerable<byte> data = Read<byte>(addr, arr.Length * size);
             for (int i = 0; i < arr.Length; i++)
             {
                 arr[i] = data.Skip(i * size).Take(size).ToArray().ToStruct<T>();
             }
             return arr;
-        }
-        /// <summary>
-        /// Write<byte>() Is Preferred.
-        /// </summary>
-        private void Write(PointerEx addr, byte[] bytes)
-        {
-            PointerEx bytesWritten = IntPtr.Zero;
-            Win32.VirtualProtectEx(BaseProcess.Handle, addr, bytes.Length, Win32.MemoryProtection.ExecuteReadWrite, out int oldProtection);
-            Win32.WriteProcessMemory(BaseProcess.Handle, addr, bytes, bytes.Length, ref bytesWritten);
-            Win32.VirtualProtectEx(BaseProcess.Handle, addr, bytes.Length, (Win32.MemoryProtection)oldProtection, out int _);
-            Console.WriteLine(oldProtection);
         }
         /// <summary>
         /// Writes Process Memory (Value)
@@ -128,7 +108,7 @@ namespace AnotherExternalMemoryLibrary
         /// <param name="array">Array of type to write</param>
         public void Write<T>(PointerEx addr, T[] array)
         {
-            if (array is byte[] ba) { Write(addr, ba); return; }
+            if (array is byte[] ba) { Win32.WriteProcessMemory(Handle, addr, ba); return; }
 
             int size = Marshal.SizeOf(typeof(T));
             byte[] writeData = new byte[size * array.Length];
@@ -136,7 +116,7 @@ namespace AnotherExternalMemoryLibrary
             {
                 array[i].ToByteArray().CopyTo(writeData, i * size);
             }
-            Write(addr, writeData);
+            Write<byte>(addr, writeData);
         }
         #endregion
         #region Scanning

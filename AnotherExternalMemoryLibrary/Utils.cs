@@ -6,11 +6,11 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class Utils
     {
-        public static PointerEx OffsetCalculator(ProcessEx mem, PointerEx baseAddr, PointerEx baseOffset, PointerEx[] offsets)
+        public static PointerEx OffsetCalculator(PointerEx handle, PointerEx baseAddr, PointerEx baseOffset, PointerEx[] offsets)
         {
             PointerEx result = baseAddr + baseOffset;
             foreach (PointerEx offset in offsets)
-                result = offset + mem.Read<PointerEx>(result);
+                result = offset + Win32.ReadProcessMemory(handle, result, PointerEx.Size).ToStruct<PointerEx>();
 
             return result;
         }
@@ -20,7 +20,7 @@ namespace AnotherExternalMemoryLibrary
         }
         public static byte[] NOP<T>()
         {
-            return Enumerable.Repeat((byte)0x90, Marshal.SizeOf(typeof(T))).ToArray();
+            return NOP(Marshal.SizeOf(typeof(T)));
         }
         public static void DumpProcessMemory(ProcessEx mem, string? path = null)
         {
