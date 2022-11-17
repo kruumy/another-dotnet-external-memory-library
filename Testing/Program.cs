@@ -11,7 +11,6 @@ namespace Testing
             ProcessEx mem = new ProcessEx(Process.GetProcessesByName("BloonsTD6").FirstOrDefault());
 
 
-            Console.WriteLine(Utils.IsAdministrator());
             Console.WriteLine(mem.BaseAddress.ToString());
             Console.ReadLine();
 
