@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace AnotherExternalMemoryLibrary
 {
@@ -94,7 +95,7 @@ namespace AnotherExternalMemoryLibrary
             else if (value is ushort u) data = BitConverter.GetBytes(u);
             else if (value is bool bo) data = BitConverter.GetBytes(bo);
             else if (value is char c) data = BitConverter.GetBytes(c);
-            else if (value is string str) data = str.ToByteArray();
+            else if (value is string str) data = Encoding.Default.GetBytes(str);
             else if (value is byte b) data = new byte[] { b };
             else if (value is sbyte sb) data = new byte[] { (byte)sb };
             else throw new Exception($"Invalid Type {typeof(T)}");
@@ -174,7 +175,7 @@ namespace AnotherExternalMemoryLibrary
         {
             if (value is IntPtr ip) return !PointerEx.Is64Bit ? Scan(BitConverter.GetBytes(ip.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ip.ToInt64()), targetModule);
             else if (value is PointerEx ipx) return !PointerEx.Is64Bit ? Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt64()), targetModule);
-            else if (value is string str) return Scan(str.ToByteArray(), targetModule);
+            else if (value is string str) return Scan(Encoding.Default.GetBytes(str), targetModule);
             else if (value is int i) return Scan(BitConverter.GetBytes(i), targetModule);
             else if (value is uint ui) return Scan(BitConverter.GetBytes(ui), targetModule);
             else if (value is long l) return Scan(BitConverter.GetBytes(l), targetModule);

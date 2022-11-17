@@ -15,10 +15,6 @@ namespace AnotherExternalMemoryLibrary
             }
             return result;
         }
-        public static byte[] ToByteArray(this string s)
-        {
-            return Encoding.Default.GetBytes(s);
-        }
         public static T ToStruct<T>(this byte[] data)
         {
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
