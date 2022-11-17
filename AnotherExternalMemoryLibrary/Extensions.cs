@@ -10,7 +10,9 @@ namespace AnotherExternalMemoryLibrary
         public static T ToStruct<T>(this byte[] data) where T : struct
         {
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+#pragma warning disable CS8605 // Unboxing a possibly null value.
             T val = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
+#pragma warning restore CS8605 // Unboxing a possibly null value.
             handle.Free();
             return val;
         }
