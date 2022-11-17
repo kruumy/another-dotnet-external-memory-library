@@ -45,8 +45,9 @@ namespace AnotherExternalMemoryLibrary
             using var stream = new FileStream(path, FileMode.Append);
             stream.Write(bytes, 0, bytes.Length);
         }
-        public static void GoDebugPrivlage()
+        public static void EnableDebugMode()
         {
+            // might be unnessesary because Process.EnableDebugMode();
             PointerEx hToken;
             LUID luidSEDebugNameValue;
             TOKEN_PRIVILEGES tkpPrivileges;

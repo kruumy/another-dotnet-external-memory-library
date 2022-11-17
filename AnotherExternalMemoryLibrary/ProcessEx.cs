@@ -8,11 +8,16 @@ namespace AnotherExternalMemoryLibrary
     {
         public Process BaseProcess { get; private set; }
         public PointerEx BaseAddress => BaseProcess.MainModule?.BaseAddress ?? IntPtr.Zero;
-        public PointerEx Handle => BaseProcess.Handle;
+        public PointerEx Handle { get; private set; }
         public ProcessModuleCollection Modules => BaseProcess.Modules;
         public ProcessEx(Process targetProcess)
         {
             BaseProcess = targetProcess;
+
+            if (Utils.IsAdministrator())
+                Process.EnterDebugMode();
+
+            Handle = Win32.OpenProcess(Win32.ProcessAccess.PROCESS_ACCESS, false, BaseProcess.Id);
         }
         #region Read&Write
         public byte[] Read(PointerEx addr, int NumOfBytes)

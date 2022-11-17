@@ -181,7 +181,7 @@ namespace AnotherExternalMemoryLibrary
         [DllImport("advapi32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool OpenProcessToken(PointerEx ProcessHandle,
-            UInt32 DesiredAccess, out PointerEx TokenHandle);
+            uint DesiredAccess, out PointerEx TokenHandle);
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern PointerEx GetCurrentProcess();
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]

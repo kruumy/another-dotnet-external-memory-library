@@ -9,11 +9,12 @@ namespace Testing
         static void Main(string[] args)
         {
             ProcessEx mem = new ProcessEx(Process.GetProcessesByName("BloonsTD6").FirstOrDefault());
+
+
+            Console.WriteLine(Utils.IsAdministrator());
             Console.WriteLine(mem.BaseAddress.ToString());
-            foreach (var i in mem.Read<byte>(mem.BaseAddress, 10))
-            {
-                Console.WriteLine(i.ToString());
-            }
+            Console.ReadLine();
+
         }
 
     }
