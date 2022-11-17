@@ -20,7 +20,7 @@ namespace AnotherExternalMemoryLibrary
             Handle = Win32.OpenProcess(Win32.ProcessAccess.PROCESS_ACCESS, false, BaseProcess.Id);
         }
         #region Read&Write
-        public byte[] Read(PointerEx addr, int NumOfBytes)
+        private byte[] Read(PointerEx addr, int NumOfBytes)
         {
             byte[] data = new byte[NumOfBytes];
             PointerEx bytesRead = IntPtr.Zero;
@@ -58,6 +58,8 @@ namespace AnotherExternalMemoryLibrary
         }
         public T[] Read<T>(PointerEx addr, int NumOfItems)
         {
+            if (typeof(T) == typeof(byte)) { return (dynamic)Read(addr, NumOfItems); }
+
             T[] arr = new T[NumOfItems];
             int size = Marshal.SizeOf(typeof(T));
             IEnumerable<byte> data = Read(addr, arr.Length * size);
@@ -67,7 +69,7 @@ namespace AnotherExternalMemoryLibrary
             }
             return arr;
         }
-        public void Write(PointerEx addr, byte[] bytes)
+        private void Write(PointerEx addr, byte[] bytes)
         {
             PointerEx bytesWritten = IntPtr.Zero;
             Win32.VirtualProtectEx(BaseProcess.Handle, addr, bytes.Length, Win32.MemoryProtection.ExecuteReadWrite, out int oldProtection);
@@ -93,12 +95,13 @@ namespace AnotherExternalMemoryLibrary
             else if (value is string str) data = str.ToByteArray();
             else if (value is byte b) data = new byte[] { b };
             else if (value is sbyte sb) data = new byte[] { (byte)sb };
-            else if (value is byte[] ba) data = ba;
             else throw new Exception($"Invalid Type {typeof(T)}");
             Write(addr, data);
         }
         public void Write<T>(PointerEx addr, T[] array)
         {
+            if (array is byte[] ba) { Write(addr, ba); return; }
+
             int size = Marshal.SizeOf(typeof(T));
             byte[] writeData = new byte[size * array.Length];
             for (int i = 0; i < array.Length; i++)

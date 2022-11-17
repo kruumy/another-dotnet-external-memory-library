@@ -60,6 +60,10 @@ namespace AnotherExternalMemoryLibrary
             }
             return Encoding.Default.GetString(bytes, 0, length);
         }
+        public static string GetString(this char[] chars)
+        {
+            return chars.ToByteArray().GetString();
+        }
         public static string GetHexString(this byte[] bytes)
         {
             StringBuilder hex = new StringBuilder(bytes.Length * 2);

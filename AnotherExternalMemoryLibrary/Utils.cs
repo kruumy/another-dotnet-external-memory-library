@@ -34,7 +34,7 @@ namespace AnotherExternalMemoryLibrary
             {
                 VirtualQueryEx(mem.BaseProcess.Handle, sys_info.lpMinimumApplicationAddress, out memInfo, sys_info.dwPageSize);
 
-                byte[] bytes = mem.Read(i, memInfo.RegionSize);
+                byte[] bytes = mem.Read<byte[]>(i, memInfo.RegionSize);
                 AppendAllBytes(path, bytes);
 
                 i += memInfo.RegionSize;
