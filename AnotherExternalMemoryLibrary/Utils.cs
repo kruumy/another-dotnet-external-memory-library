@@ -1,4 +1,5 @@
-﻿using System.Security.Principal;
+﻿using System.Runtime.InteropServices;
+using System.Security.Principal;
 using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
@@ -17,6 +18,10 @@ namespace AnotherExternalMemoryLibrary
         {
             return Enumerable.Repeat((byte)0x90, NumOfBytes).ToArray();
         }
+        public static byte[] NOP<T>()
+        {
+            return Enumerable.Repeat((byte)0x90, Marshal.SizeOf(typeof(T))).ToArray();
+        }
         public static void DumpProcessMemory(ProcessEx mem, string? path = null)
         {
             path ??= $"{mem.BaseProcess.ProcessName}_{mem.BaseProcess.UserProcessorTime.ToString().Replace(':', '_')}.dmp";
@@ -34,7 +39,7 @@ namespace AnotherExternalMemoryLibrary
             {
                 VirtualQueryEx(mem.BaseProcess.Handle, sys_info.lpMinimumApplicationAddress, out memInfo, sys_info.dwPageSize);
 
-                byte[] bytes = mem.Read<byte[]>(i, memInfo.RegionSize);
+                byte[] bytes = mem.Read<byte>(i, memInfo.RegionSize);
                 AppendAllBytes(path, bytes);
 
                 i += memInfo.RegionSize;
