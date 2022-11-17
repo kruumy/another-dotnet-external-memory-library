@@ -1,24 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace AnotherExternalMemoryLibrary
 {
     public static class Extensions
     {
-        public static byte[] ToByteArray(this char[] chars)
-        {
-            byte[] result = new byte[chars.Length];
-            for (int i = 0; i < chars.Length; i++)
-            {
-                result[i] = Convert.ToByte(chars[i]);
-            }
-            return result;
-        }
-        public static byte[] ToByteArray(this string str)
-        {
-            return Encoding.Default.GetBytes(str);
-        }
         public static T ToStruct<T>(this byte[] data) where T : struct
         {
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -28,9 +16,9 @@ namespace AnotherExternalMemoryLibrary
         }
         public static byte[] ToByteArray<T>(this T s) where T : struct
         {
-            PointerEx size = Marshal.SizeOf(s);
+            int size = Marshal.SizeOf(s);
             byte[] data = new byte[size];
-            PointerEx dwStruct = Marshal.AllocHGlobal((int)size);
+            PointerEx dwStruct = Marshal.AllocHGlobal(size);
             Marshal.StructureToPtr(s, dwStruct, true);
             Marshal.Copy(dwStruct, data, 0, size);
             Marshal.FreeHGlobal(dwStruct);
@@ -83,5 +71,6 @@ namespace AnotherExternalMemoryLibrary
         {
             return new PointerEx(ip);
         }
+
     }
 }
