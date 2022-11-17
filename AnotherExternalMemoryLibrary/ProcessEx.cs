@@ -25,13 +25,9 @@ namespace AnotherExternalMemoryLibrary
         /// <typeparam name="T">Type</typeparam>
         /// <param name="addr">Absolute address</param>
         /// <returns>Value of Type(</returns>
-        public T Read<T>(PointerEx addr)
+        public T Read<T>(PointerEx addr) where T : struct
         {
-            PointerEx size = IntPtr.Zero;
-            if (typeof(T) == typeof(string) || typeof(T) == typeof(char[]))
-                size = 1023;
-            else
-                size = Marshal.SizeOf(typeof(T));
+            int size = Marshal.SizeOf(typeof(T));
             byte[] data = Read<byte>(addr, size);
 
             if (typeof(T) == typeof(PointerEx) || typeof(T) == typeof(IntPtr))
@@ -39,20 +35,19 @@ namespace AnotherExternalMemoryLibrary
                     return (dynamic)(PointerEx)BitConverter.ToInt64(data);
                 else
                     return (dynamic)(PointerEx)BitConverter.ToInt32(data);
-            if (typeof(T) == typeof(float)) return (dynamic)BitConverter.ToSingle(data);
-            if (typeof(T) == typeof(double)) return (dynamic)BitConverter.ToDouble(data);
-            if (typeof(T) == typeof(long)) return (dynamic)BitConverter.ToInt64(data);
-            if (typeof(T) == typeof(ulong)) return (dynamic)BitConverter.ToUInt64(data);
-            if (typeof(T) == typeof(int)) return (dynamic)BitConverter.ToInt32(data);
-            if (typeof(T) == typeof(uint)) return (dynamic)BitConverter.ToUInt32(data);
-            if (typeof(T) == typeof(short)) return (dynamic)BitConverter.ToInt16(data);
-            if (typeof(T) == typeof(ushort)) return (dynamic)BitConverter.ToUInt16(data);
-            if (typeof(T) == typeof(bool)) return (dynamic)BitConverter.ToBoolean(data);
-            if (typeof(T) == typeof(string)) return (dynamic)data.GetString();
-            if (typeof(T) == typeof(char)) return (dynamic)Convert.ToChar(data[0]);
-            if (typeof(T) == typeof(byte)) return (dynamic)data[0];
-            if (typeof(T) == typeof(sbyte)) return (dynamic)data[0];
-            throw new Exception($"Invalid Type {typeof(T)}");
+            else if (typeof(T) == typeof(float)) return (dynamic)BitConverter.ToSingle(data);
+            else if (typeof(T) == typeof(double)) return (dynamic)BitConverter.ToDouble(data);
+            else if (typeof(T) == typeof(long)) return (dynamic)BitConverter.ToInt64(data);
+            else if (typeof(T) == typeof(ulong)) return (dynamic)BitConverter.ToUInt64(data);
+            else if (typeof(T) == typeof(int)) return (dynamic)BitConverter.ToInt32(data);
+            else if (typeof(T) == typeof(uint)) return (dynamic)BitConverter.ToUInt32(data);
+            else if (typeof(T) == typeof(short)) return (dynamic)BitConverter.ToInt16(data);
+            else if (typeof(T) == typeof(ushort)) return (dynamic)BitConverter.ToUInt16(data);
+            else if (typeof(T) == typeof(bool)) return (dynamic)BitConverter.ToBoolean(data);
+            else if (typeof(T) == typeof(char)) return (dynamic)Convert.ToChar(data[0]);
+            else if (typeof(T) == typeof(byte)) return (dynamic)data[0];
+            else if (typeof(T) == typeof(sbyte)) return (dynamic)data[0];
+            else return data.ToStruct<T>();
         }
         /// <summary>
         /// Reads Process Memory (Array)
@@ -61,7 +56,7 @@ namespace AnotherExternalMemoryLibrary
         /// <param name="addr">Absolute address</param>
         /// <param name="NumOfItems">Number of items to read</param>
         /// <returns>Array of Type</returns>
-        public T[] Read<T>(PointerEx addr, int NumOfItems)
+        public T[] Read<T>(PointerEx addr, int NumOfItems) where T : struct
         {
             if (typeof(T) == typeof(byte)) { return (dynamic)Win32.ReadProcessMemory(Handle, addr, NumOfItems); }
 
@@ -80,7 +75,7 @@ namespace AnotherExternalMemoryLibrary
         /// <typeparam name="T">Type</typeparam>
         /// <param name="addr">Absolute address</param>
         /// <param name="value">Value of type to write</param>
-        public void Write<T>(PointerEx addr, T value)
+        public void Write<T>(PointerEx addr, T value) where T : struct
         {
             byte[] data = Array.Empty<byte>();
             if (value is IntPtr ip) data = !PointerEx.Is64Bit ? BitConverter.GetBytes(ip.ToInt32()) : BitConverter.GetBytes(ip.ToInt64());
@@ -95,10 +90,9 @@ namespace AnotherExternalMemoryLibrary
             else if (value is ushort u) data = BitConverter.GetBytes(u);
             else if (value is bool bo) data = BitConverter.GetBytes(bo);
             else if (value is char c) data = BitConverter.GetBytes(c);
-            else if (value is string str) data = Encoding.Default.GetBytes(str);
             else if (value is byte b) data = new byte[] { b };
             else if (value is sbyte sb) data = new byte[] { (byte)sb };
-            else throw new Exception($"Invalid Type {typeof(T)}");
+            else data = value.ToByteArray<T>();
             Write<byte>(addr, data);
         }
         /// <summary>
@@ -107,7 +101,7 @@ namespace AnotherExternalMemoryLibrary
         /// <typeparam name="T">Type</typeparam>
         /// <param name="addr">Absolute address</param>
         /// <param name="array">Array of type to write</param>
-        public void Write<T>(PointerEx addr, T[] array)
+        public void Write<T>(PointerEx addr, T[] array) where T : struct
         {
             if (array is byte[] ba) { Win32.WriteProcessMemory(Handle, addr, ba); return; }
 
@@ -171,11 +165,10 @@ namespace AnotherExternalMemoryLibrary
                 patternbytes.Add(szByte == "?" ? (byte)0x0 : Convert.ToByte(szByte, 16));
             return Scan(patternbytes.ToArray(), targetModule);
         }
-        public PointerEx[] Scan<T>(T value, ProcessModule? targetModule = null)
+        public PointerEx[] Scan<T>(T value, ProcessModule? targetModule = null) where T : struct
         {
             if (value is IntPtr ip) return !PointerEx.Is64Bit ? Scan(BitConverter.GetBytes(ip.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ip.ToInt64()), targetModule);
             else if (value is PointerEx ipx) return !PointerEx.Is64Bit ? Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt64()), targetModule);
-            else if (value is string str) return Scan(Encoding.Default.GetBytes(str), targetModule);
             else if (value is int i) return Scan(BitConverter.GetBytes(i), targetModule);
             else if (value is uint ui) return Scan(BitConverter.GetBytes(ui), targetModule);
             else if (value is long l) return Scan(BitConverter.GetBytes(l), targetModule);
@@ -189,7 +182,7 @@ namespace AnotherExternalMemoryLibrary
             else if (value is byte b) return Scan(new byte[] { b }, targetModule);
             else if (value is sbyte sb) return Scan(new byte[] { (byte)sb }, targetModule);
             else if (value is byte[] ba) return Scan(ba, targetModule);
-            else throw new Exception($"Invalid Type {typeof(T)}");
+            else return Scan(value.ToByteArray<T>());
         }
         #endregion
         #region Indexers

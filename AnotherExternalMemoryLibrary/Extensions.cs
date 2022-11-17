@@ -15,14 +15,18 @@ namespace AnotherExternalMemoryLibrary
             }
             return result;
         }
-        public static T ToStruct<T>(this byte[] data)
+        public static byte[] ToByteArray(this string str)
+        {
+            return Encoding.Default.GetBytes(str);
+        }
+        public static T ToStruct<T>(this byte[] data) where T : struct
         {
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
             T val = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
             handle.Free();
             return val;
         }
-        public static byte[] ToByteArray<T>(this T s)
+        public static byte[] ToByteArray<T>(this T s) where T : struct
         {
             PointerEx size = Marshal.SizeOf(s);
             byte[] data = new byte[size];
@@ -32,7 +36,7 @@ namespace AnotherExternalMemoryLibrary
             Marshal.FreeHGlobal(dwStruct);
             return data;
         }
-        public static byte[] ToByteArray<T>(this T[] a_s)
+        public static byte[] ToByteArray<T>(this T[] a_s) where T : struct
         {
             int size = Marshal.SizeOf(typeof(T));
             byte[] data = new byte[a_s.Length * size];
@@ -42,7 +46,6 @@ namespace AnotherExternalMemoryLibrary
             }
             return data;
         }
-
         public static string GetString(this byte[] bytes)
         {
             int length = bytes.Length;
