@@ -8,7 +8,6 @@ namespace AnotherExternalMemoryLibrary
         public Process BaseProcess { get; private set; }
         public PointerEx BaseAddress => BaseProcess.MainModule?.BaseAddress ?? IntPtr.Zero;
         public PointerEx Handle { get; private set; }
-        public ProcessModuleCollection Modules => BaseProcess.Modules;
         public ProcessEx(Process targetProcess)
         {
             BaseProcess = targetProcess;
@@ -26,6 +25,12 @@ namespace AnotherExternalMemoryLibrary
             Win32.ReadProcessMemory(BaseProcess.Handle, addr, data, NumOfBytes, ref bytesRead);
             return data;
         }
+        /// <summary>
+        /// Reads Process Memory
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="addr">Absolute address</param>
+        /// <returns>Value of Type(</returns>
         public T Read<T>(PointerEx addr)
         {
             PointerEx size = IntPtr.Zero;
@@ -55,6 +60,13 @@ namespace AnotherExternalMemoryLibrary
             if (typeof(T) == typeof(sbyte)) return (dynamic)data[0];
             throw new Exception($"Invalid Type {typeof(T)}");
         }
+        /// <summary>
+        /// Reads Process Memory
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="addr">Absolute address</param>
+        /// <param name="NumOfItems">Number of items to read</param>
+        /// <returns>Array of Type</returns>
         public T[] Read<T>(PointerEx addr, int NumOfItems)
         {
             if (typeof(T) == typeof(byte)) { return (dynamic)Read(addr, NumOfItems); }
@@ -76,6 +88,12 @@ namespace AnotherExternalMemoryLibrary
             Win32.VirtualProtectEx(BaseProcess.Handle, addr, bytes.Length, (Win32.MemoryProtection)oldProtection, out int _);
             Console.WriteLine(oldProtection);
         }
+        /// <summary>
+        /// Writes Process Memory
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="addr">Absolute address</param>
+        /// <param name="value">Value of type to write</param>
         public void Write<T>(PointerEx addr, T value)
         {
             byte[] data = Array.Empty<byte>();
@@ -97,6 +115,12 @@ namespace AnotherExternalMemoryLibrary
             else throw new Exception($"Invalid Type {typeof(T)}");
             Write(addr, data);
         }
+        /// <summary>
+        /// Writes Process Memory
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="addr">Absolute address</param>
+        /// <param name="array">Array of type to write</param>
         public void Write<T>(PointerEx addr, T[] array)
         {
             if (array is byte[] ba) { Write(addr, ba); return; }
@@ -115,7 +139,7 @@ namespace AnotherExternalMemoryLibrary
         {
             List<ProcessModule> processModules = new List<ProcessModule>();
             if (targetModule == null)
-                foreach (ProcessModule pm in Modules)
+                foreach (ProcessModule pm in BaseProcess.Modules)
                     processModules.Add(pm);
             else
                 processModules.Add(targetModule);
@@ -183,6 +207,11 @@ namespace AnotherExternalMemoryLibrary
         }
         #endregion
         #region Misc
+        /// <summary>
+        /// Adds Offset To BaseAddress
+        /// </summary>
+        /// <param name="BaseOffset">Offset</param>
+        /// <returns>Absolute Address</returns>
         public PointerEx this[PointerEx BaseOffset]
         {
             get
@@ -190,11 +219,16 @@ namespace AnotherExternalMemoryLibrary
                 return BaseAddress + BaseOffset;
             }
         }
+        /// <summary>
+        /// Gets Module in BaseProcess that matches name
+        /// </summary>
+        /// <param name="name">Module Name</param>
+        /// <returns>ProcessModule Object</returns>
         public ProcessModule this[string name]
         {
             get
             {
-                return Modules.GetByName(name);
+                return BaseProcess.Modules.GetByName(name);
             }
         }
         #endregion
