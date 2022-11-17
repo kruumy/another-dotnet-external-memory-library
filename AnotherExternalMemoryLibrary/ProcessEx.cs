@@ -10,14 +10,16 @@ namespace AnotherExternalMemoryLibrary
         public PointerEx Handle { get; private set; }
         public ProcessEx(Process targetProcess)
         {
-            BaseProcess = targetProcess;
-
             if (Utils.IsAdministrator())
                 Process.EnterDebugMode();
 
+            BaseProcess = targetProcess ?? throw new ArgumentNullException(nameof(targetProcess));
             Handle = Win32.OpenProcess(Win32.ProcessAccess.PROCESS_ACCESS, false, BaseProcess.Id);
         }
         #region Read&Write
+        /// <summary>
+        /// Read<byte>() Is Preferred.
+        /// </summary>
         private byte[] Read(PointerEx addr, int NumOfBytes)
         {
             byte[] data = new byte[NumOfBytes];
@@ -26,7 +28,7 @@ namespace AnotherExternalMemoryLibrary
             return data;
         }
         /// <summary>
-        /// Reads Process Memory
+        /// Reads Process Memory (Value)
         /// </summary>
         /// <typeparam name="T">Type</typeparam>
         /// <param name="addr">Absolute address</param>
@@ -38,7 +40,7 @@ namespace AnotherExternalMemoryLibrary
                 size = 1023;
             else
                 size = Marshal.SizeOf(typeof(T));
-            byte[] data = Read(addr, size);
+            byte[] data = Read<byte>(addr, size);
 
             if (typeof(T) == typeof(PointerEx) || typeof(T) == typeof(IntPtr))
                 if (PointerEx.Is64Bit)
@@ -61,7 +63,7 @@ namespace AnotherExternalMemoryLibrary
             throw new Exception($"Invalid Type {typeof(T)}");
         }
         /// <summary>
-        /// Reads Process Memory
+        /// Reads Process Memory (Array)
         /// </summary>
         /// <typeparam name="T">Type</typeparam>
         /// <param name="addr">Absolute address</param>
@@ -80,6 +82,9 @@ namespace AnotherExternalMemoryLibrary
             }
             return arr;
         }
+        /// <summary>
+        /// Write<byte>() Is Preferred.
+        /// </summary>
         private void Write(PointerEx addr, byte[] bytes)
         {
             PointerEx bytesWritten = IntPtr.Zero;
@@ -89,7 +94,7 @@ namespace AnotherExternalMemoryLibrary
             Console.WriteLine(oldProtection);
         }
         /// <summary>
-        /// Writes Process Memory
+        /// Writes Process Memory (Value)
         /// </summary>
         /// <typeparam name="T">Type</typeparam>
         /// <param name="addr">Absolute address</param>
@@ -113,10 +118,10 @@ namespace AnotherExternalMemoryLibrary
             else if (value is byte b) data = new byte[] { b };
             else if (value is sbyte sb) data = new byte[] { (byte)sb };
             else throw new Exception($"Invalid Type {typeof(T)}");
-            Write(addr, data);
+            Write<byte>(addr, data);
         }
         /// <summary>
-        /// Writes Process Memory
+        /// Writes Process Memory (Array)
         /// </summary>
         /// <typeparam name="T">Type</typeparam>
         /// <param name="addr">Absolute address</param>
@@ -148,7 +153,7 @@ namespace AnotherExternalMemoryLibrary
             foreach (ProcessModule item in processModules)
             {
                 PointerEx g_lpModuleBase = item.BaseAddress;
-                byte[] g_arrModuleBuffer = Read(g_lpModuleBase, item.ModuleMemorySize);
+                byte[] g_arrModuleBuffer = Read<byte>(g_lpModuleBase, item.ModuleMemorySize);
 
                 for (int nModuleIndex = 0; nModuleIndex < g_arrModuleBuffer.Length; nModuleIndex++)
                 {
