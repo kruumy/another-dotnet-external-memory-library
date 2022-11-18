@@ -19,7 +19,7 @@ namespace AnotherExternalMemoryLibrary
         {
             return Enumerable.Repeat((byte)0x90, NumOfBytes).ToArray();
         }
-        public static byte[] NOP<T>()
+        public static byte[] NOP<T>() where T : struct
         {
             return NOP(Marshal.SizeOf(typeof(T)));
         }
