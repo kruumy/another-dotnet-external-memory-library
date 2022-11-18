@@ -1,12 +1,14 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Text;
 using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
 {
     public static class Utils
     {
-        public static PointerEx OffsetCalculator(PointerEx handle, PointerEx baseAddr, PointerEx baseOffset, PointerEx[] offsets)
+        public static PointerEx OffsetCalculator(PointerEx handle, PointerEx baseAddr, PointerEx baseOffset, params PointerEx[] offsets)
         {
             PointerEx result = baseAddr + baseOffset;
             foreach (PointerEx offset in offsets)
@@ -45,7 +47,7 @@ namespace AnotherExternalMemoryLibrary
                 i += memInfo.RegionSize;
             }
         }
-        public static void AppendAllBytes(string path, byte[] bytes)
+        public static void AppendAllBytes(string path, params byte[] bytes)
         {
             using var stream = new FileStream(path, FileMode.Append);
             stream.Write(bytes, 0, bytes.Length);
@@ -76,6 +78,22 @@ namespace AnotherExternalMemoryLibrary
         {
             return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
                       .IsInRole(WindowsBuiltInRole.Administrator);
+        }
+        public static bool IsProcessRunning(string processName)
+        {
+            return Process.GetProcessesByName(processName).Length != 0;
+        }
+        // TODO: move this to extensions as byte[].add() & byte[].addrange()
+        public static byte[] AddByteArrays(params byte[][] arrays)
+        {
+            byte[] array = new byte[arrays.Sum((byte[] a) => a.Length)];
+            int num = 0;
+            foreach (byte[] array2 in arrays)
+            {
+                Buffer.BlockCopy(array2, 0, array, num, array2.Length);
+                num += array2.Length;
+            }
+            return array;
         }
     }
 }

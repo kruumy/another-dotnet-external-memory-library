@@ -7,7 +7,7 @@ namespace AnotherExternalMemoryLibrary
         public enum ProcessAccess
         {
             PROCESS_CREATE_THREAD = 0x02,
-            PROCESS_ACCESS = PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_CREATE_THREAD | 0x0040,
+            PROCESS_ACCESS = PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION,
             PROCESS_QUERY_INFORMATION = 0x0400,
             PROCESS_VM_READ = 0x0010,
             PROCESS_VM_WRITE = 0x0020,
@@ -188,27 +188,24 @@ namespace AnotherExternalMemoryLibrary
 
         [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool IsWow64Process([In] PointerEx processHandle,
-             [Out, MarshalAs(UnmanagedType.Bool)] out bool wow64Process);
+        public static extern bool IsWow64Process([In] PointerEx processHandle, [Out, MarshalAs(UnmanagedType.Bool)] out bool wow64Process);
         [DllImport("kernel32.dll")]
         public static extern PointerEx GetLastError();
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern void SetLastError(PointerEx dwErrorCode);
         [DllImport("advapi32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool OpenProcessToken(PointerEx ProcessHandle,
-            PointerEx DesiredAccess, out PointerEx TokenHandle);
+        public static extern bool OpenProcessToken(PointerEx ProcessHandle, PointerEx DesiredAccess, out PointerEx TokenHandle);
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern PointerEx GetCurrentProcess();
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool LookupPrivilegeValue(string lpSystemName, string lpName,
-            out LUID lpLuid);
+        public static extern bool LookupPrivilegeValue(string lpSystemName, string lpName, out LUID lpLuid);
         [DllImport("advapi32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool AdjustTokenPrivileges(PointerEx TokenHandle, [MarshalAs(UnmanagedType.Bool)] bool DisableAllPrivileges, ref TOKEN_PRIVILEGES NewState, PointerEx Zero, PointerEx Null1, PointerEx Null2);
-        [DllImport("kernel32")]
-        public static extern PointerEx CreateRemoteThread(PointerEx hProcess, PointerEx lpThreadAttributes, PointerEx dwStackSize, PointerEx lpStartAddress, PointerEx lpParameter, PointerEx dwCreationFlags, out PointerEx lpThreadId);
+        [DllImport("kernel32.dll")]
+        public static extern PointerEx CreateRemoteThread(PointerEx hProcess, PointerEx lpThreadAttributes, PointerEx dwStackSize, PointerEx lpStartAddress, PointerEx lpParameter, PointerEx dwCreationFlags, PointerEx lpThreadId);
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         public static extern PointerEx GetModuleHandle(string lpModuleName);
         [DllImport("kernel32", SetLastError = true, ExactSpelling = true)]
@@ -217,6 +214,9 @@ namespace AnotherExternalMemoryLibrary
         public static extern PointerEx GetProcAddress(PointerEx hModule, string procName);
         [DllImport("kernel32")]
         public static extern bool VirtualFree(PointerEx lpAddress, PointerEx dwSize, AllocationType dwFreeType);
+        [DllImport("USER32.DLL")]
+        public static extern PointerEx PostMessage(PointerEx hWnd, PointerEx Msg, int PointerEx, PointerEx lParam);
+
 
 
     }

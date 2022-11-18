@@ -9,6 +9,7 @@ namespace AnotherExternalMemoryLibrary
         public Process BaseProcess { get; private set; }
         public PointerEx BaseAddress => BaseProcess.MainModule?.BaseAddress ?? IntPtr.Zero;
         public PointerEx Handle { get; private set; }
+        public Architecture Architecture { get; private set; }
         public ProcessEx(Process targetProcess)
         {
             if (Utils.IsAdministrator())
@@ -16,6 +17,9 @@ namespace AnotherExternalMemoryLibrary
 
             BaseProcess = targetProcess ?? throw new ArgumentNullException(nameof(targetProcess));
             Handle = Win32.OpenProcess(Win32.ProcessAccess.PROCESS_ACCESS, false, BaseProcess.Id);
+            bool IsWow64 = false;
+            Win32.IsWow64Process(Handle, out IsWow64);
+            Architecture = (Architecture)Convert.ToInt32(IsWow64); // TODO: check if this is accurate
         }
         #region Read&Write
 
@@ -205,7 +209,7 @@ namespace AnotherExternalMemoryLibrary
         /// <param name="BaseOffset">Offset for BaseAddress</param>
         /// <param name="Offsets">Offsets for Pointer</param>
         /// <returns>Pointer</returns>
-        public PointerEx this[PointerEx BaseOffset, PointerEx[] Offsets]
+        public PointerEx this[PointerEx BaseOffset, params PointerEx[] Offsets]
         {
             get
             {
@@ -220,7 +224,7 @@ namespace AnotherExternalMemoryLibrary
         /// <param name="ModuleOffset">Offset for ModuleAddress</param>
         /// <param name="Offsets">Offsets for Pointer</param>
         /// <returns>Pointer</returns>
-        public PointerEx this[string ModuleName, PointerEx ModuleOffset, PointerEx[] Offsets]
+        public PointerEx this[string ModuleName, PointerEx ModuleOffset, params PointerEx[] Offsets]
         {
             get
             {
