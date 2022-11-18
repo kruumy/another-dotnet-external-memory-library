@@ -145,12 +145,14 @@ namespace AnotherExternalMemoryLibrary
         public static extern PointerEx LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern PointerEx OpenThread(ProcessAccess dwDesiredAccess, bool bInheritHandle, PointerEx dwThreadId);
+        [DllImport("kernel32.dll")]
+        public static extern int SuspendThread(PointerEx hThread);
+        [DllImport("kernel32.dll")]
+        public static extern int ResumeThread(PointerEx hThread);
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool GetThreadContext(IntPtr hThread, IntPtr lpContext);
+        public static extern bool GetThreadContext(PointerEx hThread, PointerEx lpContext);
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool SetThreadContext(IntPtr hThread, IntPtr lpContext);
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern PointerEx ResumeThread(PointerEx hThread);
+        public static extern bool SetThreadContext(PointerEx hThread, PointerEx lpContext);
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern PointerEx QueueUserAPC2(PointerEx pfnAPC, PointerEx hThread, PointerEx dwData, PointerEx flags);
         [DllImport("kernel32.dll")]
@@ -206,8 +208,5 @@ namespace AnotherExternalMemoryLibrary
         public static extern bool VirtualFree(PointerEx lpAddress, PointerEx dwSize, AllocationType dwFreeType);
         [DllImport("USER32.DLL")]
         public static extern PointerEx PostMessage(PointerEx hWnd, PointerEx Msg, int PointerEx, PointerEx lParam);
-
-
-
     }
 }
