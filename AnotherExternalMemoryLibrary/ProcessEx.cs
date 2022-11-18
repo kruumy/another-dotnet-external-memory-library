@@ -183,7 +183,6 @@ namespace AnotherExternalMemoryLibrary
             else if (value is double d) return Scan(BitConverter.GetBytes(d), targetModule);
             else if (value is byte b) return Scan(new byte[] { b }, targetModule);
             else if (value is sbyte sb) return Scan(new byte[] { (byte)sb }, targetModule);
-            else if (value is byte[] ba) return Scan(ba, targetModule);
             else return Scan(value.ToByteArray<T>());
         }
         #endregion
