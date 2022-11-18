@@ -1,6 +1,6 @@
 ﻿namespace AnotherExternalMemoryLibrary.Extensions
 {
-    public static class Chars
+    public static class CharExtenstions
     {
         public static string GetString(this char[] chars)
         {

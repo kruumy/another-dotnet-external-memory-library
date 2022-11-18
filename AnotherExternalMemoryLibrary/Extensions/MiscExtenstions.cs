@@ -8,13 +8,16 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             if (input is string s) Console.Write(s);
             else if (input is byte[] ba) Console.Write(ba.GetHexString());
+            else if (input is byte b) Console.Write(b.GetHexString());
             else
             {
                 try
                 {
                     System.Text.Json.JsonSerializerOptions options = new System.Text.Json.JsonSerializerOptions
                     {
-                        WriteIndented = true
+                        WriteIndented = true,
+                        NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.Strict
+
                     };
                     Console.Write(System.Text.Json.JsonSerializer.Serialize(input, input.GetType(), options));
                 }

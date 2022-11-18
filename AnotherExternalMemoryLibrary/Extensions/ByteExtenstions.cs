@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AnotherExternalMemoryLibrary.Extensions
 {
-    public static class Bytes
+    public static class ByteExtenstions
     {
         public static string GetString(this byte[] bytes)
         {
@@ -28,6 +28,10 @@ namespace AnotherExternalMemoryLibrary.Extensions
             }
             return hex.ToString();
         }
+        public static string GetHexString(this byte _byte)
+        {
+            return new byte[] { _byte }.GetHexString();
+        }
         public static T ToStruct<T>(this byte[] data) where T : struct
         {
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -39,15 +43,46 @@ namespace AnotherExternalMemoryLibrary.Extensions
         }
         public static byte[] Add(this byte[] bytes, params byte[][] arrays)
         {
-            byte[] array = new byte[arrays.Sum((byte[] a) => a.Length) + bytes.Length];
-            bytes.CopyTo(array, 0);
+            byte[] result = new byte[arrays.Sum((byte[] a) => a.Length) + bytes.Length];
+            bytes.CopyTo(result, 0);
             int num = bytes.Length;
-            foreach (byte[] array2 in arrays)
+            foreach (byte[] array in arrays)
             {
-                Buffer.BlockCopy(array2, 0, array, num, array2.Length);
-                num += array2.Length;
+                Buffer.BlockCopy(array, 0, result, num, array.Length);
+                num += array.Length;
             }
-            return array;
+            return result;
+        }
+        public static int IndexOf(this byte[] bytes, params byte[] searchBytes)
+        {
+            int result = -1;
+            for (int i = 0; i < bytes.Length; i++)
+            {
+
+                if (bytes[i] == searchBytes[0])
+                {
+                    bool IsFullMatch = true;
+                    for (int j = 0; j < searchBytes.Length; j++)
+                    {
+                        if (searchBytes[j] != bytes[i + j])
+                        {
+                            IsFullMatch = false;
+                            break;
+                        }
+                    }
+                    if (IsFullMatch)
+                    {
+                        result = i;
+                        break;
+                    }
+                }
+
+            }
+            return result;
+        }
+        public static bool Contains(this byte[] bytes, params byte[] checkBytes)
+        {
+            return bytes.IndexOf(checkBytes) != -1;
         }
         public static byte[] Compress(this byte[] bytes)
         {
