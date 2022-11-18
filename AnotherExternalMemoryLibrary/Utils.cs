@@ -25,6 +25,7 @@ namespace AnotherExternalMemoryLibrary
         }
         public static void DumpProcessMemory(ProcessEx mem, string? path = null)
         {
+            //TODO: make sure it works
             path ??= $"{mem.BaseProcess.ProcessName}_{mem.BaseProcess.UserProcessorTime.ToString().Replace(':', '_')}.dmp";
             if (File.Exists(path)) File.Delete(path);
 

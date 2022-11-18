@@ -129,24 +129,22 @@ namespace AnotherExternalMemoryLibrary
             public uint __alignment2;
         }
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool WriteProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, byte[] lpBuffer, PointerEx dwSize, ref PointerEx lpNumberOfBytesWritten);
+        public static extern bool WriteProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, byte[] lpBuffer, PointerEx dwSize, out PointerEx lpNumberOfBytesWritten);
         [DllImport("kernel32.dll")]
-        public static extern bool ReadProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, [Out] byte[] lpBuffer, PointerEx dwSize, ref PointerEx lpNumberOfBytesRead);
+        public static extern bool ReadProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, [Out] byte[] lpBuffer, PointerEx dwSize, out PointerEx lpNumberOfBytesRead);
         // here for convenience
-        public static byte[] ReadProcessMemory(PointerEx handle, PointerEx addr, int NumOfBytes)
+        public static byte[] ReadProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, int NumOfBytes)
         {
             byte[] data = new byte[NumOfBytes];
-            PointerEx bytesRead = IntPtr.Zero;
-            ReadProcessMemory(handle, addr, data, NumOfBytes, ref bytesRead);
+            ReadProcessMemory(hProcess, lpBaseAddress, data, NumOfBytes, out PointerEx bytesRead);
             return data;
         }
         // here for convenience
-        public static void WriteProcessMemory(PointerEx handle, PointerEx addr, byte[] bytes)
+        public static void WriteProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, byte[] bytes)
         {
-            PointerEx bytesWritten = IntPtr.Zero;
-            VirtualProtectEx(handle, addr, bytes.Length, Win32.MemoryProtection.ExecuteReadWrite, out MemoryProtection oldProtection);
-            WriteProcessMemory(handle, addr, bytes, bytes.Length, ref bytesWritten);
-            VirtualProtectEx(handle, addr, bytes.Length, oldProtection, out MemoryProtection _);
+            VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, Win32.MemoryProtection.ExecuteReadWrite, out MemoryProtection oldProtection);
+            WriteProcessMemory(hProcess, lpBaseAddress, bytes, bytes.Length, out PointerEx bytesWritten);
+            VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, oldProtection, out MemoryProtection _);
             Console.WriteLine(oldProtection);
         }
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]

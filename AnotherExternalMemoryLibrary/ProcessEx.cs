@@ -17,7 +17,7 @@ namespace AnotherExternalMemoryLibrary
             BaseProcess = targetProcess ?? throw new ArgumentNullException(nameof(targetProcess));
             Handle = Win32.OpenProcess(Win32.ProcessAccess.PROCESS_ACCESS, false, BaseProcess.Id);
             Win32.IsWow64Process(Handle, out bool IsWow64);
-            Architecture = (Architecture)Convert.ToInt32(IsWow64); // TODO: check if this is accurate
+            Architecture = (Architecture)Convert.ToInt32(!IsWow64);
         }
         #region Read&Write
 
@@ -192,7 +192,7 @@ namespace AnotherExternalMemoryLibrary
         /// Adds Offset To BaseAddress
         /// </summary>
         /// <param name="BaseOffset">Offset for BaseAddress</param>
-        /// <returns>Pointer</returns>
+        /// <returns>Absolute Address</returns>
         public PointerEx this[PointerEx BaseOffset] => BaseAddress + BaseOffset;
         /// <summary>
         /// Adds Offsets to get Pointer
@@ -200,7 +200,7 @@ namespace AnotherExternalMemoryLibrary
         /// </summary>
         /// <param name="BaseOffset">Offset for BaseAddress</param>
         /// <param name="Offsets">Offsets for Pointer</param>
-        /// <returns>Pointer</returns>
+        /// <returns>Absolute Address</returns>
         public PointerEx this[PointerEx BaseOffset, params PointerEx[] Offsets] => Utils.OffsetCalculator(Handle, BaseAddress, BaseOffset, Offsets);
         /// <summary>
         /// Adds Offsets to get Pointer
@@ -209,7 +209,7 @@ namespace AnotherExternalMemoryLibrary
         /// <param name="ModuleName">Name of target module</param>
         /// <param name="ModuleOffset">Offset for ModuleAddress</param>
         /// <param name="Offsets">Offsets for Pointer</param>
-        /// <returns>Pointer</returns>
+        /// <returns>Absolute Address</returns>
         public PointerEx this[string ModuleName, PointerEx ModuleOffset, params PointerEx[] Offsets] => Utils.OffsetCalculator(Handle, this[ModuleName], ModuleOffset, Offsets);
         /// <summary>
         /// Gets Module Address in BaseProcess that matches name
