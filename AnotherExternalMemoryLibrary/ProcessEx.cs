@@ -16,8 +16,7 @@ namespace AnotherExternalMemoryLibrary
 
             BaseProcess = targetProcess ?? throw new ArgumentNullException(nameof(targetProcess));
             Handle = Win32.OpenProcess(Win32.ProcessAccess.PROCESS_ACCESS, false, BaseProcess.Id);
-            bool IsWow64 = false;
-            Win32.IsWow64Process(Handle, out IsWow64);
+            Win32.IsWow64Process(Handle, out bool IsWow64);
             Architecture = (Architecture)Convert.ToInt32(IsWow64); // TODO: check if this is accurate
         }
         #region Read&Write
@@ -164,7 +163,7 @@ namespace AnotherExternalMemoryLibrary
         public PointerEx[] Scan(string query, ProcessModule? targetModule = null)
         {
             List<byte> patternbytes = new List<byte>();
-            foreach (var szByte in query.Split(' '))
+            foreach (string szByte in query.Split(' '))
                 patternbytes.Add(szByte == "?" ? (byte)0x0 : Convert.ToByte(szByte, 16));
             return Scan(patternbytes.ToArray(), targetModule);
         }

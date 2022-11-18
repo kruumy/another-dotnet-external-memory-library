@@ -48,7 +48,7 @@ namespace AnotherExternalMemoryLibrary
         }
         public static void AppendAllBytes(string path, params byte[] bytes)
         {
-            using var stream = new FileStream(path, FileMode.Append);
+            using FileStream stream = new FileStream(path, FileMode.Append);
             stream.Write(bytes, 0, bytes.Length);
         }
         public static bool IsAdministrator()

@@ -96,7 +96,7 @@
 
         public static implicit operator int(PointerEx px)
         {
-            return (int)px.IntPtr.ToInt32();
+            return px.IntPtr.ToInt32();
         }
 
         public static implicit operator uint(PointerEx px)
