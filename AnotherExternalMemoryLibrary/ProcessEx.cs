@@ -1,25 +1,36 @@
 ﻿using AnotherExternalMemoryLibrary.Extensions;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
 {
     public class ProcessEx
     {
+        #region Properties
         public Process BaseProcess { get; private set; }
         public PointerEx BaseAddress => BaseProcess.MainModule?.BaseAddress ?? IntPtr.Zero;
         public PointerEx Handle { get; private set; }
         public Architecture Architecture { get; private set; }
-        public ProcessEx(Process targetProcess)
+        #endregion
+        #region Constructors
+        public ProcessEx(Process baseProcess, ProcessAccess dwDesiredAccess = ProcessAccess.PROCESS_ALL_ACCESS)
         {
             if (Utils.IsAdministrator())
                 Process.EnterDebugMode();
 
-            BaseProcess = targetProcess ?? throw new ArgumentNullException(nameof(targetProcess));
-            Handle = Win32.OpenProcess(Win32.ProcessAccess.PROCESS_ALL_ACCESS, false, BaseProcess.Id);
-            Win32.IsWow64Process(Handle, out bool IsWow64);
+            BaseProcess = baseProcess ?? throw new ArgumentNullException(nameof(baseProcess));
+
+            Handle = OpenProcess(dwDesiredAccess, false, BaseProcess.Id);
+
+            IsWow64Process(Handle, out bool IsWow64);
             Architecture = (Architecture)Convert.ToInt32(!IsWow64);
         }
+        public static ProcessEx GetProcessByName(string baseProcessName, ProcessAccess dwDesiredAccess = ProcessAccess.PROCESS_ALL_ACCESS)
+        {
+            return new ProcessEx(Process.GetProcessesByName(baseProcessName).FirstOrDefault(), dwDesiredAccess);
+        }
+        #endregion
         #region Read&Write
 
         /// <summary>
@@ -217,6 +228,32 @@ namespace AnotherExternalMemoryLibrary
         /// <param name="ModuleName">Module Name</param>
         /// <returns>Module BaseAddress</returns>
         public PointerEx this[string ModuleName] => BaseProcess.Modules.GetByName(ModuleName).BaseAddress;
+        #endregion
+        #region Misc
+        public void Dump(string? path = null)
+        {
+            //TODO: make sure it works
+            path ??= $"{BaseProcess.ProcessName}_{BaseProcess.UserProcessorTime.ToString().Replace(':', '_')}.dmp";
+            if (File.Exists(path)) File.Delete(path);
+
+            Win32.SYSTEM_INFO sys_info = new Win32.SYSTEM_INFO();
+            Win32.GetSystemInfo(out sys_info);
+
+            PointerEx proc_min_address = BaseAddress;
+            PointerEx proc_max_address = BaseProcess.PrivateMemorySize64 + proc_min_address;
+
+            PointerEx i = proc_min_address;
+            MEMORY_BASIC_INFORMATION memInfo = new MEMORY_BASIC_INFORMATION();
+            while (i < proc_max_address)
+            {
+                VirtualQueryEx(BaseProcess.Handle, sys_info.lpMinimumApplicationAddress, out memInfo, sys_info.dwPageSize);
+
+                byte[] bytes = Read<byte>(i, memInfo.RegionSize);
+                Utils.AppendAllBytes(path, bytes);
+
+                i += memInfo.RegionSize;
+            }
+        }
         #endregion
     }
 }

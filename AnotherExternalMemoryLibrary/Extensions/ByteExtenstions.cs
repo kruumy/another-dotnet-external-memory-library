@@ -41,6 +41,13 @@ namespace AnotherExternalMemoryLibrary.Extensions
             handle.Free();
             return val;
         }
+        public static byte[] Add(this byte[] bytes, params byte[] subtractBytes)
+        {
+            byte[] result = new byte[subtractBytes.Length + bytes.Length];
+            bytes.CopyTo(result, 0);
+            subtractBytes.CopyTo(result, bytes.Length);
+            return result;
+        }
         public static byte[] Add(this byte[] bytes, params byte[][] arrays)
         {
             byte[] result = new byte[arrays.Sum((byte[] a) => a.Length) + bytes.Length];
@@ -52,6 +59,19 @@ namespace AnotherExternalMemoryLibrary.Extensions
                 num += array.Length;
             }
             return result;
+        }
+        public static byte[] Subtract(this byte[] bytes, params byte[] subtractBytes)
+        {
+            List<byte> result = new List<byte>();
+            result.AddRange(bytes);
+            int start = bytes.IndexOf(subtractBytes);
+            int end = subtractBytes.Length;
+            result.RemoveRange(start, end);
+            return result.ToArray();
+        }
+        public static byte[] Subtract(this byte[] bytes, params byte[][] subtractBytes)
+        {
+            throw new NotImplementedException();
         }
         public static int IndexOf(this byte[] bytes, params byte[] searchBytes)
         {

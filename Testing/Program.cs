@@ -7,11 +7,11 @@ namespace Testing
     {
         static void Main(string[] args)
         {
-            //ProcessEx mem = new ProcessEx(Process.GetProcessesByName("BloonsTD6").FirstOrDefault());
+            //ProcessEx mem = ProcessEx.GetProcessByName("BloonsTD6");
             PointerEx pointerEx = 0xFFFFFF;
             pointerEx.print();
             byte[] bytes = { 0x90, 0x90, 0x90, 0x90, 0x45, 0x65, 0x25, 0x90, 0x90 };
-            bytes.Contains(0x45).print();
+            bytes.Subtract(0x90, 0x90, 0x90, 0x90).print();
         }
 
     }
