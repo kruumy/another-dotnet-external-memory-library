@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 Testing/
+/Testing/Program.cs
+/Testing/Testing.csproj
