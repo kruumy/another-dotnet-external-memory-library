@@ -71,9 +71,9 @@
         public static implicit operator UIntPtr(PointerEx px)
         {
             if (Is64Bit)
-                return new UIntPtr(((ulong)px.IntPtr.ToInt64()));
+                return new UIntPtr((ulong)px.IntPtr.ToInt64());
             else
-                return new UIntPtr(((uint)px.IntPtr.ToInt32()));
+                return new UIntPtr((uint)px.IntPtr.ToInt32());
         }
         public static implicit operator PointerEx(IntPtr ip)
         {

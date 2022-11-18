@@ -53,7 +53,7 @@ namespace AnotherExternalMemoryLibrary
         }
         public static bool IsAdministrator()
         {
-            return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
+            return new WindowsPrincipal(WindowsIdentity.GetCurrent())
                       .IsInRole(WindowsBuiltInRole.Administrator);
         }
         public static bool IsProcessRunning(string processName)

@@ -193,13 +193,7 @@ namespace AnotherExternalMemoryLibrary
         /// </summary>
         /// <param name="BaseOffset">Offset for BaseAddress</param>
         /// <returns>Pointer</returns>
-        public PointerEx this[PointerEx BaseOffset]
-        {
-            get
-            {
-                return BaseAddress + BaseOffset;
-            }
-        }
+        public PointerEx this[PointerEx BaseOffset] => BaseAddress + BaseOffset;
         /// <summary>
         /// Adds Offsets to get Pointer
         /// Uses Utils.OffsetCalculator()
@@ -207,13 +201,7 @@ namespace AnotherExternalMemoryLibrary
         /// <param name="BaseOffset">Offset for BaseAddress</param>
         /// <param name="Offsets">Offsets for Pointer</param>
         /// <returns>Pointer</returns>
-        public PointerEx this[PointerEx BaseOffset, params PointerEx[] Offsets]
-        {
-            get
-            {
-                return Utils.OffsetCalculator(Handle, BaseAddress, BaseOffset, Offsets);
-            }
-        }
+        public PointerEx this[PointerEx BaseOffset, params PointerEx[] Offsets] => Utils.OffsetCalculator(Handle, BaseAddress, BaseOffset, Offsets);
         /// <summary>
         /// Adds Offsets to get Pointer
         /// Uses Utils.OffsetCalculator()
@@ -222,25 +210,13 @@ namespace AnotherExternalMemoryLibrary
         /// <param name="ModuleOffset">Offset for ModuleAddress</param>
         /// <param name="Offsets">Offsets for Pointer</param>
         /// <returns>Pointer</returns>
-        public PointerEx this[string ModuleName, PointerEx ModuleOffset, params PointerEx[] Offsets]
-        {
-            get
-            {
-                return Utils.OffsetCalculator(Handle, this[ModuleName], ModuleOffset, Offsets);
-            }
-        }
+        public PointerEx this[string ModuleName, PointerEx ModuleOffset, params PointerEx[] Offsets] => Utils.OffsetCalculator(Handle, this[ModuleName], ModuleOffset, Offsets);
         /// <summary>
         /// Gets Module Address in BaseProcess that matches name
         /// </summary>
         /// <param name="ModuleName">Module Name</param>
         /// <returns>Module BaseAddress</returns>
-        public PointerEx this[string ModuleName]
-        {
-            get
-            {
-                return BaseProcess.Modules.GetByName(ModuleName).BaseAddress;
-            }
-        }
+        public PointerEx this[string ModuleName] => BaseProcess.Modules.GetByName(ModuleName).BaseAddress;
         #endregion
     }
 }

@@ -56,11 +56,11 @@ namespace AnotherExternalMemoryLibrary
             TOKEN_ADJUST_GROUPS = 0x0040,
             TOKEN_ADJUST_DEFAULT = 0x0080,
             TOKEN_ADJUST_SESSIONID = 0x0100,
-            TOKEN_READ = (STANDARD_RIGHTS_READ | TOKEN_QUERY),
-            TOKEN_ALL_ACCESS = (STANDARD_RIGHTS_REQUIRED | TOKEN_ASSIGN_PRIMARY |
+            TOKEN_READ = STANDARD_RIGHTS_READ | TOKEN_QUERY,
+            TOKEN_ALL_ACCESS = STANDARD_RIGHTS_REQUIRED | TOKEN_ASSIGN_PRIMARY |
                 TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_QUERY_SOURCE |
                 TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT |
-                TOKEN_ADJUST_SESSIONID)
+                TOKEN_ADJUST_SESSIONID
         }
         public enum SE_PRIVILEGE : uint
         {
@@ -84,21 +84,21 @@ namespace AnotherExternalMemoryLibrary
         [StructLayout(LayoutKind.Sequential)]
         public struct TOKEN_PRIVILEGES
         {
-            public UInt32 PrivilegeCount;
+            public uint PrivilegeCount;
             public LUID Luid;
-            public UInt32 Attributes;
+            public uint Attributes;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct LUID_AND_ATTRIBUTES
         {
             public LUID Luid;
-            public UInt32 Attributes;
+            public uint Attributes;
         }
         public struct LUID
         {
-            public UInt32 LowPart;
-            public Int32 HighPart;
+            public uint LowPart;
+            public int HighPart;
         }
 
         public struct SYSTEM_INFO
