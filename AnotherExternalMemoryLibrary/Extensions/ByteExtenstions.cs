@@ -69,10 +69,6 @@ namespace AnotherExternalMemoryLibrary.Extensions
             result.RemoveRange(start, end);
             return result.ToArray();
         }
-        public static byte[] Subtract(this byte[] bytes, params byte[][] subtractBytes)
-        {
-            throw new NotImplementedException();
-        }
         public static int IndexOf(this byte[] bytes, params byte[] searchBytes)
         {
             int result = -1;
