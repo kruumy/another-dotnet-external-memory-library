@@ -1,5 +1,5 @@
 ﻿using AnotherExternalMemoryLibrary;
-using System.Diagnostics;
+using AnotherExternalMemoryLibrary.Extensions;
 
 namespace Testing
 {
@@ -7,7 +7,10 @@ namespace Testing
     {
         static void Main(string[] args)
         {
-            ProcessEx mem = new ProcessEx(Process.GetProcessesByName("BloonsTD6").FirstOrDefault());
+            //ProcessEx mem = new ProcessEx(Process.GetProcessesByName("BloonsTD6").FirstOrDefault());
+            PointerEx pointerEx = 0xFFFFFF;
+            pointerEx.print();
+
         }
 
     }

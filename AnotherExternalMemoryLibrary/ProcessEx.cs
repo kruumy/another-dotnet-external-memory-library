@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using AnotherExternalMemoryLibrary.Extensions;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary
