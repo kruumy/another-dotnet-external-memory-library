@@ -15,7 +15,7 @@ namespace AnotherExternalMemoryLibrary
                 Process.EnterDebugMode();
 
             BaseProcess = targetProcess ?? throw new ArgumentNullException(nameof(targetProcess));
-            Handle = Win32.OpenProcess(Win32.ProcessAccess.PROCESS_ACCESS, false, BaseProcess.Id);
+            Handle = Win32.OpenProcess(Win32.ProcessAccess.PROCESS_ALL_ACCESS, false, BaseProcess.Id);
             Win32.IsWow64Process(Handle, out bool IsWow64);
             Architecture = (Architecture)Convert.ToInt32(!IsWow64);
         }

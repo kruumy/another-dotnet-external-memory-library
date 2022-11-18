@@ -4,14 +4,23 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class Win32
     {
-        public enum ProcessAccess
+        [Flags]
+        public enum ProcessAccess : uint
         {
-            PROCESS_CREATE_THREAD = 0x02,
-            PROCESS_ACCESS = PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION,
+            PROCESS_ALL_ACCESS = 0x001F0FFF,
+            PROCESS_CREATE_PROCESS = 0x0080,
+            PROCESS_CREATE_THREAD = 0x0002,
+            PROCESS_DUP_HANDLE = 0x0040,
             PROCESS_QUERY_INFORMATION = 0x0400,
+            PROCESS_QUERY_LIMITED_INFORMATION = 0x1000,
+            PROCESS_SET_INFORMATION = 0x0200,
+            PROCESS_SET_QUOTA = 0x0100,
+            PROCESS_SUSPEND_RESUME = 0x0800,
+            PROCESS_TERMINATE = 0x0001,
+            PROCESS_VM_OPERATION = 0x0008,
             PROCESS_VM_READ = 0x0010,
             PROCESS_VM_WRITE = 0x0020,
-            PROCESS_VM_OPERATION = 0x0008
+            SYNCHRONIZE = 0x00100000
         }
         [Flags]
         public enum AllocationType : uint
@@ -29,7 +38,7 @@ namespace AnotherExternalMemoryLibrary
         }
 
         [Flags]
-        public enum MemoryProtection
+        public enum MemoryProtection : uint
         {
             Execute = 0x10,
             ExecuteRead = 0x20,
@@ -61,25 +70,6 @@ namespace AnotherExternalMemoryLibrary
                 TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_QUERY_SOURCE |
                 TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT |
                 TOKEN_ADJUST_SESSIONID
-        }
-        public enum SE_PRIVILEGE : uint
-        {
-            ENABLED_BY_DEFAULT = 0x00000001,
-            ENABLED = 0x00000002,
-            REMOVED = 0x00000004,
-            USED_FOR_ACCESS = 0x80000000
-        }
-        public enum State : uint
-        {
-            MEM_COMMIT = 0x1000,
-            MEM_FREE = 0x10000,
-            MEM_RESERVE = 0x2000
-        }
-        public enum Type : uint
-        {
-            MEM_IMAGE = 0x1000000,
-            MEM_MAPPED = 0x40000,
-            MEM_PRIVATE = 0x20000
         }
         [StructLayout(LayoutKind.Sequential)]
         public struct TOKEN_PRIVILEGES
@@ -194,6 +184,8 @@ namespace AnotherExternalMemoryLibrary
         [DllImport("advapi32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool OpenProcessToken(PointerEx ProcessHandle, PointerEx DesiredAccess, out PointerEx TokenHandle);
+        [DllImport("kernel32.dll")]
+        public static extern PointerEx GetCurrentThread();
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern PointerEx GetCurrentProcess();
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
