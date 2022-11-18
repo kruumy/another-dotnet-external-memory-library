@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Text;
 using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
@@ -52,28 +51,6 @@ namespace AnotherExternalMemoryLibrary
             using var stream = new FileStream(path, FileMode.Append);
             stream.Write(bytes, 0, bytes.Length);
         }
-        public static void EnableDebugMode()
-        {
-            // might be unnessesary because Process.EnableDebugMode();
-            PointerEx hToken;
-            LUID luidSEDebugNameValue;
-            TOKEN_PRIVILEGES tkpPrivileges;
-
-            if (!OpenProcessToken(GetCurrentProcess(), (uint)(Privileges.TOKEN_ADJUST_PRIVILEGES | Privileges.TOKEN_QUERY), out hToken))
-            {
-                return;
-            }
-            if (!LookupPrivilegeValue(null, "SeDebugPrivilege", out luidSEDebugNameValue))
-            {
-                CloseHandle(hToken);
-                return;
-            }
-            tkpPrivileges.PrivilegeCount = 1;
-            tkpPrivileges.Luid = luidSEDebugNameValue;
-            tkpPrivileges.Attributes = (uint)SE_PRIVILEGE.ENABLED;
-            AdjustTokenPrivileges(hToken, false, ref tkpPrivileges, 0, IntPtr.Zero, IntPtr.Zero);
-            CloseHandle(hToken);
-        }
         public static bool IsAdministrator()
         {
             return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
@@ -82,18 +59,6 @@ namespace AnotherExternalMemoryLibrary
         public static bool IsProcessRunning(string processName)
         {
             return Process.GetProcessesByName(processName).Length != 0;
-        }
-        // TODO: move this to extensions as byte[].add() & byte[].addrange()
-        public static byte[] AddByteArrays(params byte[][] arrays)
-        {
-            byte[] array = new byte[arrays.Sum((byte[] a) => a.Length)];
-            int num = 0;
-            foreach (byte[] array2 in arrays)
-            {
-                Buffer.BlockCopy(array2, 0, array, num, array2.Length);
-                num += array2.Length;
-            }
-            return array;
         }
     }
 }

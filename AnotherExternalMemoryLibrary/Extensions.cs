@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace AnotherExternalMemoryLibrary
@@ -51,7 +50,7 @@ namespace AnotherExternalMemoryLibrary
         }
         public static string GetString(this char[] chars)
         {
-            return chars.ToByteArray().GetString();
+            return new string(chars);
         }
         public static string GetHexString(this byte[] bytes)
         {
@@ -73,6 +72,17 @@ namespace AnotherExternalMemoryLibrary
         {
             return new PointerEx(ip);
         }
-
+        public static byte[] Add(this byte[] bytes, params byte[][] arrays)
+        {
+            byte[] array = new byte[arrays.Sum((byte[] a) => a.Length) + bytes.Length];
+            bytes.CopyTo(array, 0);
+            int num = bytes.Length;
+            foreach (byte[] array2 in arrays)
+            {
+                Buffer.BlockCopy(array2, 0, array, num, array2.Length);
+                num += array2.Length;
+            }
+            return array;
+        }
     }
 }
