@@ -5,7 +5,7 @@ using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
 {
-    public class ProcessEx
+    public class ProcessEx : IDisposable
     {
         #region Properties
         public Process BaseProcess { get; private set; }
@@ -248,6 +248,16 @@ namespace AnotherExternalMemoryLibrary
                 i += memInfo.RegionSize;
             }
         }
+
+        public void Dispose()
+        {
+            CloseHandle(Handle);
+            if (Utils.IsAdministrator())
+                Process.LeaveDebugMode();
+            BaseProcess.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
         public static implicit operator ProcessEx(Process p)
         {
             return new ProcessEx(p);
