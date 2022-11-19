@@ -52,6 +52,7 @@ namespace AnotherExternalMemoryLibrary
             NoCacheModifierflag = 0x200,
             WriteCombineModifierflag = 0x400
         }
+        [Flags]
         public enum Privileges : uint
         {
             STANDARD_RIGHTS_REQUIRED = 0x000F0000,
@@ -207,6 +208,6 @@ namespace AnotherExternalMemoryLibrary
         [DllImport("kernel32")]
         public static extern bool VirtualFree(PointerEx lpAddress, PointerEx dwSize, AllocationType dwFreeType);
         [DllImport("USER32.DLL")]
-        public static extern PointerEx PostMessage(PointerEx hWnd, PointerEx Msg, int PointerEx, PointerEx lParam);
+        public static extern PointerEx PostMessage(PointerEx hWnd, PointerEx Msg, PointerEx wParam, PointerEx lParam);
     }
 }
