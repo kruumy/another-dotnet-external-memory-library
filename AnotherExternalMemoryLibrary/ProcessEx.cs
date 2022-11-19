@@ -1,6 +1,7 @@
 ﻿using AnotherExternalMemoryLibrary.Extensions;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
@@ -224,31 +225,17 @@ namespace AnotherExternalMemoryLibrary
         public PointerEx this[string ModuleName] => BaseProcess.Modules.GetByName(ModuleName).BaseAddress;
         #endregion
         #region Misc
-        public void Dump(string? path = null)
+        /// <summary>
+        /// Simple DLL Injection
+        /// </summary>
+        /// <param name="dllPath">path to dll file</param>
+        public void InjectDLL(string dllPath)
         {
-            //TODO: make sure it works
-            path ??= $"{BaseProcess.ProcessName}_{BaseProcess.UserProcessorTime.ToString().Replace(':', '_')}.dmp";
-            if (File.Exists(path)) File.Delete(path);
-
-            Win32.SYSTEM_INFO sys_info = new Win32.SYSTEM_INFO();
-            Win32.GetSystemInfo(out sys_info);
-
-            PointerEx proc_min_address = BaseAddress;
-            PointerEx proc_max_address = BaseProcess.PrivateMemorySize64 + proc_min_address;
-
-            PointerEx i = proc_min_address;
-            MEMORY_BASIC_INFORMATION memInfo = new MEMORY_BASIC_INFORMATION();
-            while (i < proc_max_address)
-            {
-                VirtualQueryEx(BaseProcess.Handle, sys_info.lpMinimumApplicationAddress, out memInfo, sys_info.dwPageSize);
-
-                byte[] bytes = Read<byte>(i, memInfo.RegionSize);
-                Utils.AppendAllBytes(path, bytes);
-
-                i += memInfo.RegionSize;
-            }
+            PointerEx loadLibraryAddr = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
+            PointerEx allocMemAddress = VirtualAllocEx(Handle, 0, dllPath.Length + 1, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ReadWrite);
+            WriteProcessMemory(Handle, allocMemAddress, Encoding.Default.GetBytes(dllPath), dllPath.Length + 1, out PointerEx _);
+            CreateRemoteThread(Handle, 0, 0, loadLibraryAddr, allocMemAddress, 0, 0);
         }
-
         public void Dispose()
         {
             CloseHandle(Handle);
