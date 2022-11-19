@@ -17,9 +17,11 @@ namespace AnotherExternalMemoryLibrary.Extensions
                     {
                         WriteIndented = true,
                         NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.Strict
-
                     };
-                    Console.Write(System.Text.Json.JsonSerializer.Serialize(input, input.GetType(), options));
+
+                    string result = System.Text.Json.JsonSerializer.Serialize(input, input.GetType(), options);
+                    if (result == "{}") throw new Exception($"Empty Result, {result}");
+                    Console.WriteLine(result);
                 }
                 catch
                 {

@@ -87,7 +87,7 @@ namespace AnotherExternalMemoryLibrary
         {
             byte[] data = Array.Empty<byte>();
             if (value is IntPtr ip) data = !PointerEx.Is64Bit ? BitConverter.GetBytes(ip.ToInt32()) : BitConverter.GetBytes(ip.ToInt64());
-            else if (value is PointerEx ipx) data = !PointerEx.Is64Bit ? BitConverter.GetBytes(ipx.IntPtr.ToInt32()) : BitConverter.GetBytes(ipx.IntPtr.ToInt64());
+            else if (value is PointerEx ipx) data = !PointerEx.Is64Bit ? BitConverter.GetBytes((int)ipx) : BitConverter.GetBytes((long)ipx);
             else if (value is float f) data = BitConverter.GetBytes(f);
             else if (value is double d) data = BitConverter.GetBytes(d);
             else if (value is long l) data = BitConverter.GetBytes(l);
@@ -176,7 +176,7 @@ namespace AnotherExternalMemoryLibrary
         public PointerEx[] Scan<T>(T value, ProcessModule? targetModule = null) where T : struct
         {
             if (value is IntPtr ip) return !PointerEx.Is64Bit ? Scan(BitConverter.GetBytes(ip.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ip.ToInt64()), targetModule);
-            else if (value is PointerEx ipx) return !PointerEx.Is64Bit ? Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt32()), targetModule) : Scan(BitConverter.GetBytes(ipx.IntPtr.ToInt64()), targetModule);
+            else if (value is PointerEx ipx) return !PointerEx.Is64Bit ? Scan(BitConverter.GetBytes((int)ipx), targetModule) : Scan(BitConverter.GetBytes((long)ipx), targetModule);
             else if (value is int i) return Scan(BitConverter.GetBytes(i), targetModule);
             else if (value is uint ui) return Scan(BitConverter.GetBytes(ui), targetModule);
             else if (value is long l) return Scan(BitConverter.GetBytes(l), targetModule);
@@ -261,6 +261,10 @@ namespace AnotherExternalMemoryLibrary
         public static implicit operator ProcessEx(Process p)
         {
             return new ProcessEx(p);
+        }
+        public override string ToString()
+        {
+            return @$"{BaseProcess.ProcessName} - {Architecture}";
         }
         #endregion
     }

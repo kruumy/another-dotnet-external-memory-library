@@ -1,11 +1,10 @@
 ﻿namespace AnotherExternalMemoryLibrary
 {
-    public struct PointerEx
+    public readonly struct PointerEx
     {
-        public static bool Is64Bit => IntPtr.Size == sizeof(long);
+        private readonly IntPtr IntPtr { get; }
         public static int Size => IntPtr.Size;
-
-        public IntPtr IntPtr { get; set; }
+        public static bool Is64Bit => Size == sizeof(long);
         public PointerEx(IntPtr value)
         {
             IntPtr = value;
@@ -24,6 +23,8 @@
             else
                 return IntPtr.ToInt32().ToString($"X{IntPtr.Size}");
         }
+        public override int GetHashCode() => this;
+        public override bool Equals(object obj) => obj is PointerEx px && px == this;
         #region Operators
         public static PointerEx operator +(PointerEx px, PointerEx pxo)
         {
