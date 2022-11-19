@@ -23,8 +23,15 @@
             else
                 return IntPtr.ToInt32().ToString($"X{IntPtr.Size}");
         }
-        public override int GetHashCode() => this;
-        public override bool Equals(object obj) => obj is PointerEx px && px == this;
+        public override int GetHashCode()
+        {
+            return this;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is PointerEx px && px == this;
+        }
         #region Operators
         public static PointerEx operator +(PointerEx px, PointerEx pxo)
         {
