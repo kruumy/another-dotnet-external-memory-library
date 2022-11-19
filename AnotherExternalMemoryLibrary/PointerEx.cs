@@ -1,4 +1,6 @@
-﻿namespace AnotherExternalMemoryLibrary
+﻿using AnotherExternalMemoryLibrary.Extensions;
+
+namespace AnotherExternalMemoryLibrary
 {
     public readonly struct PointerEx
     {
@@ -21,7 +23,7 @@
             if (Is64Bit)
                 return IntPtr.ToInt64().ToString($"X{IntPtr.Size * 2}");
             else
-                return IntPtr.ToInt32().ToString($"X{IntPtr.Size}");
+                return IntPtr.ToInt32().ToString($"X{IntPtr.Size * 2}");
         }
         public override int GetHashCode()
         {
@@ -149,6 +151,26 @@
         {
             return px.IntPtr.ToPointer();
         }
-        #endregion
+        public static implicit operator PointerEx(byte[] bytes)
+        {
+            if (bytes.Length <= Size)
+            {
+                while (bytes.Length < Size)
+                    bytes = bytes.Add(0x0);
+
+                if (Is64Bit)
+                    return BitConverter.ToInt64(bytes);
+                else
+                    return BitConverter.ToInt32(bytes);
+            }
+            else
+                throw new Exception($"Cannot convert byte[] length of {bytes.Length} to PointerEx size {Size}");
+        }
+        public static implicit operator byte[](PointerEx px)
+        {
+            return Is64Bit ? BitConverter.GetBytes((long)px) : BitConverter.GetBytes((int)px);
+        }
     }
+    #endregion
 }
+

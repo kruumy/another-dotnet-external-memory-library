@@ -41,11 +41,11 @@ namespace AnotherExternalMemoryLibrary.Extensions
             handle.Free();
             return val;
         }
-        public static byte[] Add(this byte[] bytes, params byte[] subtractBytes)
+        public static byte[] Add(this byte[] bytes, params byte[] addBytes)
         {
-            byte[] result = new byte[subtractBytes.Length + bytes.Length];
+            byte[] result = new byte[addBytes.Length + bytes.Length];
             bytes.CopyTo(result, 0);
-            subtractBytes.CopyTo(result, bytes.Length);
+            addBytes.CopyTo(result, bytes.Length);
             return result;
         }
         public static byte[] Add(this byte[] bytes, params byte[][] arrays)
