@@ -1,6 +1,6 @@
 ﻿namespace AnotherExternalMemoryLibrary
 {
-    public readonly unsafe struct PointerEx
+    public readonly struct PointerEx
     {
         private readonly IntPtr IntPtr { get; }
         public static int Size => IntPtr.Size;
@@ -90,10 +90,6 @@
         {
             return new PointerEx(uip);
         }
-        public static implicit operator bool(PointerEx px)
-        {
-            return (long)px != 0;
-        }
 
         public static implicit operator byte(PointerEx px)
         {
@@ -145,19 +141,13 @@
         {
             return new IntPtr((long)ul);
         }
-        public static implicit operator PointerEx(void* pointer)
+        public static unsafe implicit operator PointerEx(void* pointer)
         {
             return new IntPtr(pointer);
         }
-
-        public static bool operator true(PointerEx p)
+        public static unsafe implicit operator void*(PointerEx px)
         {
-            return p;
-        }
-
-        public static bool operator false(PointerEx p)
-        {
-            return !p;
+            return px.IntPtr.ToPointer();
         }
         #endregion
     }
