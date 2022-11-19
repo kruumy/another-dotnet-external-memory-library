@@ -13,7 +13,6 @@ namespace AnotherExternalMemoryLibrary
         public PointerEx Handle { get; private set; }
         public Architecture Architecture { get; private set; }
         #endregion
-        #region Constructors
         public ProcessEx(Process baseProcess, ProcessAccess dwDesiredAccess = ProcessAccess.PROCESS_ALL_ACCESS)
         {
             if (Utils.IsAdministrator())
@@ -26,11 +25,6 @@ namespace AnotherExternalMemoryLibrary
             IsWow64Process(Handle, out bool IsWow64);
             Architecture = (Architecture)Convert.ToInt32(!IsWow64);
         }
-        public static ProcessEx GetProcessByName(string baseProcessName, ProcessAccess dwDesiredAccess = ProcessAccess.PROCESS_ALL_ACCESS)
-        {
-            return new ProcessEx(Process.GetProcessesByName(baseProcessName).FirstOrDefault(), dwDesiredAccess);
-        }
-        #endregion
         #region Read&Write
 
         /// <summary>
@@ -253,6 +247,10 @@ namespace AnotherExternalMemoryLibrary
 
                 i += memInfo.RegionSize;
             }
+        }
+        public static implicit operator ProcessEx(Process p)
+        {
+            return new ProcessEx(p);
         }
         #endregion
     }
