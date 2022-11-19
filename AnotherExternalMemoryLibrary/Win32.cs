@@ -136,7 +136,6 @@ namespace AnotherExternalMemoryLibrary
             VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, Win32.MemoryProtection.ExecuteReadWrite, out MemoryProtection oldProtection);
             WriteProcessMemory(hProcess, lpBaseAddress, bytes, bytes.Length, out PointerEx bytesWritten);
             VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, oldProtection, out MemoryProtection _);
-            Console.WriteLine(oldProtection);
         }
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
         public static extern PointerEx VirtualAllocEx(PointerEx hProcess, PointerEx lpAddress, PointerEx dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
@@ -208,6 +207,14 @@ namespace AnotherExternalMemoryLibrary
         [DllImport("kernel32")]
         public static extern bool VirtualFree(PointerEx lpAddress, PointerEx dwSize, AllocationType dwFreeType);
         [DllImport("USER32.DLL")]
-        public static extern PointerEx PostMessage(PointerEx hWnd, PointerEx Msg, PointerEx wParam, PointerEx lParam);
+        public static extern bool PostMessageA(PointerEx hWnd, PointerEx Msg, PointerEx wParam, PointerEx lParam);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool MoveWindow(PointerEx hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+        [DllImport("user32.dll")]
+        public static extern void SetWindowPos(PointerEx hwnd, PointerEx hwndInsertAfter, int X, int Y, int width, int height, uint flags);
+        [DllImport("user32.dll")]
+        public static extern int SetWindowLong(PointerEx hWnd, int nIndex, uint dwNewLong);
+        [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
+        public static extern PointerEx GetWindowLongPtr(PointerEx hWnd, int nIndex);
     }
 }

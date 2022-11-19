@@ -29,8 +29,9 @@ namespace AnotherExternalMemoryLibrary
         {
             return this;
         }
-
+#pragma warning disable CS8765
         public override bool Equals(object obj)
+#pragma warning restore CS8765
         {
             return obj is PointerEx px && px == this;
         }
