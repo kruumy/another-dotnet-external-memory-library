@@ -129,7 +129,6 @@ namespace AnotherExternalMemoryLibrary
                     WriteProcessMemory(Handle, intPtr2, Encoding.ASCII.GetBytes(s));
                     byte[] array2 = new byte[2] { 255, 53 };
                     int value = (int)((long)intPtr2 - (long)(ptr + array.Length) - 6);
-                    Console.WriteLine("Offset = " + value.ToString("X"));
                     array2 = array2.Add(BitConverter.GetBytes(value));
                     array = array.Add(array2);
                     num += ((string)parameters[num2]).Length + 2;
