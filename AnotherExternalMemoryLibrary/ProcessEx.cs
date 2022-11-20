@@ -193,6 +193,9 @@ namespace AnotherExternalMemoryLibrary
             else return Scan(value.ToByteArray<T>());
         }
         #endregion
+        #region Calling
+
+        #endregion
         #region Indexers
         /// <summary>
         /// Adds Offset To BaseAddress
