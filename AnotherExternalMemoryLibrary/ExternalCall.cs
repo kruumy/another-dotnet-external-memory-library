@@ -3,6 +3,9 @@ using System.Text;
 using static AnotherExternalMemoryLibrary.Win32;
 namespace AnotherExternalMemoryLibrary
 {
+    // Most code from
+    // https://github.com/Airyzz
+    // I just reworked it
     public static class ExternalCall
     {
         internal static readonly byte[] CallPrologue64 = new byte[8]
