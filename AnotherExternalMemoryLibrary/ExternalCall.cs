@@ -115,7 +115,7 @@ namespace AnotherExternalMemoryLibrary
             CreateRemoteThread(Handle, IntPtr.Zero, 0u, ptr, IntPtr.Zero, 0u, IntPtr.Zero);
             VirtualFreeEx(Handle, ptr, 2048, (uint)FreeType.Release);
         }
-        public static void Callx64(PointerEx Handle, IntPtr Address, params object[] parameters)
+        public static void Callx64(PointerEx Handle, PointerEx Address, params object[] parameters)
         {
             byte[] array = CallPrologue64;
             PointerEx ptr = VirtualAllocEx(Handle, 0x0, 2048u, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
@@ -140,7 +140,7 @@ namespace AnotherExternalMemoryLibrary
                 }
             }
             array = array.Add(new byte[2] { 72, 184 });
-            array = array.Add(BitConverter.GetBytes(Address.ToInt64()));
+            array = array.Add(BitConverter.GetBytes((long)Address));
             array = array.Add(new byte[2] { 255, 208 });
             byte[] callEpilogue = CallEpilogue64;
             long value2 = ptr + num;
