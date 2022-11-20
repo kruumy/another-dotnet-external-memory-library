@@ -4,7 +4,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
 {
     public static class StructExtenstions
     {
-        public static byte[] ToByteArray<T>(this T s) where T : struct
+        public static byte[] ToByteArray<T>(this T s)
         {
             int size = Marshal.SizeOf(s);
             byte[] data = new byte[size];
@@ -14,7 +14,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
             Marshal.FreeHGlobal(dwStruct);
             return data;
         }
-        public static byte[] ToByteArray<T>(this T[] a_s) where T : struct
+        public static byte[] ToByteArray<T>(this T[] a_s)
         {
             int size = Marshal.SizeOf(typeof(T));
             byte[] data = new byte[a_s.Length * size];

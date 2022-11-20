@@ -1,5 +1,4 @@
 ﻿using AnotherExternalMemoryLibrary.Extensions;
-using System.Runtime.InteropServices;
 using static AnotherExternalMemoryLibrary.ExternalCall.Shared;
 using static AnotherExternalMemoryLibrary.Win32;
 
@@ -22,11 +21,10 @@ namespace AnotherExternalMemoryLibrary.ExternalCall
             Handle = _Handle;
             Address = _Address;
         }
-        public int Execute()
+        public void Execute()
         {
             uint num = 2048u;
-            PointerEx ptr = VirtualAllocEx(Handle, IntPtr.Zero, num * 2, (AllocationType)12288, MemoryProtection.ExecuteReadWrite);
-            PointerEx ptr2 = ptr + num;
+            PointerEx ptr = VirtualAllocEx(Handle, 0x0, num * 2, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
             byte[] array = CallPrologue86;
             if (eax != null) array = array.Add(AssembleRegister(eax, Register.eax, Handle));
             if (ecx != null) array = array.Add(AssembleRegister(ecx, Register.ecx, Handle));
@@ -36,19 +34,50 @@ namespace AnotherExternalMemoryLibrary.ExternalCall
             if (ebp != null) array = array.Add(AssembleRegister(ebp, Register.ebp, Handle));
             if (esi != null) array = array.Add(AssembleRegister(esi, Register.esi, Handle));
             if (edi != null) array = array.Add(AssembleRegister(edi, Register.edi, Handle));
-            Buffer.BlockCopy(BitConverter.GetBytes((uint)(int)Address), 0, UserCallEpilogue86, 3, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes((uint)(int)ptr2), 0, UserCallEpilogue86, 11, 4);
+            Buffer.BlockCopy(Address, 0, UserCallEpilogue86, 3, 4);
+            Buffer.BlockCopy(ptr + num, 0, UserCallEpilogue86, 11, 4);
             array = array.Add(UserCallEpilogue86);
-            Win32.WriteProcessMemory(Handle, ptr, array);
-            Random random = new Random(DateTime.Now.Millisecond);
-            int num2 = random.Next(int.MinValue, int.MaxValue);
-            Win32.WriteProcessMemory(Handle, ptr2, BitConverter.GetBytes(num2));
-            CreateRemoteThread(Handle, IntPtr.Zero, 0u, ptr, IntPtr.Zero, 0u, IntPtr.Zero);
-            while (BitConverter.ToInt32(Win32.ReadProcessMemory(Handle, ptr2, Marshal.SizeOf(ptr2))) == num2)
+            WriteProcessMemory(Handle, ptr, array);
+            CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, 0x0);
+        }
+        public void CallFunction86(params object[] parameters)
+        {
+            byte[] array = CallPrologue86;
+            PointerEx ptr = VirtualAllocEx(Handle, 0x0, 2048u, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
+            int num = 1024;
+            int num2 = parameters.Length;
+            while (num2-- > 0)
             {
-                Thread.Sleep(5);
+                if (parameters[num2] is string s)
+                {
+                    byte[] array3 = new byte[1] { 104 };
+                    int num3 = ptr + num;
+                    WriteProcessMemory(Handle, num3, System.Text.Encoding.ASCII.GetBytes(s));
+                    array3 = array3.Add(BitConverter.GetBytes(num3));
+                    num += s.Length + 1;
+                    array = array.Add(array3);
+                }
+                else
+                {
+                    byte[] array2 = new byte[1] { 104 };
+                    array2 = array2.Add(parameters[num2].ToByteArray());
+                    array = array.Add(array2);
+                }
             }
-            return BitConverter.ToInt32(Win32.ReadProcessMemory(Handle, ptr2, Marshal.SizeOf(ptr2)));
+            byte[] array4 = new byte[1] { 184 };
+            array4 = array4.Add(Address);
+            array = array.Add(array4);
+            byte[] callEpilogue = CallEpilogue86;
+            int num4 = ptr + num;
+            Buffer.BlockCopy(BitConverter.GetBytes(num4), 0, callEpilogue, 6, 4);
+            array = array.Add(callEpilogue);
+            WriteProcessMemory(Handle, ptr, array);
+            int num5 = -1;
+            WriteProcessMemory(Handle, num4, BitConverter.GetBytes(num5));
+            CreateRemoteThread(Handle, IntPtr.Zero, 0u, ptr, IntPtr.Zero, 0u, IntPtr.Zero);
+            int num6 = 20;
+            int num7 = 0;
+            VirtualFreeEx(Handle, ptr, 2048, (uint)FreeType.Release);
         }
     }
 }

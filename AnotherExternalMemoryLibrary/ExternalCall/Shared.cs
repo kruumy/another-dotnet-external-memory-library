@@ -1,5 +1,4 @@
 ﻿using AnotherExternalMemoryLibrary.Extensions;
-using System.Runtime.InteropServices;
 using System.Text;
 using static AnotherExternalMemoryLibrary.Win32;
 
@@ -9,31 +8,29 @@ namespace AnotherExternalMemoryLibrary.ExternalCall
     {
         internal static readonly byte[] CallPrologue64 = new byte[8]
         {
-            85, 72, 139, 236, 72, 131, 236, 8
+            0x55, 0x48, 0x8B, 0xEC, 0x48, 0x83, 0xEC, 0x8
         };
 
         internal static readonly byte[] CallEpilogue64 = new byte[19]
         {
-            72, 131, 196, 8, 72, 163, 0, 0, 0, 0,
-            0, 0, 0, 0, 72, 139, 229, 93, 195
+            0x48, 0x83, 0xC4, 0x8, 0x48, 0xA3, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x48, 0x8B, 0xE5, 0x5D, 0xC3
         };
 
         internal static readonly byte[] CallPrologue86 = new byte[6]
         {
-            85, 139, 236, 131, 236, 8
+            0x55, 0x8B, 0xEC, 0x83, 0xEC, 0x8
         };
-
         internal static readonly byte[] CallEpilogue86 = new byte[14]
         {
-            255, 208, 131, 196, 8, 163, 0, 0, 0, 0,
-            139, 229, 93, 195
+            0xFF, 0xD0, 0x83, 0xC4, 0x8, 0xA3, 0x0, 0x0, 0x0, 0x0,
+            0x8B, 0xE5, 0x5D, 0xC3
         };
-
         internal static readonly byte[] UserCallEpilogue86 = new byte[22]
         {
-            199, 69, 252, 0, 0, 0, 0, 255, 85, 252,
-            163, 0, 0, 0, 0, 131, 196, 8, 139, 229,
-            93, 195
+            0xC7, 0x45, 0xFC, 0x0, 0x0, 0x0, 0x0, 0xFF, 0x55, 0xFC,
+            0xA3, 0x0, 0x0, 0x0, 0x0, 0x83, 0xC4, 0x8, 0x8B, 0xE5,
+            0x5D, 0xC3
         };
         internal enum Register
         {
@@ -46,32 +43,19 @@ namespace AnotherExternalMemoryLibrary.ExternalCall
             esi,
             edi
         }
-        public static byte[] StructToByteArray(object obj)
-        {
-            int num = Marshal.SizeOf(obj);
-            byte[] array = new byte[num];
-            IntPtr intPtr = Marshal.AllocHGlobal(num);
-            Marshal.StructureToPtr(obj, intPtr, fDeleteOld: true);
-            Marshal.Copy(intPtr, array, 0, num);
-            Marshal.FreeHGlobal(intPtr);
-            return array;
-        }
         internal static byte[] AssembleRegister(object register, Register type, PointerEx handle)
         {
             if (register == null) throw new ArgumentNullException(nameof(register));
-
-            byte[] array = new byte[1] { (byte)(184 + (byte)type) };
-            if (register.GetType() == typeof(int) || register.GetType() == typeof(float) || register.GetType() == typeof(bool))
+            byte[] array = { (byte)(0xB8 + type) };
+            if (register is string s)
             {
-                byte[] array2 = StructToByteArray(register);
-                array = array.Add(array2);
+                PointerEx intPtr = VirtualAllocEx(handle, IntPtr.Zero, s.Length + 1, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
+                WriteProcessMemory(handle, intPtr, Encoding.ASCII.GetBytes(s));
+                array = array.Add(intPtr);
             }
-            else if (register.GetType() == typeof(string))
+            else
             {
-                IntPtr intPtr = VirtualAllocEx(handle, IntPtr.Zero, (uint)(((string)register).Length + 1), (AllocationType)12288, MemoryProtection.ExecuteReadWrite);
-                Win32.WriteProcessMemory(handle, intPtr, Encoding.ASCII.GetBytes((string)register));
-                byte[] array3 = StructToByteArray(intPtr);
-                array = array.Add(array3);
+                array = array.Add(register.ToByteArray());
             }
             return array;
         }

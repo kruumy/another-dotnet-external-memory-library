@@ -91,7 +91,11 @@ namespace AnotherExternalMemoryLibrary
             public uint LowPart;
             public int HighPart;
         }
-
+        public enum FreeType
+        {
+            Decommit = 0x4000,
+            Release = 0x8000
+        }
         public struct SYSTEM_INFO
         {
             public ushort wProcessorArchitecture;
