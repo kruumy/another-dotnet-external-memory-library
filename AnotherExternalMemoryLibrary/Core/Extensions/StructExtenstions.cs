@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AnotherExternalMemoryLibrary.Extensions
+namespace AnotherExternalMemoryLibrary.Core.Extensions
 {
     public static class StructExtenstions
     {

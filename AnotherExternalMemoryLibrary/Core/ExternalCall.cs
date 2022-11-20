@@ -1,40 +1,40 @@
-﻿using AnotherExternalMemoryLibrary.Extensions;
+﻿using AnotherExternalMemoryLibrary.Core.Extensions;
 using System.Text;
-using static AnotherExternalMemoryLibrary.Win32;
-namespace AnotherExternalMemoryLibrary
+using static AnotherExternalMemoryLibrary.Core.Win32;
+namespace AnotherExternalMemoryLibrary.Core
 {
     // Most code from
     // https://github.com/Airyzz
     // I just reworked it
     public static class ExternalCall
     {
-        internal static readonly byte[] CallPrologue64 = new byte[8]
+        private static readonly byte[] CallPrologue64 = new byte[8]
         {
             0x55, 0x48, 0x8B, 0xEC, 0x48, 0x83, 0xEC, 0x8
         };
 
-        internal static readonly byte[] CallEpilogue64 = new byte[19]
+        private static readonly byte[] CallEpilogue64 = new byte[19]
         {
             0x48, 0x83, 0xC4, 0x8, 0x48, 0xA3, 0x0, 0x0, 0x0, 0x0,
             0x0, 0x0, 0x0, 0x0, 0x48, 0x8B, 0xE5, 0x5D, 0xC3
         };
 
-        internal static readonly byte[] CallPrologue86 = new byte[6]
+        private static readonly byte[] CallPrologue86 = new byte[6]
         {
             0x55, 0x8B, 0xEC, 0x83, 0xEC, 0x8
         };
-        internal static readonly byte[] CallEpilogue86 = new byte[14]
+        private static readonly byte[] CallEpilogue86 = new byte[14]
         {
             0xFF, 0xD0, 0x83, 0xC4, 0x8, 0xA3, 0x0, 0x0, 0x0, 0x0,
             0x8B, 0xE5, 0x5D, 0xC3
         };
-        internal static readonly byte[] UserCallEpilogue86 = new byte[22]
+        private static readonly byte[] UserCallEpilogue86 = new byte[22]
         {
             0xC7, 0x45, 0xFC, 0x0, 0x0, 0x0, 0x0, 0xFF, 0x55, 0xFC,
             0xA3, 0x0, 0x0, 0x0, 0x0, 0x83, 0xC4, 0x8, 0x8B, 0xE5,
             0x5D, 0xC3
         };
-        internal enum Register
+        private enum Register
         {
             eax,
             ecx,
@@ -45,7 +45,7 @@ namespace AnotherExternalMemoryLibrary
             esi,
             edi
         }
-        internal static byte[] AssembleRegister(object register, Register type, PointerEx handle)
+        private static byte[] AssembleRegister(object register, Register type, PointerEx handle)
         {
             if (register == null) throw new ArgumentNullException(nameof(register));
             byte[] array = { (byte)(0xB8 + type) };

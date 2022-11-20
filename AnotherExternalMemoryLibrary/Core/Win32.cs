@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AnotherExternalMemoryLibrary
+namespace AnotherExternalMemoryLibrary.Core
 {
     public static class Win32
     {
@@ -137,7 +137,7 @@ namespace AnotherExternalMemoryLibrary
         // here for convenience
         public static void WriteProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, byte[] bytes)
         {
-            VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, Win32.MemoryProtection.ExecuteReadWrite, out MemoryProtection oldProtection);
+            VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, MemoryProtection.ExecuteReadWrite, out MemoryProtection oldProtection);
             WriteProcessMemory(hProcess, lpBaseAddress, bytes, bytes.Length, out PointerEx bytesWritten);
             VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, oldProtection, out MemoryProtection _);
         }

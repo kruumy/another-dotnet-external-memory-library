@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace AnotherExternalMemoryLibrary.Extensions
+namespace AnotherExternalMemoryLibrary.Core.Extensions
 {
     public static class ByteExtenstions
     {

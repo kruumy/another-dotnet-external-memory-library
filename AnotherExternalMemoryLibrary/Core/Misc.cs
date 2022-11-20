@@ -1,11 +1,11 @@
-﻿using AnotherExternalMemoryLibrary.Extensions;
+﻿using AnotherExternalMemoryLibrary.Core.Extensions;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-namespace AnotherExternalMemoryLibrary
+namespace AnotherExternalMemoryLibrary.Core
 {
-    public static class Utils
+    public static class Misc
     {
         public static PointerEx OffsetCalculator(PointerEx handle, PointerEx baseAddr, PointerEx baseOffset, params PointerEx[] offsets)
         {
