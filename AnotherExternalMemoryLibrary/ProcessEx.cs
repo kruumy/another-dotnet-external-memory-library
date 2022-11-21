@@ -16,7 +16,7 @@ namespace AnotherExternalMemoryLibrary
         #endregion
         public ProcessEx(Process baseProcess, ProcessAccess dwDesiredAccess = ProcessAccess.PROCESS_ALL_ACCESS)
         {
-            if (Misc.IsAdministrator())
+            if (Misc.IsAdministrator)
                 Process.EnterDebugMode();
 
             BaseProcess = baseProcess ?? throw new ArgumentNullException(nameof(baseProcess));
@@ -46,7 +46,7 @@ namespace AnotherExternalMemoryLibrary
         void IDisposable.Dispose()
         {
             CloseHandle(Handle);
-            if (Misc.IsAdministrator())
+            if (Misc.IsAdministrator)
                 Process.LeaveDebugMode();
             BaseProcess.Dispose();
             GC.SuppressFinalize(this);

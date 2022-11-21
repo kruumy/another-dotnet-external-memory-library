@@ -7,6 +7,7 @@ namespace AnotherExternalMemoryLibrary.Core
 {
     public static class Misc
     {
+        public static bool IsAdministrator => new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
         public static PointerEx OffsetCalculator(PointerEx handle, PointerEx baseAddr, PointerEx baseOffset, params PointerEx[] offsets)
         {
             PointerEx result = baseAddr + baseOffset;
@@ -27,11 +28,6 @@ namespace AnotherExternalMemoryLibrary.Core
         {
             using FileStream stream = new FileStream(path, FileMode.Append);
             stream.Write(bytes, 0, bytes.Length);
-        }
-        public static bool IsAdministrator()
-        {
-            return new WindowsPrincipal(WindowsIdentity.GetCurrent())
-                      .IsInRole(WindowsBuiltInRole.Administrator);
         }
         public static bool IsProcessRunning(string processName)
         {
