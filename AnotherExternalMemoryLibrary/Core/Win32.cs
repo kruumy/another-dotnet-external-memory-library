@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
 
 namespace AnotherExternalMemoryLibrary.Core
 {
@@ -71,6 +72,33 @@ namespace AnotherExternalMemoryLibrary.Core
                 TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_QUERY_SOURCE |
                 TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT |
                 TOKEN_ADJUST_SESSIONID
+        }
+        [Flags]
+        public enum SetWindowPosFlags : uint
+        {
+            SWP_ASYNCWINDOWPOS = 0x4000,
+            SWP_DEFERERASE = 0x2000,
+            SWP_DRAWFRAME = 0x0020,
+            SWP_FRAMECHANGED = 0x0020,
+            SWP_HIDEWINDOW = 0x0080,
+            SWP_NOACTIVATE = 0x0010,
+            SWP_NOCOPYBITS = 0x0100,
+            SWP_NOMOVE = 0x0002,
+            SWP_NOOWNERZORDER = 0x0200,
+            SWP_NOREDRAW = 0x0008,
+            SWP_NOREPOSITION = 0x0200,
+            SWP_NOSENDCHANGING = 0x0400,
+            SWP_NOSIZE = 0x0001,
+            SWP_NOZORDER = 0x0004,
+            SWP_SHOWWINDOW = 0x0040
+        }
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
         }
         [StructLayout(LayoutKind.Sequential)]
         public struct TOKEN_PRIVILEGES
@@ -215,10 +243,19 @@ namespace AnotherExternalMemoryLibrary.Core
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool MoveWindow(PointerEx hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
         [DllImport("user32.dll")]
-        public static extern void SetWindowPos(PointerEx hwnd, PointerEx hwndInsertAfter, int X, int Y, int width, int height, uint flags);
+        public static extern void SetWindowPos(PointerEx hwnd, PointerEx hwndInsertAfter, int X, int Y, int width, int height, SetWindowPosFlags flags);
         [DllImport("user32.dll")]
         public static extern int SetWindowLong(PointerEx hWnd, int nIndex, uint dwNewLong);
         [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
         public static extern PointerEx GetWindowLongPtr(PointerEx hWnd, int nIndex);
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetWindowRect(PointerEx hWnd, out RECT rect);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern PointerEx FindWindow(string lpClassName, string lpWindowName);
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern int GetWindowText(PointerEx hWnd, StringBuilder lpString, int nMaxCount);
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern int GetWindowTextLength(PointerEx hWnd);
     }
 }

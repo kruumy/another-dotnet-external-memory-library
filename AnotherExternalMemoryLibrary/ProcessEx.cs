@@ -25,8 +25,11 @@ namespace AnotherExternalMemoryLibrary
 
             IsWow64Process(Handle, out bool IsWow64);
             Architecture = (Architecture)Convert.ToInt32(!IsWow64);
+
+            Window = new Core.Window(BaseProcess.MainWindowHandle);
         }
         public static implicit operator ProcessEx(Process p) => new ProcessEx(p);
+        public Core.Window Window { get; private set; }
         public T Read<T>(PointerEx addr) where T : struct => Core.ReadProcessMemory.Read<T>(Handle, addr);
         public T[] Read<T>(PointerEx addr, int NumOfItems) where T : struct => Core.ReadProcessMemory.Read<T>(Handle, addr, NumOfItems);
         public void Write<T>(PointerEx addr, T value) where T : struct => Core.WriteProcessMemory.Write<T>(Handle, addr, value);
