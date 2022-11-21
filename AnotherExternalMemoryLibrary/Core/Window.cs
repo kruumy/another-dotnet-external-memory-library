@@ -1,10 +1,43 @@
-﻿using System.Text;
+﻿using System.Runtime.InteropServices;
+using System.Text;
 
 namespace AnotherExternalMemoryLibrary.Core
 {
     public class Window
     {
         public PointerEx WindowHandle { get; set; }
+        public PointerEx[] ChildWindows
+        {
+            get
+            {
+                List<PointerEx> childHandles = new();
+                GCHandle gcChildhandlesList = GCHandle.Alloc(childHandles);
+                PointerEx pointerChildHandlesList = GCHandle.ToIntPtr(gcChildhandlesList);
+                try
+                {
+                    static bool EnumWindow(PointerEx hWnd, PointerEx lParam)
+                    {
+                        GCHandle gcChildhandlesList = GCHandle.FromIntPtr(lParam);
+                        if (gcChildhandlesList.Target != null)
+                        {
+                            if (gcChildhandlesList.Target is List<PointerEx> childHandles)
+                            {
+                                childHandles.Add(hWnd);
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                    Win32.EnumWindowProc childProc = new(EnumWindow);
+                    Win32.EnumChildWindows(WindowHandle, childProc, pointerChildHandlesList);
+                }
+                finally
+                {
+                    gcChildhandlesList.Free();
+                }
+                return childHandles.ToArray();
+            }
+        }
         public int X
         {
             get

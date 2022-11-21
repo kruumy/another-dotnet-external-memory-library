@@ -257,5 +257,13 @@ namespace AnotherExternalMemoryLibrary.Core
         public static extern int GetWindowText(PointerEx hWnd, StringBuilder lpString, int nMaxCount);
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int GetWindowTextLength(PointerEx hWnd);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool AttachConsole(PointerEx dwProcessId);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern uint GetProcessIdOfThread(PointerEx handle);
+        public delegate bool EnumWindowProc(PointerEx hwnd, PointerEx lparam);
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool EnumChildWindows(PointerEx hwnd, EnumWindowProc func, PointerEx lParam);
     }
 }
