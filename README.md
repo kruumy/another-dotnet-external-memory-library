@@ -30,6 +30,12 @@ Addresses[] = ex.Scan(new byte[] {0x90,0x90,0x90,0x90});
 Addresses[] = ex.Scan("E8 0A EC ? ? FF");
 Addresses[] = ex.Scan<int>(999);
 
+// Window Control
+ex.Window.X = 0
+ex.Window.Y = 0
+ex.Window.Width = 1920
+ex.Window.Height = 1080
+
 // and more
 ```
 ### Credits
