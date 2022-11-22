@@ -9,6 +9,8 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
             if (input is string s) Console.Write(s);
             else if (input is byte[] ba) Console.Write(ba.GetHexString());
             else if (input is byte b) Console.Write(b.GetHexString());
+            else if (input is PointerEx px) Console.Write(px.ToString());
+            else if (input is IEnumerable<PointerEx> ipx) ipx.ToList().ForEach(x=> Console.Write($"{x}, "));
             else
             {
                 try
@@ -21,7 +23,7 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
 
                     string result = System.Text.Json.JsonSerializer.Serialize(input, input.GetType(), options);
                     if (result == "{}") throw new Exception($"Empty Result, {result}");
-                    Console.WriteLine(result);
+                    Console.Write(result);
                 }
                 catch
                 {

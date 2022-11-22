@@ -33,7 +33,7 @@ namespace AnotherExternalMemoryLibrary
         public T Read<T>(PointerEx addr) where T : struct => Core.ReadProcessMemory.Read<T>(Handle, addr);
         public T[] Read<T>(PointerEx addr, int NumOfItems) where T : struct => Core.ReadProcessMemory.Read<T>(Handle, addr, NumOfItems);
         public void Write<T>(PointerEx addr, T value) where T : struct => Core.WriteProcessMemory.Write<T>(Handle, addr, value);
-        public void Write<T>(PointerEx addr, T[] array) where T : struct => Core.WriteProcessMemory.Write<T>(Handle, addr, array);
+        public void Write<T>(PointerEx addr, params T[] array) where T : struct => Core.WriteProcessMemory.Write<T>(Handle, addr, array);
         public PointerEx[] Scan(byte[] arrPattern, ProcessModule[] targetModules) => Core.SigSharpScan.Scan(Handle, arrPattern, targetModules);
         public PointerEx[] Scan(string query, ProcessModule[] targetModules) => Core.SigSharpScan.Scan(Handle, query, targetModules);
         public PointerEx[] Scan<T>(T value, ProcessModule[] targetModules) where T : struct => Core.SigSharpScan.Scan<T>(Handle, value, targetModules);
