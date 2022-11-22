@@ -93,38 +93,30 @@ namespace AnotherExternalMemoryLibrary
         {
             return new PointerEx(uip);
         }
-
         public static implicit operator byte(PointerEx px)
         {
             return (byte)px.IntPtr;
         }
-
         public static implicit operator sbyte(PointerEx px)
         {
             return (sbyte)px.IntPtr;
         }
-
         public static implicit operator int(PointerEx px)
         {
             return px.IntPtr.ToInt32();
         }
-
         public static implicit operator uint(PointerEx px)
         {
             return (uint)px.IntPtr.ToInt32();
         }
-
         public static implicit operator long(PointerEx px)
         {
             return px.IntPtr.ToInt64();
         }
-
         public static implicit operator ulong(PointerEx px)
         {
             return (ulong)px.IntPtr.ToInt64();
         }
-
-
         public static implicit operator PointerEx(int i)
         {
             return new IntPtr(i);
