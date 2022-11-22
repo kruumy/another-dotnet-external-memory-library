@@ -8,15 +8,7 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
     {
         public static string GetString(this byte[] bytes)
         {
-            int length = bytes.Length;
-            for (int i = 0; i < length; i++)
-            {
-                if (bytes[i] == 0)
-                {
-                    length = i;
-                    break;
-                }
-            }
+            int length = bytes.IndexOf(0x00);
             return Encoding.Default.GetString(bytes, 0, length);
         }
         public static string GetHexString(this byte[] bytes)
@@ -32,12 +24,12 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         {
             return new byte[] { _byte }.GetHexString();
         }
-        public static T ToStruct<T>(this byte[] data) where T : struct
+        public static T ToStruct<T>(this byte[] data)
         {
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-#pragma warning disable CS8605 // Unboxing a possibly null value.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             T val = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
-#pragma warning restore CS8605 // Unboxing a possibly null value.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             handle.Free();
             return val;
         }
