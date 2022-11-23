@@ -12,7 +12,7 @@ namespace AnotherExternalMemoryLibrary.Core
         {
             PointerEx result = baseAddr + baseOffset;
             foreach (PointerEx offset in offsets)
-                result = offset + Win32.ReadProcessMemory(handle, result, PointerEx.Size).ToStruct<PointerEx>();
+                result = offset + ReadProcessMemory.Read<byte>(handle, result, PointerEx.Size).ToStruct<PointerEx>();
 
             return result;
         }

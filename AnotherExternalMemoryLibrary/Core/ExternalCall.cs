@@ -52,7 +52,7 @@ namespace AnotherExternalMemoryLibrary.Core
             if (register is string s)
             {
                 PointerEx intPtr = VirtualAllocEx(handle, IntPtr.Zero, s.Length + 1, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
-                WriteProcessMemory(handle, intPtr, Encoding.ASCII.GetBytes(s));
+                WriteProcessMemory.Write(handle, intPtr, Encoding.ASCII.GetBytes(s));
                 array = array.Add(intPtr);
             }
             else
@@ -77,8 +77,8 @@ namespace AnotherExternalMemoryLibrary.Core
             Buffer.BlockCopy(Address, 0, UserCallEpilogue86, 3, 4);
             Buffer.BlockCopy(ptr + num, 0, UserCallEpilogue86, 11, 4);
             array = array.Add(UserCallEpilogue86);
-            WriteProcessMemory(Handle, ptr, array);
-            CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, 0x0);
+            WriteProcessMemory.Write(Handle, ptr, array);
+            Win32.CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, 0x0);
         }
         public static void Callx86(PointerEx Handle, PointerEx Address, params object[] parameters)
         {
@@ -92,7 +92,7 @@ namespace AnotherExternalMemoryLibrary.Core
                 {
                     byte[] array3 = { 0x68 };
                     int num3 = ptr + num;
-                    WriteProcessMemory(Handle, num3, Encoding.ASCII.GetBytes(s));
+                    WriteProcessMemory.Write(Handle, num3, Encoding.ASCII.GetBytes(s));
                     array3 = array3.Add(BitConverter.GetBytes(num3));
                     num += s.Length + 1;
                     array = array.Add(array3);
@@ -109,9 +109,9 @@ namespace AnotherExternalMemoryLibrary.Core
             int num4 = ptr + num;
             Buffer.BlockCopy(BitConverter.GetBytes(num4), 0, callEpilogue, 6, 4);
             array = array.Add(callEpilogue);
-            WriteProcessMemory(Handle, ptr, array);
+            WriteProcessMemory.Write(Handle, ptr, array);
             int num5 = -1;
-            WriteProcessMemory(Handle, num4, BitConverter.GetBytes(num5));
+            WriteProcessMemory.Write(Handle, num4, BitConverter.GetBytes(num5));
             CreateRemoteThread(Handle, IntPtr.Zero, 0u, ptr, IntPtr.Zero, 0u, IntPtr.Zero);
             VirtualFreeEx(Handle, ptr, 2048, (uint)FreeType.Release);
         }
@@ -126,7 +126,7 @@ namespace AnotherExternalMemoryLibrary.Core
                 if (parameters[num2] is string s)
                 {
                     PointerEx intPtr2 = ptr + num;
-                    WriteProcessMemory(Handle, intPtr2, Encoding.ASCII.GetBytes(s));
+                    WriteProcessMemory.Write(Handle, intPtr2, Encoding.ASCII.GetBytes(s));
                     byte[] array2 = new byte[2] { 255, 53 };
                     int value = (int)((long)intPtr2 - (long)(ptr + array.Length) - 6);
                     array2 = array2.Add(BitConverter.GetBytes(value));
@@ -145,7 +145,7 @@ namespace AnotherExternalMemoryLibrary.Core
             long value2 = ptr + num;
             Buffer.BlockCopy(BitConverter.GetBytes(value2), 0, callEpilogue, 6, 8);
             array = array.Add(callEpilogue);
-            WriteProcessMemory(Handle, ptr, array);
+            WriteProcessMemory.Write(Handle, ptr, array);
         }
     }
 }

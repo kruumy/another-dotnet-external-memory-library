@@ -5,20 +5,26 @@ namespace AnotherExternalMemoryLibrary.Core
 {
     public static class WriteProcessMemory
     {
+        private static void WriteProcessMemory_(PointerEx hProcess, PointerEx lpBaseAddress, byte[] bytes)
+        {
+            Win32.VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, Win32.MemoryProtection.ExecuteReadWrite, out Win32.MemoryProtection oldProtection);
+            Win32.WriteProcessMemory(hProcess, lpBaseAddress, bytes, bytes.Length, out PointerEx bytesWritten);
+            Win32.VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, oldProtection, out Win32.MemoryProtection _);
+        }
         public static void Write<T>(PointerEx pHandle, PointerEx addr, T value) where T : struct
         {
             byte[] data = value.ToByteArray();
-            Win32.WriteProcessMemory(pHandle, addr, data);
+            WriteProcessMemory_(pHandle, addr, data);
         }
         public static void Write<T>(PointerEx pHandle, PointerEx addr, params T[] array) where T : struct
         {
-            if (array is byte[] ba) { Win32.WriteProcessMemory(pHandle, addr, ba); return; }
+            if (array is byte[] ba) { WriteProcessMemory_(pHandle, addr, ba); return; }
 
             int size = Marshal.SizeOf(typeof(T));
             byte[] writeData = new byte[size * array.Length];
             for (int i = 0; i < array.Length; i++)
                 array[i].ToByteArray().CopyTo(writeData, i * size);
-            Win32.WriteProcessMemory(pHandle, addr, writeData);
+            WriteProcessMemory_(pHandle, addr, writeData);
         }
     }
 }

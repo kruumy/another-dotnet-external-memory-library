@@ -155,20 +155,6 @@ namespace AnotherExternalMemoryLibrary.Core
         public static extern bool WriteProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, byte[] lpBuffer, PointerEx dwSize, out PointerEx lpNumberOfBytesWritten);
         [DllImport("kernel32.dll")]
         public static extern bool ReadProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, [Out] byte[] lpBuffer, PointerEx dwSize, out PointerEx lpNumberOfBytesRead);
-        // here for convenience
-        public static byte[] ReadProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, int NumOfBytes)
-        {
-            byte[] data = new byte[NumOfBytes];
-            ReadProcessMemory(hProcess, lpBaseAddress, data, NumOfBytes, out PointerEx bytesRead);
-            return data;
-        }
-        // here for convenience
-        public static void WriteProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, byte[] bytes)
-        {
-            VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, MemoryProtection.ExecuteReadWrite, out MemoryProtection oldProtection);
-            WriteProcessMemory(hProcess, lpBaseAddress, bytes, bytes.Length, out PointerEx bytesWritten);
-            VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, oldProtection, out MemoryProtection _);
-        }
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
         public static extern PointerEx VirtualAllocEx(PointerEx hProcess, PointerEx lpAddress, PointerEx dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
         [DllImport("kernel32.dll", SetLastError = true)]
