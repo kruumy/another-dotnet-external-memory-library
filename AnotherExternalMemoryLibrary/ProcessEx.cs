@@ -13,6 +13,7 @@ namespace AnotherExternalMemoryLibrary
         public PointerEx BaseAddress => BaseProcess.MainModule?.BaseAddress ?? IntPtr.Zero;
         public PointerEx Handle { get; private set; }
         public Architecture Architecture { get; private set; }
+        public ProcessAccess DesiredAccess { get; private set; }
         #endregion
         public ProcessEx(Process baseProcess, ProcessAccess dwDesiredAccess = ProcessAccess.PROCESS_ALL_ACCESS)
         {
@@ -22,6 +23,7 @@ namespace AnotherExternalMemoryLibrary
             BaseProcess = baseProcess ?? throw new ArgumentNullException(nameof(baseProcess));
 
             Handle = OpenProcess(dwDesiredAccess, false, BaseProcess.Id);
+            DesiredAccess = dwDesiredAccess;
 
             IsWow64Process(Handle, out bool IsWow64);
             Architecture = (Architecture)Convert.ToInt32(!IsWow64);
