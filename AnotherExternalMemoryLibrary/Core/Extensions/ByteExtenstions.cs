@@ -6,10 +6,17 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
 {
     public static class ByteExtenstions
     {
-        public static string GetString(this byte[] bytes)
+        public static string GetString(this byte[] bytes, bool trimToNull = true)
         {
-            int length = bytes.IndexOf(0x00);
-            return Encoding.Default.GetString(bytes, 0, length);
+            if (trimToNull)
+            {
+                int length = bytes.IndexOf(new byte[] { 0x00 }, 1, false).FirstOrDefault();
+                return Encoding.Default.GetString(bytes, 0, length);
+            }
+            else
+            {
+                return Encoding.Default.GetString(bytes);
+            }
         }
         public static string GetHexString(this byte[] bytes)
         {
@@ -24,12 +31,12 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         {
             return new byte[] { _byte }.GetHexString();
         }
-        public static T ToStruct<T>(this byte[] data)
+        public static T ToStruct<T>(this byte[] data) where T : struct
         {
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8605 // Unboxing a possibly null value.
             T val = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8605 // Unboxing a possibly null value.
             handle.Free();
             return val;
         }
@@ -52,45 +59,38 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
             }
             return result;
         }
-        public static byte[] Subtract(this byte[] bytes, params byte[] subtractBytes)
+        public static int[] IndexOf(this byte[] bytes, byte[] searchBytes, int maxResults = int.MaxValue, bool nullAsBlank = false)
         {
-            List<byte> result = new List<byte>();
-            result.AddRange(bytes);
-            int start = bytes.IndexOf(subtractBytes);
-            int end = subtractBytes.Length;
-            result.RemoveRange(start, end);
-            return result.ToArray();
-        }
-        public static int IndexOf(this byte[] bytes, params byte[] searchBytes)
-        {
-            int result = -1;
+            List<int> result = new();
             for (int i = 0; i < bytes.Length; i++)
             {
+                if (bytes[i] != searchBytes[0])
+                    continue;
 
-                if (bytes[i] == searchBytes[0])
+                bool PatternCheck(int nOffset, byte[] arrPattern)
                 {
-                    bool IsFullMatch = true;
-                    for (int j = 0; j < searchBytes.Length; j++)
+                    for (int j = 0; j < arrPattern.Length; j++)
                     {
-                        if (searchBytes[j] != bytes[i + j])
-                        {
-                            IsFullMatch = false;
-                            break;
-                        }
-                    }
-                    if (IsFullMatch)
-                    {
-                        result = i;
-                        break;
-                    }
-                }
+                        if (nullAsBlank && arrPattern[j] == 0x0)
+                            continue;
 
+                        if (arrPattern[j] != bytes[nOffset + j])
+                            return false;
+                    }
+                    return true;
+                }
+                if (PatternCheck(i, searchBytes))
+                {
+                    result.Add(i);
+                    if (result.Count >= maxResults)
+                        break;
+                }
             }
-            return result;
+            return result.ToArray();
         }
         public static bool Contains(this byte[] bytes, params byte[] checkBytes)
         {
-            return bytes.IndexOf(checkBytes) != -1;
+            return bytes.IndexOf(checkBytes, 1, false).Length > 0;
         }
         public static byte[] Compress(this byte[] bytes)
         {

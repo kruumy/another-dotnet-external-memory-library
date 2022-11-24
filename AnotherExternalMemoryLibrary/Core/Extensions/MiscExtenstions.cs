@@ -41,5 +41,9 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
                     return item;
             throw new Exception("Name Did Not Match Any ModuleNames");
         }
+        public static IEnumerable<ProcessModule> GetEnumerable(this ProcessModuleCollection modules)
+        {
+            return modules.Cast<ProcessModule>();
+        }
     }
 }
