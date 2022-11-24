@@ -30,7 +30,7 @@ namespace AnotherExternalMemoryLibrary
 
             Window = new Core.Window(BaseProcess.MainWindowHandle);
         }
-        public static implicit operator ProcessEx(Process p) => new ProcessEx(p);
+        public static implicit operator ProcessEx(Process p) => new(p);
         public Core.Window Window { get; private set; }
         public T Read<T>(PointerEx addr) where T : struct => Core.ReadProcessMemory.Read<T>(Handle, addr);
         public T[] Read<T>(PointerEx addr, int NumOfItems) where T : struct => Core.ReadProcessMemory.Read<T>(Handle, addr, NumOfItems);
