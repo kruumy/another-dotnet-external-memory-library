@@ -8,13 +8,11 @@ namespace AnotherExternalMemoryLibrary
 {
     public class ProcessEx : IDisposable
     {
-        #region Properties
         public Process BaseProcess { get; private set; }
         public PointerEx BaseAddress => BaseProcess.MainModule?.BaseAddress ?? IntPtr.Zero;
         public PointerEx Handle { get; private set; }
         public Architecture Architecture { get; private set; }
         public ProcessAccess DesiredAccess { get; private set; }
-        #endregion
         public ProcessEx(Process baseProcess, ProcessAccess dwDesiredAccess = ProcessAccess.PROCESS_ALL_ACCESS)
         {
             if (Misc.IsAdministrator)
