@@ -40,6 +40,19 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
             handle.Free();
             return val;
         }
+        public static T[] ToStructArray<T>(this byte[] data) where T : struct
+        {
+            int sizeOfResultType = Marshal.SizeOf(typeof(T));
+            T[] result = new T[data.Length / sizeOfResultType];
+            for (int i = 0; i < data.Length; i += sizeOfResultType)
+            {
+                byte[] toaddbytes = new byte[sizeOfResultType];
+                for (int j = 0; j < sizeOfResultType; j++)
+                    toaddbytes[j] = data[i + j];
+                result[i / sizeOfResultType] = toaddbytes.ToStruct<T>();
+            }
+            return result;
+        }
         public static byte[] Add(this byte[] bytes, params byte[] addBytes)
         {
             byte[] result = new byte[addBytes.Length + bytes.Length];
