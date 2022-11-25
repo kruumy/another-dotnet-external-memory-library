@@ -45,5 +45,9 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         {
             return modules.Cast<ProcessModule>();
         }
+        public static IEnumerable<T> GetRange<T>(this IEnumerable<T> source,int start,int end)
+        {
+            return source.Skip(start).Take(end);
+        }
     }
 }

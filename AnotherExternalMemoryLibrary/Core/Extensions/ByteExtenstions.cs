@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.Drawing;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -40,17 +41,12 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
             handle.Free();
             return val;
         }
-        public static T[] ToStructArray<T>(this byte[] data) where T : struct
+        public static T[] ToStructArray<T>(this byte[] data,int? size = null) where T : struct
         {
-            int sizeOfResultType = Marshal.SizeOf(typeof(T));
+            int sizeOfResultType = size == null ? Marshal.SizeOf(typeof(T)) : (int)size;
             T[] result = new T[data.Length / sizeOfResultType];
             for (int i = 0; i < data.Length; i += sizeOfResultType)
-            {
-                byte[] toaddbytes = new byte[sizeOfResultType];
-                for (int j = 0; j < sizeOfResultType; j++)
-                    toaddbytes[j] = data[i + j];
-                result[i / sizeOfResultType] = toaddbytes.ToStruct<T>();
-            }
+                result[i / sizeOfResultType] = (data.GetRange(i,sizeOfResultType).ToArray().ToStruct<T>());
             return result;
         }
         public static byte[] Add(this byte[] bytes, params byte[] addBytes)
