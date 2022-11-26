@@ -13,7 +13,7 @@ namespace AnotherExternalMemoryLibrary.Core
             {
                 PointerEx g_lpModuleBase = item.BaseAddress;
                 byte[] g_arrModuleBuffer = Core.ReadProcessMemory.Read<byte>(pHandle, g_lpModuleBase, item.ModuleMemorySize);
-                IEnumerable<int> scanResult = g_arrModuleBuffer.IndexOf(pattern,int.MaxValue,true);
+                IEnumerable<int> scanResult = g_arrModuleBuffer.IndexOf(pattern, int.MaxValue, nullAsBlank: true);
                 foreach (var ptr in scanResult)
                     result.Add(g_lpModuleBase + ptr);
             }

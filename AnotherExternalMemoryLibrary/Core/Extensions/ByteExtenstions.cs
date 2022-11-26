@@ -11,7 +11,7 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         {
             if (trimToNull)
             {
-                int length = bytes.IndexOf(new byte[] { 0x00 }, 1, false).FirstOrDefault();
+                int length = bytes.IndexOf(new byte[] { 0x00 }, 1, nullAsBlank: false).FirstOrDefault();
                 return Encoding.Default.GetString(bytes, 0, length);
             }
             else
@@ -68,27 +68,24 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
             }
             return result;
         }
-        public static int[] IndexOf(this byte[] bytes, byte[] searchBytes, int maxResults = int.MaxValue, bool nullAsBlank = false)
+        public static int[] IndexOf(this byte[] bytes, byte[] searchBytes, int maxResults = int.MaxValue, int start = 0, int? end = null, bool nullAsBlank = false)
         {
             List<int> result = new();
-            for (int i = 0; i < bytes.Length; i++)
+            end ??= bytes.Length;
+            for (int i = start; i < end; i++)
             {
                 if (bytes[i] != searchBytes[0])
                     continue;
-
-                bool PatternCheck(int nOffset, byte[] arrPattern)
+                bool isFullPattern = true;
+                for (int j = 0; j < searchBytes.Length; j++)
                 {
-                    for (int j = 0; j < arrPattern.Length; j++)
-                    {
-                        if (nullAsBlank && arrPattern[j] == 0x0)
-                            continue;
+                    if (nullAsBlank && searchBytes[j] == 0x0)
+                        continue;
 
-                        if (arrPattern[j] != bytes[nOffset + j])
-                            return false;
-                    }
-                    return true;
+                    if (searchBytes[j] != bytes[i + j])
+                        isFullPattern = false;
                 }
-                if (PatternCheck(i, searchBytes))
+                if (isFullPattern)
                 {
                     result.Add(i);
                     if (result.Count >= maxResults)
@@ -99,7 +96,7 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         }
         public static bool Contains(this byte[] bytes, params byte[] checkBytes)
         {
-            return bytes.IndexOf(checkBytes, 1, false).Length > 0;
+            return bytes.IndexOf(checkBytes, 1, nullAsBlank: false).Length > 0;
         }
         public static byte[] Compress(this byte[] bytes)
         {
