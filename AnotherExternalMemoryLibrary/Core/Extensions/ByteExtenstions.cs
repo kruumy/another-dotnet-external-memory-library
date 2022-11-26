@@ -81,9 +81,11 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
                 {
                     if (nullAsBlank && searchBytes[j] == 0x0)
                         continue;
-
                     if (searchBytes[j] != bytes[i + j])
+                    {
                         isFullPattern = false;
+                        break;
+                    }
                 }
                 if (isFullPattern)
                 {
