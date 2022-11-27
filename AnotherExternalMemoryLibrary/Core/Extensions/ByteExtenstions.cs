@@ -12,6 +12,7 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
             if (trimToNull)
             {
                 int length = bytes.IndexOf(new byte[] { 0x00 }, 1, nullAsBlank: false).FirstOrDefault();
+                if (length <= 0) length = bytes.Length;
                 return Encoding.Default.GetString(bytes, 0, length);
             }
             else
