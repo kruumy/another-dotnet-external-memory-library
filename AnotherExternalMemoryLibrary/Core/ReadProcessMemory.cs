@@ -26,7 +26,7 @@ namespace AnotherExternalMemoryLibrary.Core
             int size = Marshal.SizeOf(typeof(T));
             IEnumerable<byte> data = ReadProcessMemory_(pHandle, addr, arr.Length * size);
             for (int i = 0; i < arr.Length; i++)
-                arr[i] = data.Skip(i * size).Take(size).ToArray().ToStruct<T>();
+                arr[i] = data.GetRange(i * size,size).ToArray().ToStruct<T>();
             return arr;
         }
     }

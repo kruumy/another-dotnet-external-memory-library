@@ -35,7 +35,11 @@ namespace AnotherExternalMemoryLibrary.Core
             TopDown = 0x100000,
             WriteWatch = 0x200000,
             ResetUndo = 0x1000000,
-            LargePages = 0x20000000
+            LargePages = 0x20000000,
+            PRIVATE = 0x20000,
+            IMAGE = 0x1000000,
+            MAPPED = 0x40000
+
         }
 
         [Flags]
