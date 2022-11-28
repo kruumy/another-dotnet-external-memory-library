@@ -25,7 +25,7 @@ ex.UserCallx86(0xFFFFFF,"disconnect",0);
 ex.Callx86(0xFFFFFF,0,"devmap mp_rust");
 
 // Scan Memory
-Addresses[] = ex.Scan(new byte[] {0x90,0x90,0x90,0x90});
+Addresses[] = ex.Scan(0x90,0x90,0x90,0x90);
 
 // Window Control
 ex.Window.X = 0

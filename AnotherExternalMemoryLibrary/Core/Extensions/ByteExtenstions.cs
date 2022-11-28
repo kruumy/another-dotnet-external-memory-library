@@ -72,7 +72,7 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         public static int[] IndexOf(this byte[] bytes, byte[] searchBytes, int maxResults = int.MaxValue, int start = 0, int? end = null, bool nullAsBlank = false)
         {
             List<int> result = new();
-            end ??= bytes.Length;
+            end ??= bytes.Length - 1;
             for (int i = start; i < end; i++)
             {
                 if (bytes[i] != searchBytes[0])

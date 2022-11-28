@@ -34,7 +34,7 @@ namespace AnotherExternalMemoryLibrary
         public T[] Read<T>(PointerEx addr, int NumOfItems) where T : struct => Core.ReadProcessMemory.Read<T>(Handle, addr, NumOfItems);
         public void Write<T>(PointerEx addr, T value) where T : struct => Core.WriteProcessMemory.Write<T>(Handle, addr, value);
         public void Write<T>(PointerEx addr, params T[] array) where T : struct => Core.WriteProcessMemory.Write<T>(Handle, addr, array);
-        public IEnumerable<PointerEx> Scan(IEnumerable<ProcessModule> modules, params byte[] pattern) => Core.MemoryScan.Scan(Handle,modules, pattern);
+        public PointerEx[] Scan(params byte[] pattern) => Core.MemoryScan.Scan(Handle,pattern);
         public void LoadLibraryA(string dllPath) => Core.DLLInjection.LoadLibraryA(Handle, dllPath);
         public void UserCallx86(PointerEx addr, object? eax = null, object? ecx = null, object? edx = null, object? ebx = null, object? esp = null, object? ebp = null, object? esi = null, object? edi = null) => Core.ExternalCall.UserCallx86(Handle, addr, eax, ecx, edx, ebx, esp, ebp, esi, edi);
         public void Callx86(PointerEx addr, params object[] paramaters) => Core.ExternalCall.Callx86(Handle, addr, paramaters);
