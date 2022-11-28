@@ -1,4 +1,5 @@
 ﻿using AnotherExternalMemoryLibrary.Core.Extensions;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static AnotherExternalMemoryLibrary.Core.Win32;
 
@@ -16,16 +17,26 @@ namespace AnotherExternalMemoryLibrary.Core
             while (VirtualQueryEx(pHandle, lpAddress, out memInfo, memInfoSize) != 0 || lpAddress >= end)
             {
                 lpAddress = memInfo.BaseAddress + memInfo.RegionSize;
-                byte[] data = new byte[memInfo.RegionSize];
-                ReadProcessMemory(pHandle, lpAddress, data, data.Length, out PointerEx bytesRead);
-                int[] searchResults = data.IndexOf(pattern);
-                if (searchResults.Length > 0)
+
+                int SplitNum = (int)((long)memInfo.RegionSize / int.MaxValue) + 1;
+                PointerEx readStart = lpAddress;
+                int readLength = (int)((long)memInfo.RegionSize / SplitNum);
+                for (int i = 0; i < SplitNum; i++)
                 {
-                    foreach (int num in searchResults)
+                    byte[] data = new byte[readLength];
+                    ReadProcessMemory(pHandle, readStart, data, data.Length, out PointerEx bytesRead);
+                    Debug.WriteLine($"started, {readStart}--{(PointerEx)readLength}/{SplitNum}, {memInfo.RegionSize}");
+                    int[] searchResults = data.IndexOf(pattern);
+                    Debug.WriteLine($"stopped, {searchResults.Length}");
+                    if (searchResults.Length > 0)
                     {
-                        ret.Add(lpAddress + num);
-                        //ReadProcessMemory.Read<byte>(pHandle,ret[^1],5).print();
+                        foreach (int num in searchResults)
+                        {
+                            ret.Add(readStart + num);
+                            //ReadProcessMemory.Read<byte>(pHandle,ret[^1],pattern.Length).print();
+                        }
                     }
+                    readStart += readLength;
                 }
             }
             return ret.ToArray();
