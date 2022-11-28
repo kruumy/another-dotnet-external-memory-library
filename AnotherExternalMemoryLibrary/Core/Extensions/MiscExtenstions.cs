@@ -10,7 +10,7 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
             else if (input is byte[] ba) Console.Write(ba.GetHexString());
             else if (input is byte b) Console.Write(b.GetHexString());
             else if (input is PointerEx px) Console.Write(px.ToString());
-            else if (input is IEnumerable<PointerEx> ipx) ipx.ToList().ForEach(x=> Console.Write($"{x}, "));
+            else if (input is IEnumerable<PointerEx> ipx) ipx.ToList().ForEach(x => Console.Write($"{x}, "));
             else
             {
                 try
@@ -45,7 +45,7 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         {
             return modules.Cast<ProcessModule>();
         }
-        public static IEnumerable<T> GetRange<T>(this IEnumerable<T> source,int start,int end)
+        public static IEnumerable<T> GetRange<T>(this IEnumerable<T> source, int start, int end)
         {
             return source.Skip(start).Take(end);
         }

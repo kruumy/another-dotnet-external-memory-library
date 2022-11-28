@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -42,12 +41,12 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
             handle.Free();
             return val;
         }
-        public static T[] ToStructArray<T>(this byte[] data,int? size = null) where T : struct
+        public static T[] ToStructArray<T>(this byte[] data, int? size = null) where T : struct
         {
             int sizeOfResultType = size == null ? Marshal.SizeOf(typeof(T)) : (int)size;
             T[] result = new T[data.Length / sizeOfResultType];
             for (int i = 0; i < data.Length; i += sizeOfResultType)
-                result[i / sizeOfResultType] = (data.GetRange(i,sizeOfResultType).ToArray().ToStruct<T>());
+                result[i / sizeOfResultType] = (data.GetRange(i, sizeOfResultType).ToArray().ToStruct<T>());
             return result;
         }
         public static byte[] Add(this byte[] bytes, params byte[] addBytes)
@@ -72,7 +71,7 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         public static int[] IndexOf(this byte[] bytes, byte[] searchBytes, int maxResults = int.MaxValue, int start = 0, int? end = null, bool nullAsBlank = false)
         {
             List<int> result = new();
-            end ??= bytes.Length - 1;
+            end ??= bytes.Length - 2;
             for (int i = start; i < end; i++)
             {
                 if (bytes[i] != searchBytes[0])
@@ -87,6 +86,7 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
                         isFullPattern = false;
                         break;
                     }
+
                 }
                 if (isFullPattern)
                 {

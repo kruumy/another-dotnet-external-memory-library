@@ -7,6 +7,8 @@ namespace AnotherExternalMemoryLibrary
         private readonly IntPtr IntPtr { get; }
         public static int Size => IntPtr.Size;
         public static bool Is64Bit => Size == sizeof(long);
+        public static PointerEx MaxValue => IntPtr.MaxValue;
+        public static PointerEx MinValue => IntPtr.MinValue;
         public PointerEx(IntPtr value)
         {
             IntPtr = value;
