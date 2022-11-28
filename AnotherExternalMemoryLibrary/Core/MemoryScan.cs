@@ -13,7 +13,7 @@ namespace AnotherExternalMemoryLibrary.Core
             MEMORY_BASIC_INFORMATION memInfo = new();
             PointerEx memInfoSize = Marshal.SizeOf(memInfo);
             PointerEx lpAddress = start;
-            while (VirtualQueryEx(pHandle, lpAddress, out memInfo, memInfoSize) != 0 || lpAddress >= end)
+            while (VirtualQueryEx(pHandle, lpAddress, out memInfo, memInfoSize) != 0 && lpAddress < end)
             {
                 lpAddress = memInfo.BaseAddress + memInfo.RegionSize;
 
