@@ -5,7 +5,6 @@ using static AnotherExternalMemoryLibrary.Core.Win32;
 
 namespace AnotherExternalMemoryLibrary.Core
 {
-    // Does not support x64 yet
     public static class MemoryScan
     {
         public static PointerEx[] Scan(PointerEx pHandle, PointerEx start, PointerEx end, params byte[] pattern)
@@ -47,6 +46,7 @@ namespace AnotherExternalMemoryLibrary.Core
         }
         public static PointerEx[] Scan(PointerEx pHandle, int NumOfThreads, params byte[] pattern)
         {
+            // TODO: Recieves duplicate values cause VirtualQueryEx rounds to base address, fix it.
             List<PointerEx> ret = new();
             Thread[] threads = new Thread[NumOfThreads];
             PointerEx start = 0x0;
