@@ -1,28 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<Platforms>x86;x64</Platforms>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<SignAssembly>False</SignAssembly>
+		<Description>A Lightweight .NET External Process Memory Library </Description>
+		<Copyright>Joshua Pauls</Copyright>
+		<PackageProjectUrl>https://github.com/kruumy/another-dotnet-external-memory-library</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/kruumy/another-dotnet-external-memory-library</RepositoryUrl>
+		<PackageTags>library;memory;win32api</PackageTags>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
 	  <NoWarn>1701;1702;1591</NoWarn>
+	  <DebugType>full</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
 	  <NoWarn>1701;1702;1591</NoWarn>
+	  <DebugType>full</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 	  <NoWarn>1701;1702;1591</NoWarn>
+	  <DebugType>full</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 	  <NoWarn>1701;1702;1591</NoWarn>
+	  <DebugType>full</DebugType>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\..\ActorConsole-Rewritten-iw4\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
 </Project>
