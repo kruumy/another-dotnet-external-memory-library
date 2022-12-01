@@ -3,7 +3,7 @@ using static AnotherExternalMemoryLibrary.Core.Win32;
 
 namespace AnotherExternalMemoryLibrary.Core
 {
-    public static class DLLInjection
+    public static class LoadLibrary
     {
         public static void LoadLibraryA(PointerEx pHandle, string dllPath)
         {

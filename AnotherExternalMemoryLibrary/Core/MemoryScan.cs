@@ -62,7 +62,7 @@ namespace AnotherExternalMemoryLibrary.Core
                 start += PointerEx.MaxValue / NumOfThreads;
                 end += PointerEx.MaxValue / NumOfThreads;
             }
-            foreach (var thread in threads)
+            foreach (Thread thread in threads)
             {
                 thread.Join();
             }
