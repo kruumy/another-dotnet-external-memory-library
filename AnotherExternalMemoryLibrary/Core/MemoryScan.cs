@@ -1,6 +1,8 @@
 ﻿using AnotherExternalMemoryLibrary.Core.Extensions;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using static AnotherExternalMemoryLibrary.Core.Win32;
 
 namespace AnotherExternalMemoryLibrary.Core
@@ -9,8 +11,8 @@ namespace AnotherExternalMemoryLibrary.Core
     {
         public static PointerEx[] Scan(PointerEx pHandle, PointerEx start, PointerEx end, params byte[] pattern)
         {
-            List<PointerEx> ret = new();
-            MEMORY_BASIC_INFORMATION memInfo = new();
+            List<PointerEx> ret = new List<PointerEx>();
+            MEMORY_BASIC_INFORMATION memInfo = new MEMORY_BASIC_INFORMATION();
             PointerEx memInfoSize = Marshal.SizeOf(memInfo);
             PointerEx lpAddress = start;
             while (VirtualQueryEx(pHandle, lpAddress, out memInfo, memInfoSize) != 0 && lpAddress < end)
@@ -47,7 +49,7 @@ namespace AnotherExternalMemoryLibrary.Core
         public static PointerEx[] Scan(PointerEx pHandle, int NumOfThreads, params byte[] pattern)
         {
             // TODO: Recieves duplicate values cause VirtualQueryEx rounds to base address, fix it.
-            List<PointerEx> ret = new();
+            List<PointerEx> ret = new List<PointerEx>();
             Thread[] threads = new Thread[NumOfThreads];
             PointerEx start = 0x0;
             PointerEx end = PointerEx.MaxValue / NumOfThreads;

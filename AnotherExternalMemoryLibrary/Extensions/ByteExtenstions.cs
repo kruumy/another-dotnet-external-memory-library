@@ -1,4 +1,8 @@
-﻿using System.IO.Compression;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -70,8 +74,9 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         }
         public static int[] IndexOf(this byte[] bytes, byte[] searchBytes, int maxResults = int.MaxValue, int start = 0, int? end = null, bool nullAsBlank = false)
         {
-            List<int> result = new();
-            end ??= bytes.Length - 2;
+            List<int> result = new List<int>();
+            if (end == null)
+                end = bytes.Length - 2;
             for (int i = start; i < end; i++)
             {
                 if (bytes[i] != searchBytes[0])
@@ -116,10 +121,10 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         }
         public static byte[] Decompress(this byte[] compressedBytes)
         {
-            using MemoryStream inputStream = new MemoryStream(compressedBytes.Length);
+            MemoryStream inputStream = new MemoryStream(compressedBytes.Length);
             inputStream.Write(compressedBytes, 0, compressedBytes.Length);
             inputStream.Seek(0, SeekOrigin.Begin);
-            using MemoryStream outputStream = new MemoryStream();
+            MemoryStream outputStream = new MemoryStream();
             using (DeflateStream deflateStream = new DeflateStream(inputStream, CompressionMode.Decompress))
             {
                 byte[] buffer = new byte[4096];

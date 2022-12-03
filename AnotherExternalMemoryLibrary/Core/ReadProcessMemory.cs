@@ -1,4 +1,6 @@
 ﻿using AnotherExternalMemoryLibrary.Core.Extensions;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary.Core
@@ -20,7 +22,7 @@ namespace AnotherExternalMemoryLibrary.Core
 
         public static T[] Read<T>(PointerEx pHandle, PointerEx addr, int NumOfItems) where T : struct
         {
-            if (typeof(T) == typeof(byte)) { return (dynamic)ReadProcessMemory_(pHandle, addr, NumOfItems); }
+            if (typeof(T) == typeof(byte)) { return ReadProcessMemory_(pHandle, addr, NumOfItems) as T[]; }
 
             T[] arr = new T[NumOfItems];
             int size = Marshal.SizeOf(typeof(T));

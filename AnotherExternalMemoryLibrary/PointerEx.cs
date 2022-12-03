@@ -1,14 +1,15 @@
 ﻿using AnotherExternalMemoryLibrary.Core.Extensions;
+using System;
 
 namespace AnotherExternalMemoryLibrary
 {
     public readonly struct PointerEx
     {
-        private readonly IntPtr IntPtr { get; }
+        private IntPtr IntPtr { get; }
         public static int Size => IntPtr.Size;
         public static bool Is64Bit => Size == sizeof(long);
-        public static PointerEx MaxValue => IntPtr.MaxValue;
-        public static PointerEx MinValue => IntPtr.MinValue;
+        public static PointerEx MaxValue => Is64Bit ? (PointerEx)long.MaxValue : (PointerEx)int.MaxValue;
+        public static PointerEx MinValue => Is64Bit ? (PointerEx)ulong.MinValue : (PointerEx)uint.MinValue;
         public PointerEx(IntPtr value)
         {
             IntPtr = value;
@@ -154,9 +155,9 @@ namespace AnotherExternalMemoryLibrary
                     bytes = bytes.Add(0x0);
 
                 if (Is64Bit)
-                    return BitConverter.ToInt64(bytes);
+                    return BitConverter.ToInt64(bytes, 0);
                 else
-                    return BitConverter.ToInt32(bytes);
+                    return BitConverter.ToInt32(bytes, 0);
             }
             else
                 throw new Exception($"Cannot convert byte[] length of {bytes.Length} to PointerEx size {Size}");

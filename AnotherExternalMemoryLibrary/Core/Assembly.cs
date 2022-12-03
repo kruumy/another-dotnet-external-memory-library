@@ -1,4 +1,6 @@
 ﻿using AnotherExternalMemoryLibrary.Core.Extensions;
+using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using static AnotherExternalMemoryLibrary.Core.Win32;

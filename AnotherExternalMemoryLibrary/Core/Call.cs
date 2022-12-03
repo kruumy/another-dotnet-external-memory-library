@@ -1,4 +1,5 @@
 ﻿using AnotherExternalMemoryLibrary.Core.Extensions;
+using System;
 using System.Text;
 using static AnotherExternalMemoryLibrary.Core.Assembly;
 using static AnotherExternalMemoryLibrary.Core.Win32;
@@ -36,7 +37,7 @@ namespace AnotherExternalMemoryLibrary.Core
             0x5D, 0xC3
         };
 
-        public static void UserCallx86(PointerEx Handle, PointerEx Address, object? eax = null, object? ecx = null, object? edx = null, object? ebx = null, object? esp = null, object? ebp = null, object? esi = null, object? edi = null)
+        public static void UserCallx86(PointerEx Handle, PointerEx Address, object eax = null, object ecx = null, object edx = null, object ebx = null, object esp = null, object ebp = null, object esi = null, object edi = null)
         {
             uint num = 2048u;
             PointerEx ptr = VirtualAllocEx(Handle, 0x0, num * 2, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
