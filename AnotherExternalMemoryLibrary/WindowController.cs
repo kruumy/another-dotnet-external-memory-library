@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace AnotherExternalMemoryLibrary.Core
+namespace AnotherExternalMemoryLibrary
 {
     public class Window
     {

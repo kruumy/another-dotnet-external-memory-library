@@ -1,9 +1,8 @@
-﻿using AnotherExternalMemoryLibrary.Core.Extensions;
+﻿using AnotherExternalMemoryLibrary.Extensions;
 using System;
 using System.Text;
-using static AnotherExternalMemoryLibrary.Core.Assembly;
-using static AnotherExternalMemoryLibrary.Core.Win32;
-namespace AnotherExternalMemoryLibrary.Core
+using static AnotherExternalMemoryLibrary.Win32;
+namespace AnotherExternalMemoryLibrary
 {
     // Most code from
     // https://github.com/Airyzz
@@ -36,7 +35,33 @@ namespace AnotherExternalMemoryLibrary.Core
             0xA3, 0x0, 0x0, 0x0, 0x0, 0x83, 0xC4, 0x8, 0x8B, 0xE5,
             0x5D, 0xC3
         };
-
+        public enum Register
+        {
+            eax,
+            ecx,
+            edx,
+            ebx,
+            esp,
+            ebp,
+            esi,
+            edi
+        }
+        public static byte[] AssembleRegister(object register, Register type, PointerEx handle)
+        {
+            if (register == null) throw new ArgumentNullException(nameof(register));
+            byte[] array = { (byte)(0xB8 + type) };
+            if (register is string s)
+            {
+                PointerEx intPtr = VirtualAllocEx(handle, IntPtr.Zero, s.Length + 1, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
+                WriteProcessMemory.Write(handle, intPtr, Encoding.ASCII.GetBytes(s));
+                array = array.Add(intPtr);
+            }
+            else
+            {
+                array = array.Add(register.ToByteArray());
+            }
+            return array;
+        }
         public static void UserCallx86(PointerEx Handle, PointerEx Address, object eax = null, object ecx = null, object edx = null, object ebx = null, object esp = null, object ebp = null, object esi = null, object edi = null)
         {
             uint num = 2048u;
@@ -54,7 +79,7 @@ namespace AnotherExternalMemoryLibrary.Core
             Buffer.BlockCopy(ptr + num, 0, UserCallEpilogue86, 11, 4);
             array = array.Add(UserCallEpilogue86);
             WriteProcessMemory.Write(Handle, ptr, array);
-            Win32.CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, 0x0);
+            CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, 0x0);
         }
         public static void Callx86(PointerEx Handle, PointerEx Address, params object[] parameters)
         {

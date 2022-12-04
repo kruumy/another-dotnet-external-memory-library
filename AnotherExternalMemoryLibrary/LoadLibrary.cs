@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using static AnotherExternalMemoryLibrary.Core.Win32;
+using static AnotherExternalMemoryLibrary.Win32;
 
-namespace AnotherExternalMemoryLibrary.Core
+namespace AnotherExternalMemoryLibrary
 {
     public static class LoadLibrary
     {

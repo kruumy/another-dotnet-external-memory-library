@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace AnotherExternalMemoryLibrary.Core.Extensions
+namespace AnotherExternalMemoryLibrary.Extensions
 {
-    public static class MiscExtenstions
+    public static class ProcessModuleExtensions
     {
-
         public static ProcessModule GetByName(this ProcessModuleCollection modules, string name)
         {
             foreach (ProcessModule item in modules)
@@ -18,10 +17,6 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
         public static IEnumerable<ProcessModule> GetEnumerable(this ProcessModuleCollection modules)
         {
             return modules.Cast<ProcessModule>();
-        }
-        public static IEnumerable<T> GetRange<T>(this IEnumerable<T> source, int start, int end)
-        {
-            return source.Skip(start).Take(end);
         }
     }
 }

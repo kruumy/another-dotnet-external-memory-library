@@ -1,9 +1,9 @@
-﻿using AnotherExternalMemoryLibrary.Core.Extensions;
+﻿using AnotherExternalMemoryLibrary.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace AnotherExternalMemoryLibrary.Core
+namespace AnotherExternalMemoryLibrary
 {
     public static class ReadProcessMemory
     {

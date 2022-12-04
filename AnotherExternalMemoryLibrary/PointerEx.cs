@@ -1,4 +1,4 @@
-﻿using AnotherExternalMemoryLibrary.Core.Extensions;
+﻿using AnotherExternalMemoryLibrary.Extensions;
 using System;
 
 namespace AnotherExternalMemoryLibrary

@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace AnotherExternalMemoryLibrary.Core
+namespace AnotherExternalMemoryLibrary
 {
     public static class Win32
     {

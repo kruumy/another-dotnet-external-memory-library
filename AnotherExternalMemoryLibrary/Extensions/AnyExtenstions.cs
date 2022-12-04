@@ -1,8 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary.Core.Extensions
 {
-    public static class StructExtenstions
+    public static class AnyExtenstions
     {
         public static byte[] ToByteArray<T>(this T s)
         {
@@ -23,6 +25,10 @@ namespace AnotherExternalMemoryLibrary.Core.Extensions
                 a_s[i].ToByteArray().CopyTo(data, i * size);
             }
             return data;
+        }
+        public static IEnumerable<T> GetRange<T>(this IEnumerable<T> source, int start, int end)
+        {
+            return source.Skip(start).Take(end);
         }
     }
 }

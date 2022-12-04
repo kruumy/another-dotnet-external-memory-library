@@ -1,4 +1,4 @@
-﻿namespace AnotherExternalMemoryLibrary.Core.Extensions
+﻿namespace AnotherExternalMemoryLibrary.Extensions
 {
     public static class CharExtenstions
     {
