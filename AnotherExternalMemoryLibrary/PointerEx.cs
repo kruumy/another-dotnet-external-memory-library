@@ -9,7 +9,7 @@ namespace AnotherExternalMemoryLibrary
         public static int Size => IntPtr.Size;
         public static bool Is64Bit => Size == sizeof(long);
         public static PointerEx MaxValue => Is64Bit ? (PointerEx)long.MaxValue : (PointerEx)int.MaxValue;
-        public static PointerEx MinValue => Is64Bit ? (PointerEx)ulong.MinValue : (PointerEx)uint.MinValue;
+        public static PointerEx MinValue => Is64Bit ? (PointerEx)long.MinValue : (PointerEx)int.MinValue;
         public PointerEx(IntPtr value)
         {
             IntPtr = value;
