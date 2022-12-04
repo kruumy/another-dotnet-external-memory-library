@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace AnotherExternalMemoryLibrary.Core.Extensions
+namespace AnotherExternalMemoryLibrary.Extensions
 {
     public static class AnyExtenstions
     {

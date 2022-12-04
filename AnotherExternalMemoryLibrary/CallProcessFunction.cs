@@ -7,7 +7,7 @@ namespace AnotherExternalMemoryLibrary
     // Most code from
     // https://github.com/Airyzz
     // I just reworked it
-    public static class Call
+    public static class CallProcessFunction
     {
         private static readonly byte[] CallPrologue64 = new byte[8]
         {

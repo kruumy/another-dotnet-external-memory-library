@@ -3,7 +3,7 @@ using System.Text;
 
 namespace AnotherExternalMemoryLibrary
 {
-    public class Window
+    public class WindowController
     {
         public PointerEx WindowHandle { get; set; }
         public int X
@@ -64,7 +64,7 @@ namespace AnotherExternalMemoryLibrary
                 return sb.ToString();
             }
         }
-        public Window(PointerEx _WindowHandle)
+        public WindowController(PointerEx _WindowHandle)
         {
             WindowHandle = _WindowHandle;
         }
