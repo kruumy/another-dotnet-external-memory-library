@@ -163,7 +163,7 @@ namespace AnotherExternalMemoryLibrary
         {
             return Is64Bit ? BitConverter.GetBytes((long)px) : BitConverter.GetBytes((int)px);
         }
+        #endregion
     }
-    #endregion
 }
 
