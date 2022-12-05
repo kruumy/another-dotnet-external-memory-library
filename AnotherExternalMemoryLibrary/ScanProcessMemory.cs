@@ -1,7 +1,6 @@
 ﻿using AnotherExternalMemoryLibrary.Extensions;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading;
 using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary

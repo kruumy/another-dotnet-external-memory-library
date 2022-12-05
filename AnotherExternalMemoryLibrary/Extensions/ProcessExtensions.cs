@@ -53,11 +53,15 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             return new WindowController(process.MainWindowHandle);
         }
-        public static PointerEx CalculateOffsets(this Process process, params PointerEx[] Offsets)
+        public static PointerEx CalculateOffsets(this Process process, PointerEx BaseOffset, params PointerEx[] Offsets)
         {
-            PointerEx result = process.MainModule.BaseAddress;
+            return process.CalculateOffsets(process.MainModule.BaseAddress, BaseOffset, Offsets);
+        }
+        public static PointerEx CalculateOffsets(this Process process, PointerEx BaseAddress, PointerEx BaseOffset, params PointerEx[] Offsets)
+        {
+            PointerEx result = BaseAddress + BaseOffset;
             foreach (PointerEx offset in Offsets)
-                result = offset + AnotherExternalMemoryLibrary.ReadProcessMemory.Read<byte>(process.Handle, result, PointerEx.Size).ToStruct<PointerEx>();
+                result = offset + ReadProcessMemory.Read<byte>(process.Handle, result, PointerEx.Size).ToStruct<PointerEx>();
             return result;
         }
     }
