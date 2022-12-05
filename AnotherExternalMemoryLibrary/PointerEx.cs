@@ -124,17 +124,14 @@ namespace AnotherExternalMemoryLibrary
         {
             return new IntPtr(i);
         }
-
         public static implicit operator PointerEx(uint ui)
         {
             return new IntPtr((int)ui);
         }
-
         public static implicit operator PointerEx(long l)
         {
             return new IntPtr(l);
         }
-
         public static implicit operator PointerEx(ulong ul)
         {
             return new IntPtr((long)ul);
