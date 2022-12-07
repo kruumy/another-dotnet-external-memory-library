@@ -38,9 +38,5 @@ namespace AnotherExternalMemoryLibrary
             }
             return ret.ToArray();
         }
-        public static PointerEx[] Scan(PointerEx pHandle, params byte[] pattern)
-        {
-            return Scan(pHandle, 0x0, PointerEx.MaxValue, pattern);
-        }
     }
 }

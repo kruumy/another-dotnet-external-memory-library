@@ -27,6 +27,10 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             WriteProcessMemory.Write<T>(process.Handle, address, values);
         }
+        public static PointerEx[] Scan(this Process process, PointerEx start, PointerEx end, params byte[] pattern)
+        {
+            return ScanProcessMemory.Scan(process.Handle, start, end, pattern);
+        }
         public static void Call(this Process process, PointerEx address, params object[] parameters)
         {
             switch (process.GetArchitecture())
@@ -53,16 +57,20 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             return new WindowController(process.MainWindowHandle);
         }
-        public static PointerEx CalculateOffsets(this Process process, PointerEx BaseOffset, params PointerEx[] Offsets)
+        public static PointerEx CalculatePointer(this Process process, PointerEx BaseOffset, params PointerEx[] Offsets)
         {
-            return process.CalculateOffsets(process.MainModule.BaseAddress, BaseOffset, Offsets);
+            return process.CalculatePointer(process.MainModule.BaseAddress, BaseOffset, Offsets);
         }
-        public static PointerEx CalculateOffsets(this Process process, PointerEx BaseAddress, PointerEx BaseOffset, params PointerEx[] Offsets)
+        public static PointerEx CalculatePointer(this Process process, PointerEx BaseAddress, PointerEx BaseOffset, params PointerEx[] Offsets)
         {
             PointerEx result = BaseAddress + BaseOffset;
             foreach (PointerEx offset in Offsets)
                 result = offset + ReadProcessMemory.Read<byte>(process.Handle, result, PointerEx.Size).ToStruct<PointerEx>();
             return result;
+        }
+        public static PointerEx CalculatePointer(this Process process, string ModuleName, PointerEx BaseOffset, params PointerEx[] Offsets)
+        {
+            return process.CalculatePointer(process.Modules.GetByName(ModuleName).BaseAddress, BaseOffset, Offsets);
         }
     }
 }
