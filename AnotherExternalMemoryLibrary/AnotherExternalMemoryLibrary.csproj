@@ -13,6 +13,10 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/kruumy/another-dotnet-external-memory-library</RepositoryUrl>
 		<PackageTags>library;memory;win32api</PackageTags>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>Another External Memory Library</Title>
+		<Authors>Joshua Pauls</Authors>
+		<NeutralLanguage>en</NeutralLanguage>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
