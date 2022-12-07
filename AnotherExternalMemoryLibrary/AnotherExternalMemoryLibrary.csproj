@@ -10,7 +10,6 @@
 		<Description>A Lightweight .NET External Process Memory Library </Description>
 		<Copyright>Joshua Pauls</Copyright>
 		<PackageProjectUrl>https://github.com/kruumy/another-dotnet-external-memory-library</PackageProjectUrl>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/kruumy/another-dotnet-external-memory-library</RepositoryUrl>
 		<PackageTags>library;memory;win32api</PackageTags>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
