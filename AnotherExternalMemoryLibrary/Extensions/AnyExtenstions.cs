@@ -10,7 +10,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             int size = Marshal.SizeOf(s);
             byte[] data = new byte[size];
-            ptr dwStruct = Marshal.AllocHGlobal(size);
+            IntPtrEx dwStruct = Marshal.AllocHGlobal(size);
             Marshal.StructureToPtr(s, dwStruct, true);
             Marshal.Copy(dwStruct, data, 0, size);
             Marshal.FreeHGlobal(dwStruct);

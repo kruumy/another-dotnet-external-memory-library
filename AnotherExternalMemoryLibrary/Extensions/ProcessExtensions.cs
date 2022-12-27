@@ -23,7 +23,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <param name="address">Address to read from</param>
         /// <returns>value</returns>
-        public static T Read<T>(this Process process, ptr address) where T : struct
+        public static T Read<T>(this Process process, IntPtrEx address) where T : struct
         {
             return AnotherExternalMemoryLibrary.ReadProcessMemory.Read<T>(process.Handle, address);
         }
@@ -35,7 +35,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="address">Address to read from</param>
         /// <param name="NumOfItems">Number of items to read</param>
         /// <returns>values</returns>
-        public static T[] Read<T>(this Process process, ptr address, int NumOfItems) where T : struct
+        public static T[] Read<T>(this Process process, IntPtrEx address, int NumOfItems) where T : struct
         {
             return AnotherExternalMemoryLibrary.ReadProcessMemory.Read<T>(process.Handle, address, NumOfItems);
         }
@@ -46,7 +46,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <param name="address">Address to write to</param>
         /// <param name="value">What to write</param>
-        public static void Write<T>(this Process process, ptr address, T value) where T : struct
+        public static void Write<T>(this Process process, IntPtrEx address, T value) where T : struct
         {
             WriteProcessMemory.Write<T>(process.Handle, address, value);
         }
@@ -57,7 +57,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <param name="address">Address to write to</param>
         /// <param name="values">What to write</param>
-        public static void Write<T>(this Process process, ptr address, params T[] values) where T : struct
+        public static void Write<T>(this Process process, IntPtrEx address, params T[] values) where T : struct
         {
             WriteProcessMemory.Write<T>(process.Handle, address, values);
         }
@@ -69,7 +69,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="end">Ending point</param>
         /// <param name="pattern">Pattern to search for</param>
         /// <returns>All matches</returns>
-        public static ptr[] Scan(this Process process, ptr start, ptr end, params byte[] pattern)
+        public static IntPtrEx[] Scan(this Process process, IntPtrEx start, IntPtrEx end, params byte[] pattern)
         {
             return ScanProcessMemory.Scan(process.Handle, start, end, pattern);
         }
@@ -79,7 +79,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <param name="address">Address of function</param>
         /// <param name="parameters">All parameters to pass to the function if any</param>
-        public static void Call(this Process process, ptr address, params object[] parameters)
+        public static void Call(this Process process, IntPtrEx address, params object[] parameters)
         {
             switch (process.GetArchitecture())
             {
@@ -106,7 +106,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="ebp">registry</param>
         /// <param name="esi">registry</param>
         /// <param name="edi">registry</param>
-        public static void UserCall(this Process process, ptr address, object eax = null, object ecx = null, object edx = null, object ebx = null, object esp = null, object ebp = null, object esi = null, object edi = null)
+        public static void UserCall(this Process process, IntPtrEx address, object eax = null, object ecx = null, object edx = null, object ebx = null, object esp = null, object ebp = null, object esi = null, object edi = null)
         {
             CallProcessFunction.UserCallx86(process.Handle, address, eax, ecx, edx, ebx, esp, ebp, esi, edi);
         }
@@ -135,7 +135,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="BaseOffset">Offset of the main module</param>
         /// <param name="Offsets">Offsets to read from that point to the absolute address</param>
         /// <returns>Absolute address</returns>
-        public static ptr CalculatePointer(this Process process, ptr BaseOffset, params ptr[] Offsets)
+        public static IntPtrEx CalculatePointer(this Process process, IntPtrEx BaseOffset, params IntPtrEx[] Offsets)
         {
             return process.CalculatePointer(process.MainModule.BaseAddress, BaseOffset, Offsets);
         }
@@ -147,11 +147,11 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="BaseOffset">Offset of the BaseAddress</param>
         /// <param name="Offsets">Offsets to read from that point to the absolute address</param>
         /// <returns>Absolute address</returns>
-        public static ptr CalculatePointer(this Process process, ptr BaseAddress, ptr BaseOffset, params ptr[] Offsets)
+        public static IntPtrEx CalculatePointer(this Process process, IntPtrEx BaseAddress, IntPtrEx BaseOffset, params IntPtrEx[] Offsets)
         {
-            ptr result = BaseAddress + BaseOffset;
-            foreach (ptr offset in Offsets)
-                result = offset + ReadProcessMemory.Read<byte>(process.Handle, result, ptr.Size).ToStruct<ptr>();
+            IntPtrEx result = BaseAddress + BaseOffset;
+            foreach (IntPtrEx offset in Offsets)
+                result = offset + ReadProcessMemory.Read<byte>(process.Handle, result, IntPtrEx.Size).ToStruct<IntPtrEx>();
             return result;
         }
         /// <summary>
@@ -162,7 +162,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="ModuleOffset">Offset of the module</param>
         /// <param name="Offsets">Offsets to read from that point to the absolute address</param>
         /// <returns>Absolute address</returns>
-        public static ptr CalculatePointer(this Process process, string ModuleName, ptr ModuleOffset, params ptr[] Offsets)
+        public static IntPtrEx CalculatePointer(this Process process, string ModuleName, IntPtrEx ModuleOffset, params IntPtrEx[] Offsets)
         {
             return process.CalculatePointer(process.Modules.GetByName(ModuleName).BaseAddress, ModuleOffset, Offsets);
         }
