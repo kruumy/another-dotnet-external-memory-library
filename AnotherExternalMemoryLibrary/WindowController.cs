@@ -5,7 +5,7 @@ namespace AnotherExternalMemoryLibrary
 {
     public class WindowController
     {
-        public PointerEx WindowHandle { get; set; }
+        public IntPtrEx WindowHandle { get; set; }
         public int X
         {
             get
@@ -64,7 +64,7 @@ namespace AnotherExternalMemoryLibrary
                 return sb.ToString();
             }
         }
-        public WindowController(PointerEx _WindowHandle)
+        public WindowController(IntPtrEx _WindowHandle)
         {
             WindowHandle = _WindowHandle;
         }

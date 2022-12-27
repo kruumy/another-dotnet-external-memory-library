@@ -134,9 +134,9 @@ namespace AnotherExternalMemoryLibrary
             public ushort wProcessorArchitecture;
             public ushort wReserved;
             public uint dwPageSize;
-            public PointerEx lpMinimumApplicationAddress;
-            public PointerEx lpMaximumApplicationAddress;
-            public PointerEx dwActiveProcessorMask;
+            public ptr lpMinimumApplicationAddress;
+            public ptr lpMaximumApplicationAddress;
+            public ptr dwActiveProcessorMask;
             public uint dwNumberOfProcessors;
             public uint dwProcessorType;
             public uint dwAllocationGranularity;
@@ -146,115 +146,115 @@ namespace AnotherExternalMemoryLibrary
 
         public struct MEMORY_BASIC_INFORMATION
         {
-            public PointerEx BaseAddress;
-            public PointerEx AllocationBase;
+            public ptr BaseAddress;
+            public ptr AllocationBase;
             public uint AllocationProtect;
             public uint __alignment1;
-            public PointerEx RegionSize;
+            public ptr RegionSize;
             public uint State;
             public uint Protect;
             public uint Type;
             public uint __alignment2;
         }
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool WriteProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, byte[] lpBuffer, PointerEx dwSize, out PointerEx lpNumberOfBytesWritten);
+        public static extern bool WriteProcessMemory(ptr hProcess, ptr lpBaseAddress, byte[] lpBuffer, ptr dwSize, out ptr lpNumberOfBytesWritten);
         [DllImport("kernel32.dll")]
-        public static extern bool ReadProcessMemory(PointerEx hProcess, PointerEx lpBaseAddress, [Out] byte[] lpBuffer, PointerEx dwSize, out PointerEx lpNumberOfBytesRead);
+        public static extern bool ReadProcessMemory(ptr hProcess, ptr lpBaseAddress, [Out] byte[] lpBuffer, ptr dwSize, out ptr lpNumberOfBytesRead);
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        public static extern PointerEx VirtualAllocEx(PointerEx hProcess, PointerEx lpAddress, PointerEx dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
+        public static extern ptr VirtualAllocEx(ptr hProcess, ptr lpAddress, ptr dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool VirtualProtectEx(PointerEx processHandle, PointerEx address, PointerEx size, MemoryProtection protectionType, out MemoryProtection oldProtectionType);
+        public static extern bool VirtualProtectEx(ptr processHandle, ptr address, ptr size, MemoryProtection protectionType, out MemoryProtection oldProtectionType);
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
-        public static extern PointerEx LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
+        public static extern ptr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern PointerEx OpenThread(ProcessAccess dwDesiredAccess, bool bInheritHandle, PointerEx dwThreadId);
+        public static extern ptr OpenThread(ProcessAccess dwDesiredAccess, bool bInheritHandle, ptr dwThreadId);
         [DllImport("kernel32.dll")]
-        public static extern int SuspendThread(PointerEx hThread);
+        public static extern int SuspendThread(ptr hThread);
         [DllImport("kernel32.dll")]
-        public static extern int ResumeThread(PointerEx hThread);
+        public static extern int ResumeThread(ptr hThread);
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool GetThreadContext(PointerEx hThread, PointerEx lpContext);
+        public static extern bool GetThreadContext(ptr hThread, ptr lpContext);
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool SetThreadContext(PointerEx hThread, PointerEx lpContext);
+        public static extern bool SetThreadContext(ptr hThread, ptr lpContext);
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern PointerEx QueueUserAPC2(PointerEx pfnAPC, PointerEx hThread, PointerEx dwData, PointerEx flags);
+        public static extern ptr QueueUserAPC2(ptr pfnAPC, ptr hThread, ptr dwData, ptr flags);
         [DllImport("kernel32.dll")]
-        public static extern PointerEx OpenProcess(ProcessAccess dwDesiredAccess, bool bInheritHandle, PointerEx dwProcessId);
+        public static extern ptr OpenProcess(ProcessAccess dwDesiredAccess, bool bInheritHandle, ptr dwProcessId);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool GetExitCodeProcess(PointerEx hProcess, out PointerEx ExitCode);
+        public static extern bool GetExitCodeProcess(ptr hProcess, out ptr ExitCode);
 
         [DllImport("kernel32.dll")]
-        public static extern PointerEx GetProcessId(PointerEx handle);
+        public static extern ptr GetProcessId(ptr handle);
 
         [DllImport("kernel32.dll")]
         public static extern void GetSystemInfo(out SYSTEM_INFO lpSystemInfo);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern PointerEx VirtualQueryEx(PointerEx hProcess, PointerEx lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, PointerEx dwLength);
+        public static extern ptr VirtualQueryEx(ptr hProcess, ptr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, ptr dwLength);
 
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        public static extern bool VirtualFreeEx(PointerEx hProcess, PointerEx lpAddress, PointerEx dwSize, PointerEx dwFreeType);
+        public static extern bool VirtualFreeEx(ptr hProcess, ptr lpAddress, ptr dwSize, ptr dwFreeType);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool CloseHandle(PointerEx hHandle);
+        public static extern bool CloseHandle(ptr hHandle);
 
         [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool IsWow64Process([In] PointerEx processHandle, [Out, MarshalAs(UnmanagedType.Bool)] out bool wow64Process);
+        public static extern bool IsWow64Process([In] ptr processHandle, [Out, MarshalAs(UnmanagedType.Bool)] out bool wow64Process);
         [DllImport("kernel32.dll")]
-        public static extern PointerEx GetLastError();
+        public static extern ptr GetLastError();
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern void SetLastError(PointerEx dwErrorCode);
+        public static extern void SetLastError(ptr dwErrorCode);
         [DllImport("advapi32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool OpenProcessToken(PointerEx ProcessHandle, PointerEx DesiredAccess, out PointerEx TokenHandle);
+        public static extern bool OpenProcessToken(ptr ProcessHandle, ptr DesiredAccess, out ptr TokenHandle);
         [DllImport("kernel32.dll")]
-        public static extern PointerEx GetCurrentThread();
+        public static extern ptr GetCurrentThread();
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern PointerEx GetCurrentProcess();
+        public static extern ptr GetCurrentProcess();
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool LookupPrivilegeValue(string lpSystemName, string lpName, out LUID lpLuid);
         [DllImport("advapi32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool AdjustTokenPrivileges(PointerEx TokenHandle, [MarshalAs(UnmanagedType.Bool)] bool DisableAllPrivileges, ref TOKEN_PRIVILEGES NewState, PointerEx Zero, PointerEx Null1, PointerEx Null2);
+        public static extern bool AdjustTokenPrivileges(ptr TokenHandle, [MarshalAs(UnmanagedType.Bool)] bool DisableAllPrivileges, ref TOKEN_PRIVILEGES NewState, ptr Zero, ptr Null1, ptr Null2);
         [DllImport("kernel32.dll")]
-        public static extern PointerEx CreateRemoteThread(PointerEx hProcess, PointerEx lpThreadAttributes, PointerEx dwStackSize, PointerEx lpStartAddress, PointerEx lpParameter, PointerEx dwCreationFlags, PointerEx lpThreadId);
+        public static extern ptr CreateRemoteThread(ptr hProcess, ptr lpThreadAttributes, ptr dwStackSize, ptr lpStartAddress, ptr lpParameter, ptr dwCreationFlags, ptr lpThreadId);
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        public static extern PointerEx GetModuleHandle(string lpModuleName);
+        public static extern ptr GetModuleHandle(string lpModuleName);
         [DllImport("kernel32", SetLastError = true, ExactSpelling = true)]
-        public static extern PointerEx WaitForSingleObject(PointerEx handle, PointerEx milliseconds);
+        public static extern ptr WaitForSingleObject(ptr handle, ptr milliseconds);
         [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true)]
-        public static extern PointerEx GetProcAddress(PointerEx hModule, string procName);
+        public static extern ptr GetProcAddress(ptr hModule, string procName);
         [DllImport("kernel32")]
-        public static extern bool VirtualFree(PointerEx lpAddress, PointerEx dwSize, AllocationType dwFreeType);
+        public static extern bool VirtualFree(ptr lpAddress, ptr dwSize, AllocationType dwFreeType);
         [DllImport("USER32.DLL")]
-        public static extern bool PostMessageA(PointerEx hWnd, PointerEx Msg, PointerEx wParam, PointerEx lParam);
+        public static extern bool PostMessageA(ptr hWnd, ptr Msg, ptr wParam, ptr lParam);
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool MoveWindow(PointerEx hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+        public static extern bool MoveWindow(ptr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
         [DllImport("user32.dll")]
-        public static extern void SetWindowPos(PointerEx hwnd, PointerEx hwndInsertAfter, int X, int Y, int width, int height, SetWindowPosFlags flags);
+        public static extern void SetWindowPos(ptr hwnd, ptr hwndInsertAfter, int X, int Y, int width, int height, SetWindowPosFlags flags);
         [DllImport("user32.dll")]
-        public static extern int SetWindowLong(PointerEx hWnd, int nIndex, uint dwNewLong);
+        public static extern int SetWindowLong(ptr hWnd, int nIndex, uint dwNewLong);
         [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
-        public static extern PointerEx GetWindowLongPtr(PointerEx hWnd, int nIndex);
+        public static extern ptr GetWindowLongPtr(ptr hWnd, int nIndex);
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GetWindowRect(PointerEx hWnd, out RECT rect);
+        public static extern bool GetWindowRect(ptr hWnd, out RECT rect);
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern PointerEx FindWindow(string lpClassName, string lpWindowName);
+        public static extern ptr FindWindow(string lpClassName, string lpWindowName);
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern int GetWindowText(PointerEx hWnd, StringBuilder lpString, int nMaxCount);
+        public static extern int GetWindowText(ptr hWnd, StringBuilder lpString, int nMaxCount);
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern int GetWindowTextLength(PointerEx hWnd);
+        public static extern int GetWindowTextLength(ptr hWnd);
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool AttachConsole(PointerEx dwProcessId);
+        public static extern bool AttachConsole(ptr dwProcessId);
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern uint GetProcessIdOfThread(PointerEx handle);
-        public delegate bool EnumWindowProc(PointerEx hwnd, PointerEx lparam);
+        public static extern uint GetProcessIdOfThread(ptr handle);
+        public delegate bool EnumWindowProc(ptr hwnd, ptr lparam);
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool EnumChildWindows(PointerEx hwnd, EnumWindowProc func, PointerEx lParam);
+        public static extern bool EnumChildWindows(ptr hwnd, EnumWindowProc func, ptr lParam);
     }
 }

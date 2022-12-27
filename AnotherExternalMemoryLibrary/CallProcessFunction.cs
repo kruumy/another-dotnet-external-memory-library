@@ -46,13 +46,13 @@ namespace AnotherExternalMemoryLibrary
             esi,
             edi
         }
-        public static byte[] AssembleRegister(object register, Register type, PointerEx handle)
+        public static byte[] AssembleRegister(object register, Register type, ptr handle)
         {
             if (register == null) throw new ArgumentNullException(nameof(register));
             byte[] array = { (byte)(0xB8 + type) };
             if (register is string s)
             {
-                PointerEx intPtr = VirtualAllocEx(handle, IntPtr.Zero, s.Length + 1, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
+                ptr intPtr = VirtualAllocEx(handle, IntPtr.Zero, s.Length + 1, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
                 WriteProcessMemory.Write(handle, intPtr, Encoding.ASCII.GetBytes(s));
                 array = array.Add(intPtr);
             }
@@ -62,10 +62,10 @@ namespace AnotherExternalMemoryLibrary
             }
             return array;
         }
-        public static void UserCallx86(PointerEx Handle, PointerEx Address, object eax = null, object ecx = null, object edx = null, object ebx = null, object esp = null, object ebp = null, object esi = null, object edi = null)
+        public static void UserCallx86(ptr Handle, ptr Address, object eax = null, object ecx = null, object edx = null, object ebx = null, object esp = null, object ebp = null, object esi = null, object edi = null)
         {
             uint num = 2048u;
-            PointerEx ptr = VirtualAllocEx(Handle, 0x0, num * 2, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
+            ptr ptr = VirtualAllocEx(Handle, 0x0, num * 2, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
             byte[] array = CallPrologue86;
             if (eax != null) array = array.Add(AssembleRegister(eax, Register.eax, Handle));
             if (ecx != null) array = array.Add(AssembleRegister(ecx, Register.ecx, Handle));
@@ -81,10 +81,10 @@ namespace AnotherExternalMemoryLibrary
             WriteProcessMemory.Write(Handle, ptr, array);
             CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, 0x0);
         }
-        public static void Callx86(PointerEx Handle, PointerEx Address, params object[] parameters)
+        public static void Callx86(ptr Handle, ptr Address, params object[] parameters)
         {
             byte[] array = CallPrologue86;
-            PointerEx ptr = VirtualAllocEx(Handle, 0x0, 2048u, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
+            ptr ptr = VirtualAllocEx(Handle, 0x0, 2048u, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
             int num = 1024;
             int num2 = parameters.Length;
             while (num2-- > 0)
@@ -116,17 +116,17 @@ namespace AnotherExternalMemoryLibrary
             CreateRemoteThread(Handle, IntPtr.Zero, 0u, ptr, IntPtr.Zero, 0u, IntPtr.Zero);
             VirtualFreeEx(Handle, ptr, 2048, (uint)FreeType.Release);
         }
-        public static void Callx64(PointerEx Handle, PointerEx Address, params object[] parameters)
+        public static void Callx64(ptr Handle, ptr Address, params object[] parameters)
         {
             byte[] array = CallPrologue64;
-            PointerEx ptr = VirtualAllocEx(Handle, 0x0, 2048u, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
+            ptr ptr = VirtualAllocEx(Handle, 0x0, 2048u, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
             int num = 1024;
             int num2 = parameters.Length;
             while (num2-- > 0)
             {
                 if (parameters[num2] is string s)
                 {
-                    PointerEx intPtr2 = ptr + num;
+                    ptr intPtr2 = ptr + num;
                     WriteProcessMemory.Write(Handle, intPtr2, Encoding.ASCII.GetBytes(s));
                     byte[] array2 = new byte[2] { 255, 53 };
                     int value = (int)((long)intPtr2 - (long)(ptr + array.Length) - 6);
