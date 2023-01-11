@@ -87,7 +87,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
                     CallProcessFunction.Callx86(process.Handle, address, parameters);
                     break;
                 case Architecture.X64:
-                    CallProcessFunction.Callx86(process.Handle, address, parameters);
+                    CallProcessFunction.Callx64(process.Handle, address, parameters);
                     break;
                 default:
                     throw new Exception($"Invalid process architecture {process.GetArchitecture()}");
