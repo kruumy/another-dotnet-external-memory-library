@@ -10,7 +10,7 @@ namespace AnotherExternalMemoryLibrary
         private static byte[] ReadProcessMemory_(IntPtrEx hProcess, IntPtrEx lpBaseAddress, int NumOfBytes)
         {
             byte[] data = new byte[NumOfBytes];
-            Win32.ReadProcessMemory(hProcess, lpBaseAddress, data, NumOfBytes, out IntPtrEx bytesRead);
+            Win32.ReadProcessMemory(hProcess, lpBaseAddress, data, NumOfBytes, out IntPtrEx _);
             return data;
         }
         public static T Read<T>(IntPtrEx pHandle, IntPtrEx addr) where T : struct

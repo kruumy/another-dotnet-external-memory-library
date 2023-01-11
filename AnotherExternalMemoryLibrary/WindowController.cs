@@ -11,7 +11,7 @@ namespace AnotherExternalMemoryLibrary
             get
             {
                 Win32.GetWindowRect(WindowHandle, out Win32.RECT rect);
-                return rect.left;
+                return rect.Left;
             }
             set
             {
@@ -23,7 +23,7 @@ namespace AnotherExternalMemoryLibrary
             get
             {
                 Win32.GetWindowRect(WindowHandle, out Win32.RECT rect);
-                return rect.top;
+                return rect.Top;
             }
             set
             {
@@ -35,7 +35,7 @@ namespace AnotherExternalMemoryLibrary
             get
             {
                 Win32.GetWindowRect(WindowHandle, out Win32.RECT rect);
-                return rect.right - rect.left;
+                return rect.Right - rect.Left;
             }
             set
             {
@@ -47,7 +47,7 @@ namespace AnotherExternalMemoryLibrary
             get
             {
                 Win32.GetWindowRect(WindowHandle, out Win32.RECT rect);
-                return rect.bottom - rect.top;
+                return rect.Bottom - rect.Top;
             }
             set
             {
