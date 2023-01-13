@@ -121,6 +121,11 @@ namespace AnotherExternalMemoryLibrary
             return Instruction(0x31, reg1, reg2);
         }
 
+        public static byte[] JMP(int offset)
+        {
+            return Instruction(0xE9, offset);
+        }
+
         private static byte[] Instruction(byte opCode, Register reg1, Register reg2)
         {
             byte[] ret = new byte[2];
@@ -163,11 +168,11 @@ namespace AnotherExternalMemoryLibrary
             return ret;
         }
 
-        private static byte[] Instruction(byte opCode, int val)
+        private static byte[] Instruction(byte opCode, int offset)
         {
             byte[] ret = new byte[5];
             ret[0] = opCode;
-            BitConverter.GetBytes(val).CopyTo(ret, 1);
+            BitConverter.GetBytes(offset).CopyTo(ret, 1);
             return ret;
         }
     }
