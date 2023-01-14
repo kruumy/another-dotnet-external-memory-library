@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary
 {
-    [StructLayout(LayoutKind.Sequential)]
     public readonly struct IntPtrEx
     {
         private readonly IntPtr value;
