@@ -2,6 +2,9 @@
 
 namespace AnotherExternalMemoryLibrary
 {
+    /// <summary>
+    /// WIP, not all instructions complete.
+    /// </summary>
     public static class Assemblerx86
     {
         public enum Register : byte
