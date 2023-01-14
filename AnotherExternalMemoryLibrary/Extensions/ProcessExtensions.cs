@@ -81,17 +81,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="parameters">All parameters to pass to the function if any</param>
         public static void Call(this Process process, IntPtrEx address, params object[] parameters)
         {
-            switch (process.GetArchitecture())
-            {
-                case Architecture.X86:
-                    CallProcessFunction.Callx86(process.Handle, address, parameters);
-                    break;
-                case Architecture.X64:
-                    CallProcessFunction.Callx64(process.Handle, address, parameters);
-                    break;
-                default:
-                    throw new Exception($"Invalid process architecture {process.GetArchitecture()}");
-            }
+            CallProcessFunction.Callx86(process.Handle, address, parameters);
         }
         /// <summary>
         /// Create a thread to call a function in the process memory.
