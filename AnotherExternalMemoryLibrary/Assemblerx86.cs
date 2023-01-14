@@ -68,6 +68,14 @@ namespace AnotherExternalMemoryLibrary
         }
 
         /// <summary>
+        /// call <paramref name="reg"/>
+        /// </summary>
+        public static byte[] CALL(Register reg, int regPtrOffset)
+        {
+            return Instruction(0xFF, 0x90, reg, regPtrOffset);
+        }
+
+        /// <summary>
         /// CMP <paramref name="reg"/>,<paramref name="val"/>
         /// </summary>
         public static byte[] CMP(Register reg, int val)

@@ -41,32 +41,6 @@ namespace AnotherExternalMemoryLibrary
             0x55, 0x48, 0x8B, 0xEC, 0x48, 0x83, 0xEC, 0x8
         };
 
-        /// <summary>
-        /// push   ebp
-        /// mov    ebp,esp
-        /// sub    esp,0x8
-        /// </summary>
-        private static readonly byte[] CallPrologue86 = new byte[6]
-        {
-            0x55, 0x8B, 0xEC, 0x83, 0xEC, 0x8
-        };
-
-        /// <summary>
-        /// mov    DWORD PTR [ebp-0x4], 3..6
-        /// call   DWORD PTR [ebp-0x4]
-        /// mov    11..14,eax
-        /// add    esp,0x8
-        /// mov    esp,ebp
-        /// pop    ebp
-        /// ret
-        /// </summary>
-        private static readonly byte[] UserCallEpilogue86 = new byte[22]
-        {
-            0xC7, 0x45, 0xFC, 0x0, 0x0, 0x0, 0x0, 0xFF, 0x55, 0xFC,
-            0xA3, 0x0, 0x0, 0x0, 0x0, 0x83, 0xC4, 0x8, 0x8B, 0xE5,
-            0x5D, 0xC3
-        };
-
         public static void Callx64(IntPtrEx Handle, IntPtrEx targetAddress, params object[] parameters)
         {
             // not finished
@@ -105,7 +79,7 @@ namespace AnotherExternalMemoryLibrary
 
         public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
-            UIntPtr mainAllocSize = new UIntPtr(GetParametersSize(parameters) + 25u);
+            UIntPtr mainAllocSize = new UIntPtr(GetParametersSize(parameters) + 30u);
             IntPtrEx mainAllocAddress = VirtualAllocEx(Handle, 0x0, mainAllocSize, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ExecuteReadWrite);
             Dictionary<IntPtrEx, UIntPtr> largeParameterAllocInfo = new Dictionary<IntPtrEx, UIntPtr>();
 
@@ -117,7 +91,7 @@ namespace AnotherExternalMemoryLibrary
             {
                 if (parameters[i] is string s)
                 {
-                    byte[] strbytes = Encoding.ASCII.GetBytes(s);
+                    byte[] strbytes = Encoding.Default.GetBytes(s);
                     IntPtrEx strAddr = VirtualAllocEx(Handle, 0x0, (UIntPtr)strbytes.Length, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ExecuteReadWrite);
                     WriteProcessMemory.Write(Handle, strAddr, strbytes);
                     largeParameterAllocInfo.Add(strAddr, (UIntPtr)strbytes.Length);
@@ -148,45 +122,62 @@ namespace AnotherExternalMemoryLibrary
 
         public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
-            // not finished
-            uint totalSize = (uint)(GetParametersSize(parameters) + CallPrologue86.Length + UserCallEpilogue86.Length);
-            IntPtrEx ptr = VirtualAllocEx(Handle, 0x0, new UIntPtr(totalSize), (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
-            byte[] array = CallPrologue86;
-            IntPtrEx strAllocPtr = 0x0;
-            IntPtrEx strAllocSize = 0x0;
+            KeyValuePair<Assemblerx86.Register, object>[] newParameters = new KeyValuePair<Assemblerx86.Register, object>[parameters.Length];
+
             for (int i = 0; i < parameters.Length; i++)
             {
-                if (parameters[i] == null)
-                    continue;
-                array = array.Add((byte)(0xB8 + i));
-                if (parameters[i] is string s)
+                newParameters[i] = new KeyValuePair<Assemblerx86.Register, object>((Assemblerx86.Register)i, parameters[i]);
+            }
+            UserCallx86(Handle, Address, newParameters);
+        }
+
+        public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params KeyValuePair<Assemblerx86.Register, object>[] parameters)
+        {
+            UIntPtr mainAllocSize = new UIntPtr(GetParametersSize(parameters) + 50u);
+            IntPtrEx mainAllocAddress = VirtualAllocEx(Handle, 0x0, mainAllocSize, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ExecuteReadWrite);
+            Dictionary<IntPtrEx, UIntPtr> largeParameterAllocInfo = new Dictionary<IntPtrEx, UIntPtr>();
+
+            List<byte> main = new List<byte>((int)mainAllocSize);
+            main.AddRange(Assemblerx86.PUSH(Assemblerx86.Register.EBP));
+            main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EBP, Assemblerx86.Register.ESP));
+            main.AddRange(Assemblerx86.SUB(Assemblerx86.Register.ESP, 0x8));
+
+            foreach (KeyValuePair<Assemblerx86.Register, object> item in parameters)
+            {
+                if (item.Value is string s)
                 {
-                    strAllocSize = s.Length + 1;
-                    strAllocPtr = VirtualAllocEx(Handle, IntPtr.Zero, strAllocSize, (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
-                    WriteProcessMemory.Write(Handle, strAllocPtr, Encoding.ASCII.GetBytes(s));
-                    array = array.Add(strAllocPtr);
+                    byte[] strbytes = Encoding.Default.GetBytes(s);
+                    IntPtrEx strAddr = VirtualAllocEx(Handle, 0x0, (UIntPtr)strbytes.Length, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ExecuteReadWrite);
+                    WriteProcessMemory.Write(Handle, strAddr, strbytes);
+                    largeParameterAllocInfo.Add(strAddr, (UIntPtr)strbytes.Length);
+                    main.AddRange(Assemblerx86.MOV(item.Key, strAddr));
                 }
                 else
                 {
-                    array = array.Add(parameters[i].ToByteArray());
+                    main.AddRange(Assemblerx86.MOV(item.Key, item.Value.ToByteArray().ToStruct<int>()));
                 }
             }
 
-            Buffer.BlockCopy(Address, 0, UserCallEpilogue86, 3, 4);
-            Buffer.BlockCopy(ptr + (totalSize / 2), 0, UserCallEpilogue86, 11, 4);
-            array = array.Add(UserCallEpilogue86);
-            WriteProcessMemory.Write(Handle, ptr, array);
-            CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, out _);
-            VirtualFreeEx(Handle, ptr, new UIntPtr(totalSize), AllocationType.Release);
-            if (strAllocPtr != 0x0)
+            main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EBP, -0x4, Address));
+            main.AddRange(Assemblerx86.CALL(Assemblerx86.Register.EBP, -0x4));
+            main.AddRange(Assemblerx86.MOV(mainAllocAddress + (mainAllocSize.ToUInt32() / 2)));
+            main.AddRange(Assemblerx86.ADD(Assemblerx86.Register.ESP, 0x8));
+            main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.ESP, Assemblerx86.Register.EBP));
+            main.AddRange(Assemblerx86.POP(Assemblerx86.Register.EBP));
+            main.AddRange(Assemblerx86.RET());
+
+            WriteProcessMemory.Write(Handle, mainAllocAddress, main.ToArray());
+            CreateRemoteThread(Handle, 0, 0, mainAllocAddress, 0, 0, out _);
+
+            foreach (KeyValuePair<IntPtrEx, UIntPtr> addr in largeParameterAllocInfo)
             {
-                VirtualFreeEx(Handle, strAllocPtr, strAllocSize, AllocationType.Release);
+                VirtualFreeEx(Handle, addr.Key, addr.Value, AllocationType.Release);
             }
+            VirtualFreeEx(Handle, mainAllocAddress, mainAllocSize, AllocationType.Release);
         }
 
         private static uint GetParametersSize(params object[] parameters)
         {
-            // each parameter can only be 4 bytes long
             return (uint)(parameters.Length * 4);
         }
     }
