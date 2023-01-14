@@ -40,27 +40,6 @@ namespace AnotherExternalMemoryLibrary
             0x5D, 0xC3
         };
 
-        private static byte[] AssembleRegister(object register, Register type, IntPtrEx handle)
-        {
-            if (register == null)
-            {
-                throw new ArgumentNullException(nameof(register));
-            }
-
-            byte[] array = { (byte)(0xB8 + type) };
-            if (register is string s)
-            {
-                IntPtrEx intPtr = VirtualAllocEx(handle, IntPtr.Zero, new UIntPtr((uint)(s.Length + 1)), (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
-                WriteProcessMemory.Write(handle, intPtr, Encoding.ASCII.GetBytes(s));
-                array = array.Add(intPtr);
-            }
-            else
-            {
-                array = array.Add(register.ToByteArray());
-            }
-            return array;
-        }
-
         public static void Callx64(IntPtrEx handle, IntPtrEx targetAddress, params object[] parameters)
         {
             uint allocationSize = (uint)(CalculateAmountToAllocate(parameters) + CallPrologue64.Length + CallEpilogue64.Length);
@@ -181,6 +160,27 @@ namespace AnotherExternalMemoryLibrary
             array = array.Add(UserCallEpilogue86);
             WriteProcessMemory.Write(Handle, ptr, array);
             CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, out _);
+        }
+
+        private static byte[] AssembleRegister(object register, Register type, IntPtrEx handle)
+        {
+            if (register == null)
+            {
+                throw new ArgumentNullException(nameof(register));
+            }
+
+            byte[] array = { (byte)(0xB8 + type) };
+            if (register is string s)
+            {
+                IntPtrEx intPtr = VirtualAllocEx(handle, IntPtr.Zero, new UIntPtr((uint)(s.Length + 1)), (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
+                WriteProcessMemory.Write(handle, intPtr, Encoding.ASCII.GetBytes(s));
+                array = array.Add(intPtr);
+            }
+            else
+            {
+                array = array.Add(register.ToByteArray());
+            }
+            return array;
         }
 
         private static uint CalculateAmountToAllocate(params object[] parameters)
