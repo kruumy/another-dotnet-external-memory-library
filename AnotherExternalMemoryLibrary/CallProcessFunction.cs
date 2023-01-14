@@ -39,11 +39,11 @@ namespace AnotherExternalMemoryLibrary
             0x5D, 0xC3
         };
 
-        public static void Callx64(IntPtrEx handle, IntPtrEx targetAddress, params object[] parameters)
+        public static void Callx64(IntPtrEx Handle, IntPtrEx targetAddress, params object[] parameters)
         {
             // have not tested
             uint allocationSize = (uint)(CalculateAmountToAllocate(parameters) + CallPrologue64.Length + CallEpilogue64.Length);
-            IntPtrEx memoryPointer = VirtualAllocEx(handle, 0x0, new UIntPtr(allocationSize), (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
+            IntPtrEx memoryPointer = VirtualAllocEx(Handle, 0x0, new UIntPtr(allocationSize), (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
             int currentIndex = 1024;
             int parameterIndex = parameters.Length;
             byte[] prologue = CallPrologue64;
@@ -52,7 +52,7 @@ namespace AnotherExternalMemoryLibrary
                 if (parameters[parameterIndex] is string s)
                 {
                     IntPtr stringMemoryPointer = memoryPointer + currentIndex;
-                    WriteProcessMemory.Write(handle, stringMemoryPointer, Encoding.ASCII.GetBytes(s));
+                    WriteProcessMemory.Write(Handle, stringMemoryPointer, Encoding.ASCII.GetBytes(s));
                     byte[] offset = new byte[2] { 255, 53 };
                     int value = (int)((long)stringMemoryPointer - (long)(memoryPointer + prologue.Length) - 6);
                     offset = offset.Add(BitConverter.GetBytes(value));
@@ -71,7 +71,8 @@ namespace AnotherExternalMemoryLibrary
             long finalIndex = memoryPointer + currentIndex;
             Buffer.BlockCopy(BitConverter.GetBytes(finalIndex), 0, epilogue, 6, 8);
             prologue = prologue.Add(epilogue);
-            WriteProcessMemory.Write(handle, memoryPointer, prologue);
+            WriteProcessMemory.Write(Handle, memoryPointer, prologue);
+            VirtualFreeEx(Handle, memoryPointer, new UIntPtr(allocationSize), AllocationType.Release);
         }
 
         public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
@@ -109,7 +110,7 @@ namespace AnotherExternalMemoryLibrary
             int returnValue = -1;
             WriteProcessMemory.Write(Handle, returnAddress, BitConverter.GetBytes(returnValue));
             CreateRemoteThread(Handle, IntPtr.Zero, 0u, memoryAddress, IntPtr.Zero, 0u, out _);
-            VirtualFreeEx(Handle, memoryAddress, 2048, AllocationType.Release);
+            VirtualFreeEx(Handle, memoryAddress, new UIntPtr(totalSize), AllocationType.Release);
         }
 
         public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
@@ -139,6 +140,7 @@ namespace AnotherExternalMemoryLibrary
             array = array.Add(UserCallEpilogue86);
             WriteProcessMemory.Write(Handle, ptr, array);
             CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, out _);
+            VirtualFreeEx(Handle, ptr, new UIntPtr(totalSize), AllocationType.Release);
         }
 
         private static uint CalculateAmountToAllocate(params object[] parameters)

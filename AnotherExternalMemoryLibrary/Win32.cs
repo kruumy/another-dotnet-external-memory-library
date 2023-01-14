@@ -140,7 +140,7 @@ namespace AnotherExternalMemoryLibrary
         public static extern bool CloseHandle(IntPtr hObject);
 
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtrEx lpAddress, int dwSize, AllocationType dwFreeType);
+        public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtrEx lpAddress, UIntPtr dwSize, AllocationType dwFreeType);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct MEMORY_BASIC_INFORMATION
