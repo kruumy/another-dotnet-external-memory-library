@@ -68,7 +68,7 @@ namespace AnotherExternalMemoryLibrary
         }
 
         /// <summary>
-        /// call <paramref name="reg"/>
+        /// call [<paramref name="reg"/>+/-<paramref name="regPtrOffset"/>]
         /// </summary>
         public static byte[] CALL(Register reg, int regPtrOffset)
         {
