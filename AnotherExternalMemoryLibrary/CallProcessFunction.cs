@@ -1,6 +1,7 @@
 ﻿using AnotherExternalMemoryLibrary.Extensions;
 using System;
 using System.Text;
+using static AnotherExternalMemoryLibrary.Assemblerx86;
 using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
@@ -39,19 +40,7 @@ namespace AnotherExternalMemoryLibrary
             0x5D, 0xC3
         };
 
-        public enum Register
-        {
-            eax,
-            ecx,
-            edx,
-            ebx,
-            esp,
-            ebp,
-            esi,
-            edi
-        }
-
-        public static byte[] AssembleRegister(object register, Register type, IntPtrEx handle)
+        private static byte[] AssembleRegister(object register, Register type, IntPtrEx handle)
         {
             if (register == null)
             {
@@ -149,49 +138,49 @@ namespace AnotherExternalMemoryLibrary
             byte[] array = CallPrologue86;
             if (eax != null)
             {
-                array = array.Add(AssembleRegister(eax, Register.eax, Handle));
+                array = array.Add(AssembleRegister(eax, Register.EAX, Handle));
             }
 
             if (ecx != null)
             {
-                array = array.Add(AssembleRegister(ecx, Register.ecx, Handle));
+                array = array.Add(AssembleRegister(ecx, Register.ECX, Handle));
             }
 
             if (edx != null)
             {
-                array = array.Add(AssembleRegister(edx, Register.edx, Handle));
+                array = array.Add(AssembleRegister(edx, Register.EDX, Handle));
             }
 
             if (ebx != null)
             {
-                array = array.Add(AssembleRegister(ebx, Register.ebx, Handle));
+                array = array.Add(AssembleRegister(ebx, Register.EBX, Handle));
             }
 
             if (esp != null)
             {
-                array = array.Add(AssembleRegister(esp, Register.esp, Handle));
+                array = array.Add(AssembleRegister(esp, Register.ESP, Handle));
             }
 
             if (ebp != null)
             {
-                array = array.Add(AssembleRegister(ebp, Register.ebp, Handle));
+                array = array.Add(AssembleRegister(ebp, Register.EBP, Handle));
             }
 
             if (esi != null)
             {
-                array = array.Add(AssembleRegister(esi, Register.esi, Handle));
+                array = array.Add(AssembleRegister(esi, Register.ESI, Handle));
             }
 
             if (edi != null)
             {
-                array = array.Add(AssembleRegister(edi, Register.edi, Handle));
+                array = array.Add(AssembleRegister(edi, Register.EDI, Handle));
             }
 
             Buffer.BlockCopy(Address, 0, UserCallEpilogue86, 3, 4);
             Buffer.BlockCopy(ptr + (totalSize / 2), 0, UserCallEpilogue86, 11, 4);
             array = array.Add(UserCallEpilogue86);
             WriteProcessMemory.Write(Handle, ptr, array);
-            _ = CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, out _);
+            CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, out _);
         }
 
         private static uint CalculateAmountToAllocate(params object[] parameters)
