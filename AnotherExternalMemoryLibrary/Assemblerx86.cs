@@ -60,6 +60,14 @@ namespace AnotherExternalMemoryLibrary
         }
 
         /// <summary>
+        /// call <paramref name="reg"/>
+        /// </summary>
+        public static byte[] CALL(Register reg)
+        {
+            return Instruction(0xFF, 0xD0, reg);
+        }
+
+        /// <summary>
         /// CMP <paramref name="reg"/>,<paramref name="val"/>
         /// </summary>
         public static byte[] CMP(Register reg, int val)
@@ -132,6 +140,14 @@ namespace AnotherExternalMemoryLibrary
         }
 
         /// <summary>
+        /// mov <paramref name="ds"/>,eax
+        /// </summary>
+        public static byte[] MOV(int ds)
+        {
+            return Instruction(0xA3, ds);
+        }
+
+        /// <summary>
         /// nop
         /// </summary>
         public static byte[] NOP()
@@ -169,6 +185,22 @@ namespace AnotherExternalMemoryLibrary
         public static byte[] PUSH(Register reg)
         {
             return Instruction(0x50, reg);
+        }
+
+        /// <summary>
+        /// push <paramref name="val"/>
+        /// </summary>
+        public static byte[] PUSH(int val)
+        {
+            return Instruction(0x68, val);
+        }
+
+        /// <summary>
+        /// dec <paramref name="reg"/>
+        /// </summary>
+        public static byte[] DEC(Register reg)
+        {
+            return Instruction(0x48, reg);
         }
 
         /// <summary>
@@ -312,7 +344,7 @@ namespace AnotherExternalMemoryLibrary
         private static byte[] Instruction(byte opCode, Register reg)
         {
             byte[] ret = new byte[1];
-            ret[0] = opCode;
+            ret[0] = (byte)(opCode + reg);
             return ret;
         }
 
@@ -333,11 +365,19 @@ namespace AnotherExternalMemoryLibrary
             return ret;
         }
 
-        private static byte[] Instruction(byte opCode, int offset)
+        private static byte[] Instruction(byte opCode, byte regBaseOffset, Register reg)
+        {
+            byte[] ret = new byte[2];
+            ret[0] = opCode;
+            ret[1] = (byte)(regBaseOffset + reg);
+            return ret;
+        }
+
+        private static byte[] Instruction(byte opCode, int val)
         {
             byte[] ret = new byte[5];
             ret[0] = opCode;
-            BitConverter.GetBytes(offset).CopyTo(ret, 1);
+            BitConverter.GetBytes(val).CopyTo(ret, 1);
             return ret;
         }
 
