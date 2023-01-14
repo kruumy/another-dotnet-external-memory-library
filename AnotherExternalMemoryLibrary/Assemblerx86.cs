@@ -16,114 +16,248 @@ namespace AnotherExternalMemoryLibrary
             EDI = 0b111
         }
 
+        /// <summary>
+        /// add <paramref name="reg"/>,<paramref name="val"/>
+        /// </summary>
         public static byte[] ADD(Register reg, int val)
         {
             return Instruction(0x81, 0xC0, reg, val);
         }
 
+        /// <summary>
+        /// add <paramref name="reg1"/>,<paramref name="reg2"/>
+        /// </summary>
         public static byte[] ADD(Register reg1, Register reg2)
         {
             return Instruction(0x01, reg1, reg2);
         }
 
+        /// <summary>
+        /// and <paramref name="reg"/>,<paramref name="val"/>
+        /// </summary>
         public static byte[] AND(Register reg, int val)
         {
             return Instruction(0x81, 0xE0, reg, val);
         }
 
+        /// <summary>
+        /// and <paramref name="reg1"/>,<paramref name="reg2"/>
+        /// </summary>
         public static byte[] AND(Register reg1, Register reg2)
         {
             return Instruction(0x21, reg1, reg2);
         }
 
+        /// <summary>
+        /// call <paramref name="offset"/>
+        /// </summary>
         public static byte[] CALL(int offset)
         {
             return Instruction(0xE8, offset);
         }
 
+        /// <summary>
+        /// CMP <paramref name="reg"/>,<paramref name="val"/>
+        /// </summary>
         public static byte[] CMP(Register reg, int val)
         {
             return Instruction(0x81, 0xF8, reg, val);
         }
 
+        /// <summary>
+        /// CMP <paramref name="reg1"/>,<paramref name="reg2"/>
+        /// </summary>
         public static byte[] CMP(Register reg1, Register reg2)
         {
             return Instruction(0x39, reg1, reg2);
         }
 
+        /// <summary>
+        /// hlt
+        /// </summary>
         public static byte[] HLT()
         {
             return Instruction(0xF4);
         }
 
+        /// <summary>
+        /// jmp <paramref name="offset"/>
+        /// </summary>
+        public static byte[] JMP(int offset)
+        {
+            return Instruction(0xE9, offset);
+        }
+
+        /// <summary>
+        /// mov <paramref name="reg1"/>,<paramref name="reg2"/>
+        /// </summary>
         public static byte[] MOV(Register reg1, Register reg2)
         {
             return Instruction(0x89, reg1, reg2);
         }
 
+        /// <summary>
+        /// mov <paramref name="reg1"/>,[<paramref name="reg2"/>+/-<paramref name="reg2PtrOffset"/>]
+        /// </summary>
+        public static byte[] MOV(Register reg1, Register reg2, int reg2PtrOffset)
+        {
+            return Instruction(0x8B, reg1, reg2, reg2PtrOffset);
+        }
+
+        /// <summary>
+        /// mov [<paramref name="reg1"/>+/-<paramref name="reg1PtrOffset"/>],<paramref name="reg2"/>
+        /// </summary>
+        public static byte[] MOV(Register reg1, int reg1PtrOffset, Register reg2)
+        {
+            return Instruction(0x89, reg1, reg1PtrOffset, reg2);
+        }
+
+        /// <summary>
+        /// mov [<paramref name="reg1"/>+/-<paramref name="reg1PtrOffset"/>],<paramref name="val"/>
+        /// </summary>
+        public static byte[] MOV(Register reg1, int reg1PtrOffset, int val)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// mov <paramref name="reg"/>,<paramref name="val"/>
+        /// </summary>
         public static byte[] MOV(Register reg, int val)
         {
             return Instruction(0xB8, reg, val);
         }
 
+        /// <summary>
+        /// nop
+        /// </summary>
         public static byte[] NOP()
         {
             return Instruction(0x90);
         }
 
+        /// <summary>
+        /// or <paramref name="reg"/>,<paramref name="val"/>
+        /// </summary>
         public static byte[] OR(Register reg, int val)
         {
             return Instruction(0x81, 0xC8, reg, val);
         }
 
+        /// <summary>
+        /// or <paramref name="reg1"/>,<paramref name="reg2"/>
+        /// </summary>
         public static byte[] OR(Register reg1, Register reg2)
         {
             return Instruction(0x09, reg1, reg2);
         }
 
+        /// <summary>
+        /// pop <paramref name="reg"/>
+        /// </summary>
         public static byte[] POP(Register reg)
         {
             return Instruction(0x58, reg);
         }
 
+        /// <summary>
+        /// push <paramref name="reg"/>
+        /// </summary>
         public static byte[] PUSH(Register reg)
         {
             return Instruction(0x50, reg);
         }
 
+        /// <summary>
+        /// ret
+        /// </summary>
         public static byte[] RET()
         {
             return Instruction(0xC3);
         }
 
+        /// <summary>
+        /// sub <paramref name="reg"/>,<paramref name="val"/>
+        /// </summary>
         public static byte[] SUB(Register reg, int val)
         {
             return Instruction(0x81, 0xE8, reg, val);
         }
 
+        /// <summary>
+        /// sub <paramref name="reg1"/>,<paramref name="reg2"/>
+        /// </summary>
         public static byte[] SUB(Register reg1, Register reg2)
         {
             return Instruction(0x29, reg1, reg2);
         }
 
+        /// <summary>
+        /// test <paramref name="reg1"/>,<paramref name="reg2"/>
+        /// </summary>
         public static byte[] TEST(Register reg1, Register reg2)
         {
             return Instruction(0x85, reg1, reg2);
         }
 
+        /// <summary>
+        /// xor <paramref name="reg"/>,<paramref name="val"/>
+        /// </summary>
         public static byte[] XOR(Register reg, int val)
         {
             return Instruction(0x81, 0xF0, reg, val);
         }
 
+        /// <summary>
+        /// xor <paramref name="reg1"/>,<paramref name="reg2"/>
+        /// </summary>
         public static byte[] XOR(Register reg1, Register reg2)
         {
             return Instruction(0x31, reg1, reg2);
         }
 
-        public static byte[] JMP(int offset)
+        private static byte[] Instruction(byte opCode, Register reg1, Register reg2, int reg2PtrOffset)
         {
-            return Instruction(0xE9, offset);
+            byte[] ret;
+            byte r;
+            if (!reg2PtrOffset.ShouldBe4Bytes())
+            {
+                ret = new byte[2 + sizeof(byte)];
+                r = 0x40;
+            }
+            else
+            {
+                ret = new byte[2 + sizeof(int)];
+                r = 0x80;
+            }
+            ret[0] = opCode;
+            r += (byte)reg2;
+            r += (byte)((byte)reg1 << 3);
+            ret[1] = r;
+            Buffer.BlockCopy(BitConverter.GetBytes(reg2PtrOffset), 0, ret, 2, ret.Length - 2);
+            return ret;
+        }
+
+        private static byte[] Instruction(byte opCode, Register reg1, int reg1PtrOffset, Register reg2)
+        {
+            byte[] ret;
+            byte r;
+            if (!reg1PtrOffset.ShouldBe4Bytes())
+            {
+                ret = new byte[2 + sizeof(byte)];
+                r = 0x40;
+            }
+            else
+            {
+                ret = new byte[2 + sizeof(int)];
+                r = 0x80;
+            }
+            ret[0] = opCode;
+            r += (byte)reg1;
+            r += (byte)((byte)reg2 << 3);
+            ret[1] = r;
+            Buffer.BlockCopy(BitConverter.GetBytes(reg1PtrOffset), 0, ret, 2, ret.Length - 2);
+            return ret;
         }
 
         private static byte[] Instruction(byte opCode, Register reg1, Register reg2)
@@ -159,11 +293,11 @@ namespace AnotherExternalMemoryLibrary
             return ret;
         }
 
-        private static byte[] Instruction(byte opCode, byte regOffset, Register reg, int val)
+        private static byte[] Instruction(byte opCode, byte regBaseOffset, Register reg, int val)
         {
             byte[] ret = new byte[6];
             ret[0] = opCode;
-            ret[1] = (byte)(regOffset + reg);
+            ret[1] = (byte)(regBaseOffset + reg);
             BitConverter.GetBytes(val).CopyTo(ret, 2);
             return ret;
         }
@@ -174,6 +308,11 @@ namespace AnotherExternalMemoryLibrary
             ret[0] = opCode;
             BitConverter.GetBytes(offset).CopyTo(ret, 1);
             return ret;
+        }
+
+        private static bool ShouldBe4Bytes(this int val)
+        {
+            return val >= 0x80;
         }
     }
 }
