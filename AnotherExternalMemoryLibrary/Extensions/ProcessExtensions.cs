@@ -98,17 +98,10 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// </summary>
         /// <param name="process">Target process</param>
         /// <param name="address">Address of function</param>
-        /// <param name="eax">registry</param>
-        /// <param name="ecx">registry</param>
-        /// <param name="edx">registry</param>
-        /// <param name="ebx">registry</param>
-        /// <param name="esp">registry</param>
-        /// <param name="ebp">registry</param>
-        /// <param name="esi">registry</param>
-        /// <param name="edi">registry</param>
-        public static void UserCall(this Process process, IntPtrEx address, object eax = null, object ecx = null, object edx = null, object ebx = null, object esp = null, object ebp = null, object esi = null, object edi = null)
+        /// <param name="parameters">All parameters to pass to the function if any</param>
+        public static void UserCall(this Process process, IntPtrEx address, params object[] parameters)
         {
-            CallProcessFunction.UserCallx86(process.Handle, address, eax, ecx, edx, ebx, esp, ebp, esi, edi);
+            CallProcessFunction.UserCallx86(process.Handle, address, parameters);
         }
         /// <summary>
         /// Load a dll into the process.

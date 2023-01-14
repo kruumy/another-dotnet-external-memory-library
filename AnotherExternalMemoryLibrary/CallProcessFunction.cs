@@ -1,7 +1,6 @@
 ﻿using AnotherExternalMemoryLibrary.Extensions;
 using System;
 using System.Text;
-using static AnotherExternalMemoryLibrary.Assemblerx86;
 using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
@@ -42,6 +41,7 @@ namespace AnotherExternalMemoryLibrary
 
         public static void Callx64(IntPtrEx handle, IntPtrEx targetAddress, params object[] parameters)
         {
+            // have not tested
             uint allocationSize = (uint)(CalculateAmountToAllocate(parameters) + CallPrologue64.Length + CallEpilogue64.Length);
             IntPtrEx memoryPointer = VirtualAllocEx(handle, 0x0, new UIntPtr(allocationSize), (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
             int currentIndex = 1024;
@@ -82,6 +82,8 @@ namespace AnotherExternalMemoryLibrary
             byte[] callPrologue = CallPrologue86;
             for (int i = parameters.Length - 1; i >= 0; i--)
             {
+                if (parameters[i] == null)
+                    continue;
                 if (parameters[i] is string s)
                 {
                     byte[] pushStringAddress = { 0x68 };
@@ -96,7 +98,7 @@ namespace AnotherExternalMemoryLibrary
                     callPrologue = callPrologue.Add(new byte[] { 0x68 }, parameters[i].ToByteArray());
                 }
             }
-            byte[] callInstruction = new byte[1] { 184 };
+            byte[] callInstruction = new byte[1] { 0xB8 };
             callInstruction = callInstruction.Add(Address);
             callPrologue = callPrologue.Add(callInstruction);
             byte[] callEpilogue = CallEpilogue86;
@@ -106,53 +108,30 @@ namespace AnotherExternalMemoryLibrary
             WriteProcessMemory.Write(Handle, memoryAddress, callPrologue);
             int returnValue = -1;
             WriteProcessMemory.Write(Handle, returnAddress, BitConverter.GetBytes(returnValue));
-            _ = CreateRemoteThread(Handle, IntPtr.Zero, 0u, memoryAddress, IntPtr.Zero, 0u, out _);
-            _ = VirtualFreeEx(Handle, memoryAddress, 2048, AllocationType.Release);
+            CreateRemoteThread(Handle, IntPtr.Zero, 0u, memoryAddress, IntPtr.Zero, 0u, out _);
+            VirtualFreeEx(Handle, memoryAddress, 2048, AllocationType.Release);
         }
 
-        public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, object eax = null, object ecx = null, object edx = null, object ebx = null, object esp = null, object ebp = null, object esi = null, object edi = null)
+        public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
-            uint totalSize = (uint)(CalculateAmountToAllocate(eax, ecx, edx, ebx, esp, ebp, esi, edi) + CallPrologue86.Length + UserCallEpilogue86.Length);
+            uint totalSize = (uint)(CalculateAmountToAllocate(parameters) + CallPrologue86.Length + UserCallEpilogue86.Length);
             IntPtrEx ptr = VirtualAllocEx(Handle, 0x0, new UIntPtr(totalSize), (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
             byte[] array = CallPrologue86;
-            if (eax != null)
+            for (int i = 0; i < parameters.Length; i++)
             {
-                array = array.Add(AssembleRegister(eax, Register.EAX, Handle));
-            }
-
-            if (ecx != null)
-            {
-                array = array.Add(AssembleRegister(ecx, Register.ECX, Handle));
-            }
-
-            if (edx != null)
-            {
-                array = array.Add(AssembleRegister(edx, Register.EDX, Handle));
-            }
-
-            if (ebx != null)
-            {
-                array = array.Add(AssembleRegister(ebx, Register.EBX, Handle));
-            }
-
-            if (esp != null)
-            {
-                array = array.Add(AssembleRegister(esp, Register.ESP, Handle));
-            }
-
-            if (ebp != null)
-            {
-                array = array.Add(AssembleRegister(ebp, Register.EBP, Handle));
-            }
-
-            if (esi != null)
-            {
-                array = array.Add(AssembleRegister(esi, Register.ESI, Handle));
-            }
-
-            if (edi != null)
-            {
-                array = array.Add(AssembleRegister(edi, Register.EDI, Handle));
+                if (parameters[i] == null)
+                    continue;
+                array = array.Add((byte)(0xB8 + i));
+                if (parameters[i] is string s)
+                {
+                    IntPtrEx intPtr = VirtualAllocEx(Handle, IntPtr.Zero, new UIntPtr((uint)(s.Length + 1)), (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
+                    WriteProcessMemory.Write(Handle, intPtr, Encoding.ASCII.GetBytes(s));
+                    array = array.Add(intPtr);
+                }
+                else
+                {
+                    array = array.Add(parameters[i].ToByteArray());
+                }
             }
 
             Buffer.BlockCopy(Address, 0, UserCallEpilogue86, 3, 4);
@@ -160,27 +139,6 @@ namespace AnotherExternalMemoryLibrary
             array = array.Add(UserCallEpilogue86);
             WriteProcessMemory.Write(Handle, ptr, array);
             CreateRemoteThread(Handle, 0x0, 0x0, ptr, 0x0, 0x0, out _);
-        }
-
-        private static byte[] AssembleRegister(object register, Register type, IntPtrEx handle)
-        {
-            if (register == null)
-            {
-                throw new ArgumentNullException(nameof(register));
-            }
-
-            byte[] array = { (byte)(0xB8 + type) };
-            if (register is string s)
-            {
-                IntPtrEx intPtr = VirtualAllocEx(handle, IntPtr.Zero, new UIntPtr((uint)(s.Length + 1)), (AllocationType)0x3000, MemoryProtection.ExecuteReadWrite);
-                WriteProcessMemory.Write(handle, intPtr, Encoding.ASCII.GetBytes(s));
-                array = array.Add(intPtr);
-            }
-            else
-            {
-                array = array.Add(register.ToByteArray());
-            }
-            return array;
         }
 
         private static uint CalculateAmountToAllocate(params object[] parameters)
