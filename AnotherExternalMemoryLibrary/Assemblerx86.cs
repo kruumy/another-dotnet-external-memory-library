@@ -117,7 +117,7 @@ namespace AnotherExternalMemoryLibrary
         /// </summary>
         public static byte[] MOV(Register reg1, int reg1PtrOffset, int val)
         {
-            throw new NotImplementedException();
+            return Instruction(0xC7, reg1, reg1PtrOffset, val);
         }
 
         /// <summary>
@@ -214,6 +214,34 @@ namespace AnotherExternalMemoryLibrary
         public static byte[] XOR(Register reg1, Register reg2)
         {
             return Instruction(0x31, reg1, reg2);
+        }
+
+        private static byte[] Instruction(byte opCode, Register reg1, int reg1PtrOffset, int val)
+        {
+            byte[] ret;
+            if (!reg1PtrOffset.ShouldBe4Bytes())
+            {
+                ret = new byte[2 + (sizeof(byte) + sizeof(int))];
+                ret[1] = 0x40;
+            }
+            else
+            {
+                ret = new byte[2 + (sizeof(int) * 2)];
+                ret[1] = 0x80;
+            }
+            ret[0] = opCode;
+            ret[1] += (byte)reg1;
+            if (!reg1PtrOffset.ShouldBe4Bytes())
+            {
+                Buffer.BlockCopy(BitConverter.GetBytes(reg1PtrOffset), 0, ret, 2, sizeof(byte));
+                Buffer.BlockCopy(BitConverter.GetBytes(val), 0, ret, 2 + sizeof(byte), sizeof(int));
+            }
+            else
+            {
+                Buffer.BlockCopy(BitConverter.GetBytes(reg1PtrOffset), 0, ret, 2, sizeof(int));
+                Buffer.BlockCopy(BitConverter.GetBytes(val), 0, ret, 2 + sizeof(int), sizeof(int));
+            }
+            return ret;
         }
 
         private static byte[] Instruction(byte opCode, Register reg1, Register reg2, int reg2PtrOffset)
