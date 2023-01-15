@@ -73,25 +73,25 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             return ScanProcessMemory.Scan(process.Handle, start, end, pattern);
         }
-        /*
         /// <summary>
         /// Create a thread to call a function in the process memory.
         /// </summary>
         /// <param name="process">Target process</param>
         /// <param name="address">Address of function</param>
         /// <param name="parameters">All parameters to pass to the function if any</param>
-        public static Task<int> Call(this Process process, IntPtrEx address, params object[] parameters)
+        public static void Call(this Process process, IntPtrEx address, params object[] parameters)
         {
             switch (process.GetArchitecture())
             {
                 case Architecture.X86:
                     {
-                        return CallProcessFunction.Callx86(process.Handle, address, 1, parameters);
+                        CallProcessFunction.Callx86(process.Handle, address, 1, parameters);
+                        break;
                     }
                 case Architecture.X64:
                     {
-                        CallProcessFunction.Callx64(process.Handle, address, parameters);
-                        return null;
+                        //CallProcessFunction.Callx64(process.Handle, address, parameters);
+                        break;
                     }
                 default:
                     {
@@ -100,7 +100,6 @@ namespace AnotherExternalMemoryLibrary.Extensions
             }
 
         }
-        */
         /// <summary>
         /// Create a thread to call a function in the process memory.
         /// </summary>
