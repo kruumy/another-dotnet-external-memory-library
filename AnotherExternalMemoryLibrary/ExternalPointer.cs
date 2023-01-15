@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary
 {
-    public class ExternalPointer<T> : ExternalAlloc where T : struct
+    public class ExternalPointer<T> : ExternalAlloc where T : unmanaged
     {
         public T Value
         {

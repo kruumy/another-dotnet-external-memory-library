@@ -13,14 +13,14 @@ namespace AnotherExternalMemoryLibrary
             Win32.ReadProcessMemory(hProcess, lpBaseAddress, data, NumOfBytes, out IntPtrEx _);
             return data;
         }
-        public static T Read<T>(IntPtrEx pHandle, IntPtrEx addr) where T : struct
+        public static T Read<T>(IntPtrEx pHandle, IntPtrEx addr) where T : unmanaged
         {
             int size = Marshal.SizeOf(typeof(T));
             byte[] data = ReadProcessMemory_(pHandle, addr, size);
             return data.ToStruct<T>();
         }
 
-        public static T[] Read<T>(IntPtrEx pHandle, IntPtrEx addr, int NumOfItems) where T : struct
+        public static T[] Read<T>(IntPtrEx pHandle, IntPtrEx addr, int NumOfItems) where T : unmanaged
         {
             if (typeof(T) == typeof(byte)) { return ReadProcessMemory_(pHandle, addr, NumOfItems) as T[]; }
 

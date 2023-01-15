@@ -12,12 +12,12 @@ namespace AnotherExternalMemoryLibrary
             Win32.WriteProcessMemory(hProcess, lpBaseAddress, bytes, bytes.Length, out IntPtrEx _);
             Win32.VirtualProtectEx(hProcess, lpBaseAddress, new UIntPtr((uint)bytes.Length), oldProtection, out Win32.MemoryProtection _);
         }
-        public static void Write<T>(IntPtrEx pHandle, IntPtrEx addr, T value) where T : struct
+        public static void Write<T>(IntPtrEx pHandle, IntPtrEx addr, T value) where T : unmanaged
         {
             byte[] data = value.ToByteArray();
             WriteProcessMemory_(pHandle, addr, data);
         }
-        public static void Write<T>(IntPtrEx pHandle, IntPtrEx addr, params T[] array) where T : struct
+        public static void Write<T>(IntPtrEx pHandle, IntPtrEx addr, params T[] array) where T : unmanaged
         {
             if (array is byte[] ba) { WriteProcessMemory_(pHandle, addr, ba); return; }
 

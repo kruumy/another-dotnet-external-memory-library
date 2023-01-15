@@ -23,7 +23,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <param name="address">Address to read from</param>
         /// <returns>value</returns>
-        public static T Read<T>(this Process process, IntPtrEx address) where T : struct
+        public static T Read<T>(this Process process, IntPtrEx address) where T : unmanaged
         {
             return AnotherExternalMemoryLibrary.ReadProcessMemory.Read<T>(process.Handle, address);
         }
@@ -35,7 +35,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="address">Address to read from</param>
         /// <param name="NumOfItems">Number of items to read</param>
         /// <returns>values</returns>
-        public static T[] Read<T>(this Process process, IntPtrEx address, int NumOfItems) where T : struct
+        public static T[] Read<T>(this Process process, IntPtrEx address, int NumOfItems) where T : unmanaged
         {
             return AnotherExternalMemoryLibrary.ReadProcessMemory.Read<T>(process.Handle, address, NumOfItems);
         }
@@ -46,7 +46,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <param name="address">Address to write to</param>
         /// <param name="value">What to write</param>
-        public static void Write<T>(this Process process, IntPtrEx address, T value) where T : struct
+        public static void Write<T>(this Process process, IntPtrEx address, T value) where T : unmanaged
         {
             WriteProcessMemory.Write<T>(process.Handle, address, value);
         }
@@ -57,7 +57,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <param name="address">Address to write to</param>
         /// <param name="values">What to write</param>
-        public static void Write<T>(this Process process, IntPtrEx address, params T[] values) where T : struct
+        public static void Write<T>(this Process process, IntPtrEx address, params T[] values) where T : unmanaged
         {
             WriteProcessMemory.Write<T>(process.Handle, address, values);
         }
@@ -73,25 +73,25 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             return ScanProcessMemory.Scan(process.Handle, start, end, pattern);
         }
+        /*
         /// <summary>
         /// Create a thread to call a function in the process memory.
         /// </summary>
         /// <param name="process">Target process</param>
         /// <param name="address">Address of function</param>
         /// <param name="parameters">All parameters to pass to the function if any</param>
-        public static void Call(this Process process, IntPtrEx address, params object[] parameters)
+        public static Task<int> Call(this Process process, IntPtrEx address, params object[] parameters)
         {
             switch (process.GetArchitecture())
             {
                 case Architecture.X86:
                     {
-                        CallProcessFunction.Callx86(process.Handle, address, parameters);
-                        break;
+                        return CallProcessFunction.Callx86(process.Handle, address, 1, parameters);
                     }
                 case Architecture.X64:
                     {
                         CallProcessFunction.Callx64(process.Handle, address, parameters);
-                        break;
+                        return null;
                     }
                 default:
                     {
@@ -100,6 +100,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
             }
 
         }
+        */
         /// <summary>
         /// Create a thread to call a function in the process memory.
         /// </summary>

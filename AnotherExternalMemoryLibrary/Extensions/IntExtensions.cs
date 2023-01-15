@@ -2,7 +2,7 @@
 
 namespace AnotherExternalMemoryLibrary.Extensions
 {
-    public static class IntExtenstions
+    public static class IntExtensions
     {
         public static bool CanBeByte(this int val)
         {

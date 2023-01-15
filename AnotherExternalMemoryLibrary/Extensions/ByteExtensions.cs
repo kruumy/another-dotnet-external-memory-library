@@ -8,7 +8,7 @@ using System.Text;
 
 namespace AnotherExternalMemoryLibrary.Extensions
 {
-    public static class ByteExtenstions
+    public static class ByteExtensions
     {
         public static string GetString(this byte[] bytes, bool trimToNull = true)
         {
@@ -36,14 +36,14 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             return new byte[] { _byte }.GetHexString();
         }
-        public static T ToStruct<T>(this byte[] data) where T : struct
+        public static T ToStruct<T>(this byte[] data) where T : unmanaged
         {
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
             T val = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
             handle.Free();
             return val;
         }
-        public static T[] ToStructArray<T>(this byte[] data, int? size = null) where T : struct
+        public static T[] ToStructArray<T>(this byte[] data, int? size = null) where T : unmanaged
         {
             int sizeOfResultType = size == null ? Marshal.SizeOf(typeof(T)) : (int)size;
             T[] result = new T[data.Length / sizeOfResultType];

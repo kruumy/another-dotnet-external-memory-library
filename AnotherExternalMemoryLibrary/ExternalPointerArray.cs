@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary
 {
-    public class ExternalPointerArray<T> : ExternalAlloc where T : struct
+    public class ExternalPointerArray<T> : ExternalAlloc where T : unmanaged
     {
         public UIntPtr SizeOfItem { get; }
         public UIntPtr Length { get; }
