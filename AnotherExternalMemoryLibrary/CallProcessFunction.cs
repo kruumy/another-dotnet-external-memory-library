@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
@@ -48,12 +49,8 @@ namespace AnotherExternalMemoryLibrary
                 main.AddRange(Assemblerx64.CALL(Assemblerx64.StandardRegister.RAX));
                 main.AddRange(Assemblerx64.POP(Assemblerx64.StandardRegister.RBP));
                 main.AddRange(Assemblerx64.RET());
-                foreach (byte item in main)
-                {
-                    Console.Write($"\\x{item.ToString("X")}");
-                }
-                WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
-                CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
+                main.ForEach(v => Console.Write($"\\x{v.ToString("X")}"););
+                WriteAndCreateThread(Handle, Address, main.ToArray());
             }
         }
 
@@ -62,6 +59,19 @@ namespace AnotherExternalMemoryLibrary
             ObjectToIntParameters(Handle, parameters, out int[] intParameters, out ExternalAlloc[] largeParameterAllocs);
             Callx86(Handle, Address, intParameters);
             largeParameterAllocs.Dispose();
+        }
+
+        public static Task<int> Callx86(IntPtrEx Handle, IntPtrEx Address, uint maxReturnAttempts, params object[] parameters)
+        {
+            ObjectToIntParameters(Handle, parameters, out int[] intParameters, out ExternalAlloc[] largeParameterAllocs);
+            Task<int> ret = Callx86(Handle, Address, maxReturnAttempts, intParameters);
+            largeParameterAllocs.Dispose();
+            return ret;
+        }
+
+        public static Task<int> Callx86(IntPtrEx Handle, IntPtrEx Address, uint maxReturnAttempts, params int[] parameters)
+        {
+            throw new NotImplementedException();
         }
 
         public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params int[] parameters)
@@ -78,8 +88,7 @@ namespace AnotherExternalMemoryLibrary
                 main.AddRange(Assemblerx86.CALL(Assemblerx86.Register.EAX));
                 main.AddRange(Assemblerx86.CleanStackFrame());
                 main.Add(Assemblerx86.RET());
-                WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
-                CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
+                WriteAndCreateThread(Handle, Address, main.ToArray());
             }
         }
 
@@ -112,9 +121,7 @@ namespace AnotherExternalMemoryLibrary
                 main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EBP, -0x4, Address));
                 main.AddRange(Assemblerx86.CALL(Assemblerx86.Register.EBP, -0x4));
                 main.Add(Assemblerx86.RET());
-
-                WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
-                CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
+                WriteAndCreateThread(Handle, Address, main.ToArray());
             }
         }
 
@@ -141,7 +148,7 @@ namespace AnotherExternalMemoryLibrary
                 }
                 else if (Marshal.SizeOf(parameters[i]) <= sizeof(int))
                 {
-                    intParameters[i] = parameters[i].ToByteArray().ToStruct<int>();
+                    intParameters[i] = parameters[i].ToByteArrayUnsafe().ToStruct<int>();
                 }
                 else if (parameters[i] is string sp)
                 {
@@ -151,12 +158,18 @@ namespace AnotherExternalMemoryLibrary
                 }
                 else
                 {
-                    ExternalPointerArray<byte> ep = parameters[i].ToByteArray().ToPointer<byte>(Handle);
+                    ExternalPointerArray<byte> ep = parameters[i].ToByteArrayUnsafe().ToPointer<byte>(Handle);
                     largeParameterAllocs_l.Add(ep);
                     intParameters[i] = ep.Address;
                 }
                 largeParameterAllocs = largeParameterAllocs_l.ToArray();
             }
+        }
+
+        private static IntPtrEx WriteAndCreateThread(IntPtrEx Handle, IntPtr Address, byte[] data)
+        {
+            WriteProcessMemory.Write<byte>(Handle, Address, data);
+            return CreateRemoteThread(Handle, 0, 0, Address, 0, 0, out _);
         }
     }
 }

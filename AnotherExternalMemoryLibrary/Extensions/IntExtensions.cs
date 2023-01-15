@@ -8,7 +8,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             try
             {
-                byte _ = (byte)val;
+                _ = (byte)val;
                 return true;
             }
             catch (OverflowException)
