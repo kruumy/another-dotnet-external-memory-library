@@ -22,8 +22,7 @@ namespace AnotherExternalMemoryLibrary
                 int readLength = (int)((long)memInfo.RegionSize / SplitNum);
                 for (int i = 0; i < SplitNum; i++)
                 {
-                    byte[] data = new byte[readLength];
-                    ReadProcessMemory(pHandle, readStart, data, data.Length, out IntPtrEx bytesRead);
+                    byte[] data = ReadProcessMemory.Read<byte>(pHandle, readStart, readLength);
                     int[] searchResults = data.IndexOf(pattern);
                     if (searchResults.Length > 0)
                     {

@@ -6,7 +6,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
 {
     public static class ByteExtensions
     {
-        public static unsafe string GetString(this byte[] buffer, int index = default)
+        public static unsafe string GetString(this byte[] buffer, int index = 0)
         {
             fixed (byte* bytes = &buffer[index])
             {

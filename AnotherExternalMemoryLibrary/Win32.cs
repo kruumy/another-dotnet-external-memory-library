@@ -116,7 +116,7 @@ namespace AnotherExternalMemoryLibrary
         public static extern bool IsWow64Process([In] IntPtrEx processHandle, [Out, MarshalAs(UnmanagedType.Bool)] out bool wow64Process);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtrEx lpBaseAddress, [Out] byte[] lpBuffer, int dwSize, out IntPtrEx lpNumberOfBytesRead);
+        public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtrEx lpBaseAddress, [Out] byte[] lpBuffer, UIntPtr dwSize, out IntPtrEx lpNumberOfBytesRead);
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool SetWindowPos(IntPtr hWnd, IntPtrEx hWndInsertAfter, int x, int y, int cx, int cy, SetWindowPosFlags uFlags);

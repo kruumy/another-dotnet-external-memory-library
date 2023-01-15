@@ -10,7 +10,7 @@ namespace AnotherExternalMemoryLibrary
         private static byte[] ReadProcessMemory_(IntPtrEx hProcess, IntPtrEx lpBaseAddress, int NumOfBytes)
         {
             byte[] data = new byte[NumOfBytes];
-            Win32.ReadProcessMemory(hProcess, lpBaseAddress, data, NumOfBytes, out IntPtrEx _);
+            Win32.ReadProcessMemory(hProcess, lpBaseAddress, data, (System.UIntPtr)NumOfBytes, out IntPtrEx _);
             return data;
         }
         public static T Read<T>(IntPtrEx pHandle, IntPtrEx addr) where T : unmanaged
@@ -30,6 +30,27 @@ namespace AnotherExternalMemoryLibrary
             for (int i = 0; i < arr.Length; i++)
                 arr[i] = data.GetRange(i * size, size).ToArray().ToStruct<T>();
             return arr;
+        }
+
+        public static string ReadString(IntPtrEx pHandle, IntPtrEx addr, int maxLength = 1023, int buffSize = 256)
+        {
+            byte[] buffer;
+            byte[] rawString = new byte[maxLength + 1];
+            int bytesRead = 0;
+            while (bytesRead < maxLength)
+            {
+                buffer = ReadProcessMemory_(pHandle, addr + bytesRead, buffSize);
+                for (int i = 0; i < buffer.Length && i + bytesRead < maxLength; i++)
+                {
+                    if (buffer[i] == 0)
+                    {
+                        return rawString.GetString();
+                    }
+                    rawString[bytesRead + i] = buffer[i];
+                }
+                bytesRead += buffSize;
+            }
+            return rawString.GetString();
         }
     }
 }
