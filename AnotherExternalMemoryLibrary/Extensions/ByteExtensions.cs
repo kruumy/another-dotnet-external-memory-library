@@ -22,7 +22,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
             return val;
         }
 
-        public static T[] ToStruct<T>(this byte[] data, int? size = null) where T : unmanaged
+        public static T[] ToStructArray<T>(this byte[] data, int? size = null) where T : unmanaged
         {
             int sizeOfResultType = size == null ? Marshal.SizeOf<T>() : (int)size;
             T[] result = new T[data.Length / sizeOfResultType];
