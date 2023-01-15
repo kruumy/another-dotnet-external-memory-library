@@ -1,4 +1,4 @@
-# another-dotnet-external-memory-library
+# another-dotnet-external-memory-library (windows)
 ### Common Usage
 ```
 Process process = Process.GetProcessesByName("iw4m").FirstOrDefault();
@@ -11,8 +11,8 @@ process.Write<byte>(0xFFFFFF, 0x90, 0x90, 0x90, 0x90);
 
 PointerEx[] results = process.Scan(0x0, PointerEx.MaxValue, 0x90, 0x90, 0x90, 0x90);
 
-process.Call(0xFFFFFF, "disconnect", 0);
-process.UserCall(0xFFFFFF, 0, "devmap mp_crash");
+process.Call(0xFFFFFF, 0, "disconnect");
+process.UserCall(0xFFFFFF, "devmap mp_crash", 0);
 
 process.LoadLibraryA("totally_legit.dll");
 
