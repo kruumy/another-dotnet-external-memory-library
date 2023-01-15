@@ -8,6 +8,66 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class CallProcessFunction
     {
+        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
+        {
+            UIntPtr mainAllocSize = new UIntPtr(GetParametersSize(parameters) + 60u);
+            IntPtrEx mainAllocAddress = VirtualAllocEx(Handle, 0x0, mainAllocSize, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ExecuteReadWrite);
+            List<byte> main = new List<byte>((int)mainAllocSize);
+
+            main.AddRange(Assemblerx64.PUSH(Assemblerx64.StandardRegister.RBP));
+            main.AddRange(Assemblerx64.MOV(Assemblerx64.StandardRegister.RBP, Assemblerx64.StandardRegister.RSP));
+
+            // https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/x64-architecture#calling-conventions
+            int integerRegsCount = 0;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i] is string s)
+                {
+                    throw new NotImplementedException(s);
+                }
+                else if (parameters[i] is float || parameters[i] is double)
+                {
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    if (integerRegsCount <= 3)
+                    {
+                        object intRegister = Assemblerx64.IntegerParameterRegisters[integerRegsCount];
+                        if (intRegister is Assemblerx64.StandardRegister sr)
+                        {
+                            main.AddRange(Assemblerx64.MOV(sr, parameters[i].ToByteArray().ToStruct<int>()));
+                        }
+                        else if (intRegister is Assemblerx64.ExtraRegister er)
+                        {
+                            main.AddRange(Assemblerx64.MOV(er, parameters[i].ToByteArray().ToStruct<int>()));
+                        }
+                        integerRegsCount++;
+                    }
+                    else
+                    {
+                        main.AddRange(Assemblerx86.PUSH(parameters[i].ToByteArray().ToStruct<int>()));
+                    }
+                }
+            }
+            // figure out why having more than 1 argument breaks the stack frame
+            main.AddRange(Assemblerx64.MOV(Assemblerx64.StandardRegister.RAX, (long)Address));
+            main.AddRange(Assemblerx64.CALL(Assemblerx64.StandardRegister.RAX));
+            main.AddRange(Assemblerx64.POP(Assemblerx64.StandardRegister.RBP));
+            main.AddRange(Assemblerx64.RET());
+
+
+            foreach (byte item in main)
+            {
+                Console.Write($"\\x{item.ToString("X")}");
+            }
+
+
+            WriteProcessMemory.Write(Handle, mainAllocAddress, main.ToArray());
+            CreateRemoteThread(Handle, 0, 0, mainAllocAddress, 0, 0, out _);
+            VirtualFreeEx(Handle, mainAllocAddress, mainAllocSize, AllocationType.Release);
+        }
+
         public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
             UIntPtr mainAllocSize = new UIntPtr(GetParametersSize(parameters) + 30u);
