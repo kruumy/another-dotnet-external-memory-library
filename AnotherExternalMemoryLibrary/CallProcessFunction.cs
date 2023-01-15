@@ -49,7 +49,7 @@ namespace AnotherExternalMemoryLibrary
                 main.AddRange(Assemblerx64.CALL(Assemblerx64.StandardRegister.RAX));
                 main.AddRange(Assemblerx64.POP(Assemblerx64.StandardRegister.RBP));
                 main.AddRange(Assemblerx64.RET());
-                main.ForEach(v => Console.Write($"\\x{v.ToString("X")}"););
+                main.ForEach(v => Console.Write($"\\x{v.ToString("X")}"));
                 WriteAndCreateThread(Handle, Address, main.ToArray());
             }
         }
