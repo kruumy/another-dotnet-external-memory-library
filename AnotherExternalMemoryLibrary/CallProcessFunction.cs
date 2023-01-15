@@ -1,7 +1,6 @@
 ﻿using AnotherExternalMemoryLibrary.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using static AnotherExternalMemoryLibrary.Win32;
 
 namespace AnotherExternalMemoryLibrary
@@ -10,9 +9,9 @@ namespace AnotherExternalMemoryLibrary
     {
         public static void Callx64(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
-            UIntPtr mainAllocSize = new UIntPtr(GetParametersSize(parameters) + 60u);
-            IntPtrEx mainAllocAddress = VirtualAllocEx(Handle, 0x0, mainAllocSize, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ExecuteReadWrite);
-            List<byte> main = new List<byte>((int)mainAllocSize);
+            ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 60u));
+            List<ExternalAlloc> largeParameterAllocs = new List<ExternalAlloc>();
+            List<byte> main = new List<byte>((int)mainAlloc.Size);
 
             main.AddRange(Assemblerx64.PUSH(Assemblerx64.StandardRegister.RBP));
             main.AddRange(Assemblerx64.MOV(Assemblerx64.StandardRegister.RBP, Assemblerx64.StandardRegister.RSP));
@@ -63,29 +62,28 @@ namespace AnotherExternalMemoryLibrary
             }
 
 
-            WriteProcessMemory.Write(Handle, mainAllocAddress, main.ToArray());
-            CreateRemoteThread(Handle, 0, 0, mainAllocAddress, 0, 0, out _);
-            VirtualFreeEx(Handle, mainAllocAddress, mainAllocSize, AllocationType.Release);
+            largeParameterAllocs.ForEach(a => a.Dispose());
+            mainAlloc.Dispose();
         }
 
         public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
-            UIntPtr mainAllocSize = new UIntPtr(GetParametersSize(parameters) + 30u);
-            IntPtrEx mainAllocAddress = VirtualAllocEx(Handle, 0x0, mainAllocSize, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ExecuteReadWrite);
-            Dictionary<IntPtrEx, UIntPtr> largeParameterAllocInfo = new Dictionary<IntPtrEx, UIntPtr>();
+            ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 30u));
+            List<ExternalAlloc> largeParameterAllocs = new List<ExternalAlloc>();
 
-            List<byte> main = new List<byte>((int)mainAllocSize);
+            List<byte> main = new List<byte>((int)mainAlloc.Size);
             main.AddRange(Assemblerx86.PUSH(Assemblerx86.Register.EBP));
             main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EBP, Assemblerx86.Register.ESP));
             for (int i = parameters.Length - 1; i >= 0; i--)
             {
                 if (parameters[i] is string s)
                 {
-                    byte[] strbytes = Encoding.Default.GetBytes(s);
-                    IntPtrEx strAddr = VirtualAllocEx(Handle, 0x0, (UIntPtr)strbytes.Length, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ExecuteReadWrite);
-                    WriteProcessMemory.Write(Handle, strAddr, strbytes);
-                    largeParameterAllocInfo.Add(strAddr, (UIntPtr)strbytes.Length);
-                    main.AddRange(Assemblerx86.PUSH(strAddr));
+                    ExternalPointerArray<char> strptr = new ExternalPointerArray<char>(Handle, (UIntPtr)s.Length)
+                    {
+                        Value = s.ToCharArray()
+                    };
+                    largeParameterAllocs.Add(strptr);
+                    main.AddRange(Assemblerx86.PUSH(strptr.Address));
                 }
                 else
                 {
@@ -98,14 +96,11 @@ namespace AnotherExternalMemoryLibrary
             main.AddRange(Assemblerx86.POP(Assemblerx86.Register.EBP));
             main.AddRange(Assemblerx86.RET());
 
-            WriteProcessMemory.Write(Handle, mainAllocAddress, main.ToArray());
-            CreateRemoteThread(Handle, 0, 0, mainAllocAddress, 0, 0, out _);
+            WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
+            CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
 
-            foreach (KeyValuePair<IntPtrEx, UIntPtr> addr in largeParameterAllocInfo)
-            {
-                VirtualFreeEx(Handle, addr.Key, addr.Value, AllocationType.Release);
-            }
-            VirtualFreeEx(Handle, mainAllocAddress, mainAllocSize, AllocationType.Release);
+            largeParameterAllocs.ForEach(a => a.Dispose());
+            mainAlloc.Dispose();
         }
 
         public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
@@ -121,20 +116,20 @@ namespace AnotherExternalMemoryLibrary
 
         public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params KeyValuePair<Assemblerx86.Register, object>[] parameters)
         {
-            UIntPtr mainAllocSize = new UIntPtr(GetParametersSize(parameters) + 25u);
-            IntPtrEx mainAllocAddress = VirtualAllocEx(Handle, 0x0, mainAllocSize, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ExecuteReadWrite);
-            Dictionary<IntPtrEx, UIntPtr> largeParameterAllocInfo = new Dictionary<IntPtrEx, UIntPtr>();
+            ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 25u));
+            List<ExternalAlloc> largeParameterAllocs = new List<ExternalAlloc>();
 
-            List<byte> main = new List<byte>((int)mainAllocSize);
+            List<byte> main = new List<byte>((int)mainAlloc.Size);
             foreach (KeyValuePair<Assemblerx86.Register, object> item in parameters)
             {
                 if (item.Value is string s)
                 {
-                    byte[] strbytes = Encoding.Default.GetBytes(s);
-                    IntPtrEx strAddr = VirtualAllocEx(Handle, 0x0, (UIntPtr)strbytes.Length, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ExecuteReadWrite);
-                    WriteProcessMemory.Write(Handle, strAddr, strbytes);
-                    largeParameterAllocInfo.Add(strAddr, (UIntPtr)strbytes.Length);
-                    main.AddRange(Assemblerx86.MOV(item.Key, strAddr));
+                    ExternalPointerArray<char> strptr = new ExternalPointerArray<char>(Handle, (UIntPtr)s.Length)
+                    {
+                        Value = s.ToCharArray()
+                    };
+                    largeParameterAllocs.Add(strptr);
+                    main.AddRange(Assemblerx86.MOV(item.Key, strptr.Address));
                 }
                 else
                 {
@@ -146,14 +141,11 @@ namespace AnotherExternalMemoryLibrary
             main.AddRange(Assemblerx86.CALL(Assemblerx86.Register.EBP, -0x4));
             main.AddRange(Assemblerx86.RET());
 
-            WriteProcessMemory.Write(Handle, mainAllocAddress, main.ToArray());
-            CreateRemoteThread(Handle, 0, 0, mainAllocAddress, 0, 0, out _);
+            WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
+            CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
 
-            foreach (KeyValuePair<IntPtrEx, UIntPtr> addr in largeParameterAllocInfo)
-            {
-                VirtualFreeEx(Handle, addr.Key, addr.Value, AllocationType.Release);
-            }
-            VirtualFreeEx(Handle, mainAllocAddress, mainAllocSize, AllocationType.Release);
+            largeParameterAllocs.ForEach(a => a.Dispose());
+            mainAlloc.Dispose();
         }
 
         private static uint GetParametersSize(params object[] parameters)

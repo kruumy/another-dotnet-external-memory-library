@@ -30,7 +30,6 @@ namespace AnotherExternalMemoryLibrary
                         foreach (int num in searchResults)
                         {
                             ret.Add(readStart + num);
-                            //ReadProcessMemory.Read<byte>(pHandle,ret[^1],pattern.Length).print();
                         }
                     }
                     readStart += readLength;
