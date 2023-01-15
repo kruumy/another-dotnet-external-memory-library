@@ -50,7 +50,8 @@ namespace AnotherExternalMemoryLibrary
                 main.AddRange(Assemblerx64.POP(Assemblerx64.StandardRegister.RBP));
                 main.AddRange(Assemblerx64.RET());
                 main.ForEach(v => Console.Write($"\\x{v.ToString("X")}"));
-                WriteAndCreateThread(Handle, Address, main.ToArray());
+                WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
+                CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
             }
         }
 
@@ -71,12 +72,7 @@ namespace AnotherExternalMemoryLibrary
 
         public static Task<int> Callx86(IntPtrEx Handle, IntPtrEx Address, uint maxReturnAttempts, params int[] parameters)
         {
-            throw new NotImplementedException();
-        }
-
-        public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params int[] parameters)
-        {
-            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 30u)))
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 40u)))
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
                 main.AddRange(Assemblerx86.SetupStackFrame());
@@ -86,10 +82,41 @@ namespace AnotherExternalMemoryLibrary
                 }
                 main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EAX, Address));
                 main.AddRange(Assemblerx86.CALL(Assemblerx86.Register.EAX));
+
+                Task<int> returnTask = null;
+                if (maxReturnAttempts > 0)
+                {
+                    ExternalPointer<int> returnPtr = new ExternalPointer<int>(Handle);
+                    main.AddRange(Assemblerx86.MOV(returnPtr.Address));
+                    int previousResult = returnPtr.Value;
+                    returnTask = new Task<int>(() =>
+                    {
+                        for (uint i = 0; i < maxReturnAttempts; i++)
+                        {
+                            if (returnPtr.Value != previousResult)
+                            {
+                                break;
+                            }
+                            System.Threading.Thread.Sleep((int)(i * 10));
+                        }
+                        int ret = returnPtr.Value;
+                        returnPtr.Dispose();
+                        return ret;
+                    });
+                }
+
                 main.AddRange(Assemblerx86.CleanStackFrame());
                 main.Add(Assemblerx86.RET());
-                WriteAndCreateThread(Handle, Address, main.ToArray());
+                WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
+                CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
+                returnTask?.Start();
+                return returnTask;
             }
+        }
+
+        public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params int[] parameters)
+        {
+            _ = Callx86(Handle, Address, 0u, parameters);
         }
 
         public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
@@ -121,7 +148,8 @@ namespace AnotherExternalMemoryLibrary
                 main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EBP, -0x4, Address));
                 main.AddRange(Assemblerx86.CALL(Assemblerx86.Register.EBP, -0x4));
                 main.Add(Assemblerx86.RET());
-                WriteAndCreateThread(Handle, Address, main.ToArray());
+                WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
+                CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
             }
         }
 
@@ -146,30 +174,24 @@ namespace AnotherExternalMemoryLibrary
                     largeParameterAllocs_l.Add(ea);
                     intParameters[i] = ea.Address;
                 }
+                else if (parameters[i] is string sp)
+                {
+                    ExternalPointerArray<byte> ep = new ExternalPointerArray<byte>(Handle, sp.ToByteArray());
+                    largeParameterAllocs_l.Add(ep);
+                    intParameters[i] = ep.Address;
+                }
                 else if (Marshal.SizeOf(parameters[i]) <= sizeof(int))
                 {
                     intParameters[i] = parameters[i].ToByteArrayUnsafe().ToStruct<int>();
                 }
-                else if (parameters[i] is string sp)
-                {
-                    ExternalPointerArray<char> ep = sp.ToCharArray().ToPointer<char>(Handle);
-                    largeParameterAllocs_l.Add(ep);
-                    intParameters[i] = ep.Address;
-                }
                 else
                 {
-                    ExternalPointerArray<byte> ep = parameters[i].ToByteArrayUnsafe().ToPointer<byte>(Handle);
+                    ExternalPointerArray<byte> ep = new ExternalPointerArray<byte>(Handle, parameters[i].ToByteArrayUnsafe());
                     largeParameterAllocs_l.Add(ep);
                     intParameters[i] = ep.Address;
                 }
                 largeParameterAllocs = largeParameterAllocs_l.ToArray();
             }
-        }
-
-        private static IntPtrEx WriteAndCreateThread(IntPtrEx Handle, IntPtr Address, byte[] data)
-        {
-            WriteProcessMemory.Write<byte>(Handle, Address, data);
-            return CreateRemoteThread(Handle, 0, 0, Address, 0, 0, out _);
         }
     }
 }

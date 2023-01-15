@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -42,24 +41,6 @@ namespace AnotherExternalMemoryLibrary.Extensions
                 values[i].ToByteArrayUnsafe().CopyTo(data, i * size);
             }
             return data;
-        }
-
-        public static ExternalPointer<T> ToPointer<T>(this T value, IntPtrEx pHandle) where T : unmanaged
-        {
-            ExternalPointer<T> externalPointer = new ExternalPointer<T>(pHandle)
-            {
-                Value = value
-            };
-            return externalPointer;
-        }
-
-        public static ExternalPointerArray<T> ToPointer<T>(this T[] values, IntPtrEx pHandle) where T : unmanaged
-        {
-            ExternalPointerArray<T> externalPointerArray = new ExternalPointerArray<T>(pHandle, (UIntPtr)values.Length)
-            {
-                Value = values
-            };
-            return externalPointerArray;
         }
     }
 }
