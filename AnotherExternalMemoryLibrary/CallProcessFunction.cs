@@ -10,51 +10,51 @@ namespace AnotherExternalMemoryLibrary
     {
         public static void Callx64(IntPtrEx Handle, IntPtrEx Address, int[] intParameters, float[] floatParameters)
         {
-            ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(intParameters) + 60u));
-            List<byte> main = new List<byte>((int)mainAlloc.Size);
-
-            main.AddRange(Assemblerx64.PUSH(Assemblerx64.StandardRegister.RBP));
-            main.AddRange(Assemblerx64.MOV(Assemblerx64.StandardRegister.RBP, Assemblerx64.StandardRegister.RSP));
-
-            // https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/x64-architecture#calling-conventions
-            int integerRegsCount = 0;
-            foreach (int intParameter in intParameters)
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(intParameters) + 60u)))
             {
-                if (integerRegsCount <= 3)
+                List<byte> main = new List<byte>((int)mainAlloc.Size);
+
+                main.AddRange(Assemblerx64.PUSH(Assemblerx64.StandardRegister.RBP));
+                main.AddRange(Assemblerx64.MOV(Assemblerx64.StandardRegister.RBP, Assemblerx64.StandardRegister.RSP));
+
+                // https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/x64-architecture#calling-conventions
+                int integerRegsCount = 0;
+                foreach (int intParameter in intParameters)
                 {
-                    object intRegister = Assemblerx64.IntegerParameterRegisters[integerRegsCount];
-                    if (intRegister is Assemblerx64.StandardRegister sr)
+                    if (integerRegsCount <= 3)
                     {
-                        main.AddRange(Assemblerx64.MOV(sr, intParameter));
+                        object intRegister = Assemblerx64.IntegerParameterRegisters[integerRegsCount];
+                        if (intRegister is Assemblerx64.StandardRegister sr)
+                        {
+                            main.AddRange(Assemblerx64.MOV(sr, intParameter));
+                        }
+                        else if (intRegister is Assemblerx64.ExtraRegister er)
+                        {
+                            main.AddRange(Assemblerx64.MOV(er, intParameter));
+                        }
+                        integerRegsCount++;
                     }
-                    else if (intRegister is Assemblerx64.ExtraRegister er)
+                    else
                     {
-                        main.AddRange(Assemblerx64.MOV(er, intParameter));
+                        main.AddRange(Assemblerx86.PUSH(intParameter));
                     }
-                    integerRegsCount++;
                 }
-                else
+                foreach (float floatParameter in floatParameters)
                 {
-                    main.AddRange(Assemblerx86.PUSH(intParameter));
+                    //TODO
                 }
+                // figure out why having more than 1 argument breaks the stack frame
+                main.AddRange(Assemblerx64.MOV(Assemblerx64.StandardRegister.RAX, (long)Address));
+                main.AddRange(Assemblerx64.CALL(Assemblerx64.StandardRegister.RAX));
+                main.AddRange(Assemblerx64.POP(Assemblerx64.StandardRegister.RBP));
+                main.AddRange(Assemblerx64.RET());
+                foreach (byte item in main)
+                {
+                    Console.Write($"\\x{item.ToString("X")}");
+                }
+                WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
+                CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
             }
-            foreach (float floatParameter in floatParameters)
-            {
-                //TODO
-            }
-            // figure out why having more than 1 argument breaks the stack frame
-            main.AddRange(Assemblerx64.MOV(Assemblerx64.StandardRegister.RAX, (long)Address));
-            main.AddRange(Assemblerx64.CALL(Assemblerx64.StandardRegister.RAX));
-            main.AddRange(Assemblerx64.POP(Assemblerx64.StandardRegister.RBP));
-            main.AddRange(Assemblerx64.RET());
-            foreach (byte item in main)
-            {
-                Console.Write($"\\x{item.ToString("X")}");
-            }
-            WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
-            CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
-
-            mainAlloc.Dispose();
         }
 
         public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
@@ -66,22 +66,21 @@ namespace AnotherExternalMemoryLibrary
 
         public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params int[] parameters)
         {
-            ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 30u));
-            List<byte> main = new List<byte>((int)mainAlloc.Size);
-            main.AddRange(Assemblerx86.PUSH(Assemblerx86.Register.EBP));
-            main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EBP, Assemblerx86.Register.ESP));
-            for (int i = parameters.Length - 1; i >= 0; i--)
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 30u)))
             {
-                main.AddRange(Assemblerx86.PUSH(parameters[i]));
+                List<byte> main = new List<byte>((int)mainAlloc.Size);
+                main.AddRange(Assemblerx86.SetupStackFrame());
+                for (int i = parameters.Length - 1; i >= 0; i--)
+                {
+                    main.AddRange(Assemblerx86.PUSH(parameters[i]));
+                }
+                main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EAX, Address));
+                main.AddRange(Assemblerx86.CALL(Assemblerx86.Register.EAX));
+                main.AddRange(Assemblerx86.CleanStackFrame());
+                main.Add(Assemblerx86.RET());
+                WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
+                CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
             }
-            main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EAX, Address));
-            main.AddRange(Assemblerx86.CALL(Assemblerx86.Register.EAX));
-            main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.ESP, Assemblerx86.Register.EBP));
-            main.AddRange(Assemblerx86.POP(Assemblerx86.Register.EBP));
-            main.AddRange(Assemblerx86.RET());
-            WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
-            CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
-            mainAlloc.Dispose();
         }
 
         public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
@@ -103,19 +102,20 @@ namespace AnotherExternalMemoryLibrary
 
         public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params KeyValuePair<Assemblerx86.Register, int>[] parameters)
         {
-            ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 25u));
-            List<byte> main = new List<byte>((int)mainAlloc.Size);
-            foreach (KeyValuePair<Assemblerx86.Register, int> item in parameters)
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 25u)))
             {
-                main.AddRange(Assemblerx86.MOV(item.Key, item.Value));
-            }
-            main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EBP, -0x4, Address));
-            main.AddRange(Assemblerx86.CALL(Assemblerx86.Register.EBP, -0x4));
-            main.AddRange(Assemblerx86.RET());
+                List<byte> main = new List<byte>((int)mainAlloc.Size);
+                foreach (KeyValuePair<Assemblerx86.Register, int> item in parameters)
+                {
+                    main.AddRange(Assemblerx86.MOV(item.Key, item.Value));
+                }
+                main.AddRange(Assemblerx86.MOV(Assemblerx86.Register.EBP, -0x4, Address));
+                main.AddRange(Assemblerx86.CALL(Assemblerx86.Register.EBP, -0x4));
+                main.Add(Assemblerx86.RET());
 
-            WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
-            CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
-            mainAlloc.Dispose();
+                WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
+                CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
+            }
         }
 
         private static uint GetParametersSize(params object[] parameters)

@@ -20,6 +20,30 @@ namespace AnotherExternalMemoryLibrary
         }
 
         /// <summary>
+        /// push ebp
+        /// mov ebp,esp
+        /// </summary>
+        public static byte[] SetupStackFrame()
+        {
+            byte[] ret = new byte[3];
+            ret[0] = PUSH(Register.EBP);
+            Buffer.BlockCopy(MOV(Register.EBP, Register.ESP), 0, ret, 1, 2);
+            return ret;
+        }
+
+        /// <summary>
+        /// mov esp,ebp
+        /// pop ebp
+        /// </summary>
+        public static byte[] CleanStackFrame()
+        {
+            byte[] ret = new byte[3];
+            Buffer.BlockCopy(MOV(Register.ESP, Register.EBP), 0, ret, 0, 2);
+            ret[2] = POP(Register.EBP);
+            return ret;
+        }
+
+        /// <summary>
         /// add <paramref name="reg"/>,<paramref name="val"/>
         /// </summary>
         public static byte[] ADD(Register reg, int val)
@@ -94,7 +118,7 @@ namespace AnotherExternalMemoryLibrary
         /// <summary>
         /// hlt
         /// </summary>
-        public static byte[] HLT()
+        public static byte HLT()
         {
             return Instruction(0xF4);
         }
@@ -158,7 +182,7 @@ namespace AnotherExternalMemoryLibrary
         /// <summary>
         /// nop
         /// </summary>
-        public static byte[] NOP()
+        public static byte NOP()
         {
             return Instruction(0x90);
         }
@@ -182,7 +206,7 @@ namespace AnotherExternalMemoryLibrary
         /// <summary>
         /// pop <paramref name="reg"/>
         /// </summary>
-        public static byte[] POP(Register reg)
+        public static byte POP(Register reg)
         {
             return Instruction(0x58, reg);
         }
@@ -190,7 +214,7 @@ namespace AnotherExternalMemoryLibrary
         /// <summary>
         /// push <paramref name="reg"/>
         /// </summary>
-        public static byte[] PUSH(Register reg)
+        public static byte PUSH(Register reg)
         {
             return Instruction(0x50, reg);
         }
@@ -206,7 +230,7 @@ namespace AnotherExternalMemoryLibrary
         /// <summary>
         /// dec <paramref name="reg"/>
         /// </summary>
-        public static byte[] DEC(Register reg)
+        public static byte DEC(Register reg)
         {
             return Instruction(0x48, reg);
         }
@@ -214,7 +238,7 @@ namespace AnotherExternalMemoryLibrary
         /// <summary>
         /// ret
         /// </summary>
-        public static byte[] RET()
+        public static byte RET()
         {
             return Instruction(0xC3);
         }
@@ -342,18 +366,14 @@ namespace AnotherExternalMemoryLibrary
             return ret;
         }
 
-        private static byte[] Instruction(byte opCode)
+        private static byte Instruction(byte opCode)
         {
-            byte[] ret = new byte[1];
-            ret[0] = opCode;
-            return ret;
+            return opCode;
         }
 
-        private static byte[] Instruction(byte opCode, Register reg)
+        private static byte Instruction(byte opCode, Register reg)
         {
-            byte[] ret = new byte[1];
-            ret[0] = (byte)(opCode + reg);
-            return ret;
+            return (byte)(opCode + reg);
         }
 
         private static byte[] Instruction(byte opCode, Register reg, int val)
