@@ -195,7 +195,7 @@ namespace AnotherExternalMemoryLibrary
 
         private static uint GetParametersSize(params int[] parameters)
         {
-            return (uint)(parameters.Length * sizeof(int));
+            return (uint)(parameters.Length * (sizeof(int) + 1));
         }
 
         private static uint GetParametersSize(params int?[] parameters)
