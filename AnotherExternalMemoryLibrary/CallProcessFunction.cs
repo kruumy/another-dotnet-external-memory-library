@@ -38,7 +38,7 @@ namespace AnotherExternalMemoryLibrary
                     main.AddRange(new byte[] { 0x49, 0xC7, 0xC1 }); // mov r9,
                     main.AddRange(BitConverter.GetBytes((int)r9));
                 }
-                for (int i = 0; i < stack.Length; i++)
+                for (int i = 0; i < stack?.Length; i++)
                 {
                     main.AddRange(new byte[] { 0xC7, 0x44, 0x24 }); //mov DWORD PTR [rsp+
                     main.Add((byte)(0x20 + (i * 8)));
