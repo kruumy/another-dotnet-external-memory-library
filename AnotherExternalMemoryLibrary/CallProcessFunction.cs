@@ -26,7 +26,13 @@ namespace AnotherExternalMemoryLibrary
                         main.AddRange(new byte[] { 0x48, 0xC7, 0xC1 }); // mov rcx,
                         main.AddRange(BitConverter.GetBytes(i));
                     }
-                    
+                    else if (param0 is float f)
+                    {
+                        main.AddRange(new byte[] { 0x48, 0xC7, 0xC1 }); // mov rcx,
+                        main.AddRange(BitConverter.GetBytes(f));
+                        main.AddRange(new byte[] { 0x66, 0x48, 0x0F, 0x6E, 0xC1 }); // movq xmm0,rcx
+                    }
+
                 }
                 if (param1 != null)
                 {
@@ -34,6 +40,12 @@ namespace AnotherExternalMemoryLibrary
                     {
                         main.AddRange(new byte[] { 0x48, 0xC7, 0xC2 }); // mov rdx,
                         main.AddRange(BitConverter.GetBytes(i));
+                    }
+                    else if (param1 is float f)
+                    {
+                        main.AddRange(new byte[] { 0x48, 0xC7, 0xC2 }); // mov rdx,
+                        main.AddRange(BitConverter.GetBytes(f));
+                        main.AddRange(new byte[] { 0x66, 0x48, 0x0F, 0x6E, 0xCA }); // movq xmm1,rdx
                     }
                 }
                 if (param2 != null)
@@ -43,6 +55,12 @@ namespace AnotherExternalMemoryLibrary
                         main.AddRange(new byte[] { 0x49, 0xC7, 0xC0 }); // mov r8,
                         main.AddRange(BitConverter.GetBytes(i));
                     }
+                    else if (param2 is float f)
+                    {
+                        main.AddRange(new byte[] { 0x49, 0xC7, 0xC0 }); // mov r8,
+                        main.AddRange(BitConverter.GetBytes(f));
+                        main.AddRange(new byte[] { 0x66, 0x49, 0x0F, 0x6E, 0xD0 }); // movq xmm2,r8
+                    }
                 }
                 if (param3 != null)
                 {
@@ -50,6 +68,12 @@ namespace AnotherExternalMemoryLibrary
                     {
                         main.AddRange(new byte[] { 0x49, 0xC7, 0xC1 }); // mov r9,
                         main.AddRange(BitConverter.GetBytes(i));
+                    }
+                    else if (param3 is float f)
+                    {
+                        main.AddRange(new byte[] { 0x49, 0xC7, 0xC1 }); // mov r9,
+                        main.AddRange(BitConverter.GetBytes(f));
+                        main.AddRange(new byte[] { 0x66, 0x49, 0x0F, 0x6E, 0xD9 }); // movq xmm3,r9
                     }
                 }
                 if (stack != null)
