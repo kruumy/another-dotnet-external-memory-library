@@ -15,7 +15,7 @@ namespace AnotherExternalMemoryLibrary
         }
         public static T Read<T>(IntPtrEx pHandle, IntPtrEx addr) where T : unmanaged
         {
-            int size = Marshal.SizeOf(typeof(T));
+            int size = Marshal.SizeOf<T>();
             byte[] data = ReadProcessMemory_(pHandle, addr, size);
             return data.ToStruct<T>();
         }
@@ -25,7 +25,7 @@ namespace AnotherExternalMemoryLibrary
             if (typeof(T) == typeof(byte)) { return ReadProcessMemory_(pHandle, addr, NumOfItems) as T[]; }
 
             T[] arr = new T[NumOfItems];
-            int size = Marshal.SizeOf(typeof(T));
+            int size = Marshal.SizeOf<T>();
             IEnumerable<byte> data = ReadProcessMemory_(pHandle, addr, arr.Length * size);
             for (int i = 0; i < arr.Length; i++)
                 arr[i] = data.GetRange(i * size, size).ToArray().ToStruct<T>();
