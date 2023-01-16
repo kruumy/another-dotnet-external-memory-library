@@ -77,38 +77,79 @@ namespace AnotherExternalMemoryLibrary
             return Instruction(0xC7, 0xC0, reg, val);
         }
 
-        public static byte[] POP(StandardRegister reg)
+        public static byte NOP()
+        {
+            return Instruction(0x90);
+        }
+
+        public static byte POP(StandardRegister reg)
         {
             return Instruction(0x58, reg);
         }
 
-        public static byte[] PUSH(StandardRegister reg)
+        public static byte PUSH(StandardRegister reg)
         {
             return Instruction(0x50, reg);
         }
 
-        public static byte[] RET()
+        public static byte RET()
         {
             return Instruction(0xC3);
         }
 
-        internal static byte[] SUB(StandardRegister reg, int val)
+        public static byte[] SUB(StandardRegister reg, int val)
         {
-            return Instruction(0x81, 0xE9, reg, val);
+            return Instruction(0x81, 0xE8, reg, val);
         }
 
-        private static byte[] Instruction(byte opCode)
+        public static byte[] LEA(StandardRegister reg1, StandardRegister reg2, int reg2PtrOffset)
         {
-            byte[] ret = new byte[1];
-            ret[0] = opCode;
+            // TODO so scuffed will fix later
+            byte[] ret;
+            int amountForInfo = 3;
+            if (reg2 == StandardRegister.RSP)
+            {
+                amountForInfo++;
+            }
+
+            if (Assemblerx86.ShouldBe4Bytes(reg2PtrOffset))
+            {
+                ret = new byte[amountForInfo + sizeof(int)];
+                ret[2] = 0x80;
+            }
+            else
+            {
+                ret = new byte[amountForInfo + sizeof(byte)];
+                ret[2] = 0x40;
+            }
+            ret[0] = 0x48;
+            ret[1] = 0x8d;
+            ret[2] += (byte)reg2;
+            ret[2] += (byte)((byte)reg1 << 3);
+            if (reg2 == StandardRegister.RSP)
+            {
+                ret[3] = 0x24;
+            }
+            if (Assemblerx86.ShouldBe4Bytes(reg2PtrOffset))
+            {
+                byte[] value = BitConverter.GetBytes(reg2PtrOffset);
+                Buffer.BlockCopy(value, 0, ret, amountForInfo, value.Length);
+            }
+            else
+            {
+                ret[amountForInfo] = (byte)reg2PtrOffset;
+            }
             return ret;
         }
 
-        private static byte[] Instruction(byte opCode, StandardRegister reg)
+        private static byte Instruction(byte opCode)
         {
-            byte[] ret = new byte[1];
-            ret[0] = (byte)(opCode + (byte)reg);
-            return ret;
+            return opCode;
+        }
+
+        private static byte Instruction(byte opCode, StandardRegister reg)
+        {
+            return (byte)(opCode + (byte)reg);
         }
 
         private static byte[] Instruction(byte opCode, byte regBaseOffset, StandardRegister reg, int val)
@@ -121,6 +162,7 @@ namespace AnotherExternalMemoryLibrary
             Array.Copy(value, 0, ret, 3, value.Length);
             return ret;
         }
+
         private static byte[] Instruction(byte opCode, byte regBaseOffset, ExtraRegister reg, int val)
         {
             byte[] ret = new byte[3 + sizeof(int)];
@@ -131,6 +173,5 @@ namespace AnotherExternalMemoryLibrary
             Array.Copy(value, 0, ret, 3, value.Length);
             return ret;
         }
-
     }
 }

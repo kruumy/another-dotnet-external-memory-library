@@ -9,16 +9,17 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class CallProcessFunction
     {
-        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, int[] intParameters, float[] floatParameters)
+        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, int[] intParameters)
         {
             using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(intParameters) + 60u)))
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
 
-                main.AddRange(Assemblerx64.PUSH(Assemblerx64.StandardRegister.RBP));
-                main.AddRange(Assemblerx64.MOV(Assemblerx64.StandardRegister.RBP, Assemblerx64.StandardRegister.RSP));
+                main.Add(Assemblerx64.PUSH(Assemblerx64.StandardRegister.RBP));
+                main.Add(Assemblerx64.PUSH(Assemblerx64.StandardRegister.RDI));
+                main.AddRange(Assemblerx64.SUB(Assemblerx64.StandardRegister.RSP, 0xE8));
+                main.AddRange(Assemblerx64.LEA(Assemblerx64.StandardRegister.RBP, Assemblerx64.StandardRegister.RSP, 0x20));
 
-                // https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/x64-architecture#calling-conventions
                 int integerRegsCount = 0;
                 foreach (int intParameter in intParameters)
                 {
@@ -40,15 +41,14 @@ namespace AnotherExternalMemoryLibrary
                         main.AddRange(Assemblerx86.PUSH(intParameter));
                     }
                 }
-                foreach (float floatParameter in floatParameters)
-                {
-                    //TODO
-                }
-                // figure out why having more than 1 argument breaks the stack frame
                 main.AddRange(Assemblerx64.MOV(Assemblerx64.StandardRegister.RAX, (long)Address));
                 main.AddRange(Assemblerx64.CALL(Assemblerx64.StandardRegister.RAX));
-                main.AddRange(Assemblerx64.POP(Assemblerx64.StandardRegister.RBP));
-                main.AddRange(Assemblerx64.RET());
+
+                main.AddRange(Assemblerx64.LEA(Assemblerx64.StandardRegister.RSP, Assemblerx64.StandardRegister.RBP, 0xC8));
+                main.Add(Assemblerx64.POP(Assemblerx64.StandardRegister.RDI));
+                main.Add(Assemblerx64.POP(Assemblerx64.StandardRegister.RBP));
+                main.Add(Assemblerx64.RET());
+
                 main.ForEach(v => Console.Write($"\\x{v.ToString("X")}"));
                 WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
                 CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);

@@ -409,7 +409,7 @@ namespace AnotherExternalMemoryLibrary
             return ret;
         }
 
-        private static bool ShouldBe4Bytes(this int val)
+        internal static bool ShouldBe4Bytes(this int val)
         {
             return val >= 0x80;
         }
