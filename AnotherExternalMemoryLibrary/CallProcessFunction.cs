@@ -9,7 +9,7 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class CallProcessFunction
     {
-        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, int? rcx = null, int? rdx = null, int? r8 = null, int? r9 = null, int[] stack = null)
+        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, object param0 = null, object param1 = null, object param2 = null, object param3 = null, int[] stack = null)
         {
             using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(256u))) // TODO change later
             {
@@ -18,25 +18,39 @@ namespace AnotherExternalMemoryLibrary
                 main.Add(0x57); // push rdi
                 main.AddRange(new byte[] { 0x48, 0x81, 0xEC, 0xE8, 0x00, 0x00, 0x00 }); // sub rsp,0xe8 
                 main.AddRange(new byte[] { 0x48, 0x8D, 0x6C, 0x24, 0x20 }); // lea rbp,[rsp+0x20]
-                if (rcx != null)
+
+                if (param0 != null)
                 {
-                    main.AddRange(new byte[] { 0x48, 0xC7, 0xC1 }); // mov rcx,
-                    main.AddRange(BitConverter.GetBytes((int)rcx));
+                    if (param0 is int i)
+                    {
+                        main.AddRange(new byte[] { 0x48, 0xC7, 0xC1 }); // mov rcx,
+                        main.AddRange(BitConverter.GetBytes(i));
+                    }
+                    
                 }
-                if (rdx != null)
+                if (param1 != null)
                 {
-                    main.AddRange(new byte[] { 0x48, 0xC7, 0xC2 }); // mov rdx,
-                    main.AddRange(BitConverter.GetBytes((int)rdx));
+                    if (param1 is int i)
+                    {
+                        main.AddRange(new byte[] { 0x48, 0xC7, 0xC2 }); // mov rdx,
+                        main.AddRange(BitConverter.GetBytes(i));
+                    }
                 }
-                if (r8 != null)
+                if (param2 != null)
                 {
-                    main.AddRange(new byte[] { 0x49, 0xC7, 0xC0 }); // mov r8,
-                    main.AddRange(BitConverter.GetBytes((int)r8));
+                    if (param2 is int i)
+                    {
+                        main.AddRange(new byte[] { 0x49, 0xC7, 0xC0 }); // mov r8,
+                        main.AddRange(BitConverter.GetBytes(i));
+                    }
                 }
-                if (r9 != null)
+                if (param3 != null)
                 {
-                    main.AddRange(new byte[] { 0x49, 0xC7, 0xC1 }); // mov r9,
-                    main.AddRange(BitConverter.GetBytes((int)r9));
+                    if (param3 is int i)
+                    {
+                        main.AddRange(new byte[] { 0x49, 0xC7, 0xC1 }); // mov r9,
+                        main.AddRange(BitConverter.GetBytes(i));
+                    }
                 }
                 if (stack != null)
                 {
@@ -141,59 +155,20 @@ namespace AnotherExternalMemoryLibrary
 
         public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params int[] parameters)
         {
-            int?[] newParameters = new int?[8];
-            for (int i = 0; i < parameters.Length; i++)
+            if (parameters.Length > 8)
             {
-                newParameters[i] = parameters[i];
+                throw new ArgumentException($"{parameters.Length} is greater than the amount of registers!", nameof(parameters));
             }
-            UserCallx86(Handle, Address, newParameters[0], newParameters[1], newParameters[2], newParameters[3], newParameters[4], newParameters[5], newParameters[6], newParameters[7]);
-        }
-
-        public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, int? eax = null, int? ecx = null, int? edx = null, int? ebx = null, int? esp = null, int? ebp = null, int? esi = null, int? edi = null)
-        {
-            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(eax, ecx, edx, ebx, esp, ebp, esi, edi) + 12u)))
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 12u)))
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
-                if (eax != null)
+
+                for (int i = 0; i < parameters.Length; i++)
                 {
-                    main.Add(0xb8); // mov eax,
-                    main.AddRange(BitConverter.GetBytes((int)eax));
+                    main.Add((byte)(0xb8 + i)); // mov register,
+                    main.AddRange(BitConverter.GetBytes(parameters[i]));
                 }
-                if (ecx != null)
-                {
-                    main.Add(0xb9); // mov ecx,
-                    main.AddRange(BitConverter.GetBytes((int)ecx));
-                }
-                if (edx != null)
-                {
-                    main.Add(0xba); // mov edx,
-                    main.AddRange(BitConverter.GetBytes((int)edx));
-                }
-                if (ebx != null)
-                {
-                    main.Add(0xbb); // mov ebx,
-                    main.AddRange(BitConverter.GetBytes((int)ebx));
-                }
-                if (esp != null)
-                {
-                    main.Add(0xbc); // mov esp,
-                    main.AddRange(BitConverter.GetBytes((int)esp));
-                }
-                if (ebp != null)
-                {
-                    main.Add(0xbd); // mov ebp,
-                    main.AddRange(BitConverter.GetBytes((int)ebp));
-                }
-                if (esi != null)
-                {
-                    main.Add(0xbe); // mov esi,
-                    main.AddRange(BitConverter.GetBytes((int)esi));
-                }
-                if (edi != null)
-                {
-                    main.Add(0xbf); // mov edi,
-                    main.AddRange(BitConverter.GetBytes((int)edi));
-                }
+
                 main.AddRange(new byte[] { 0xC7, 0x45, 0xFC }); // mov DWORD PTR [ebp-0x4],
                 main.AddRange((byte[])Address);
                 main.AddRange(new byte[] { 0xFF, 0x55, 0xFC }); // call DWORD PTR[ebp-0x4]

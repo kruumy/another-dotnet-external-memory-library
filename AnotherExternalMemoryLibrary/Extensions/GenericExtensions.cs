@@ -23,7 +23,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
 
         public static byte[] ToByteArrayUnsafe<T>(this T value)
         {
-            int size = Marshal.SizeOf<T>();
+            int size = Marshal.SizeOf(value);
             byte[] data = new byte[size];
             IntPtrEx dwStruct = Marshal.AllocHGlobal(size);
             Marshal.StructureToPtr(value, dwStruct, true);
@@ -34,7 +34,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
 
         public static byte[] ToByteArrayUnsafe<T>(this T[] values)
         {
-            int size = Marshal.SizeOf<T>();
+            int size = Marshal.SizeOf(values[0]);
             byte[] data = new byte[values.Length * size];
             for (int i = 0; i < values.Length; i++)
             {
