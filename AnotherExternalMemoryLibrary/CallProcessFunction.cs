@@ -12,8 +12,9 @@ namespace AnotherExternalMemoryLibrary
     {
         public static void Callx64(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
-            ExternalAlloc[] toDispose = LargeParametersToPointers(Handle, ref parameters);
+            ExternalAlloc[] largeParameterAllocs = LargeParametersToPointers(Handle, ref parameters);
             Callx64(Handle, Address, parameters[0], parameters[1], parameters[2], parameters[3], parameters.Skip(4).ToByteArrayUnsafe().ToStructArray<long>());
+            largeParameterAllocs.Dispose();
         }
         public static void Callx64(IntPtrEx Handle, IntPtrEx Address, object param0 = null, object param1 = null, object param2 = null, object param3 = null, long[] stack = null)
         {
