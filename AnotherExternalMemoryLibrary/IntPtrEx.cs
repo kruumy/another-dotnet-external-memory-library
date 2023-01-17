@@ -14,10 +14,6 @@ namespace AnotherExternalMemoryLibrary
         {
             value = ip;
         }
-        public object ToArchitectureInteger()
-        {
-            return Is64Bit ? (long)this : (int)this;
-        }
         public override string ToString()
         {
             if (Is64Bit) return value.ToInt64().ToString($"X{IntPtr.Size * 2}");
