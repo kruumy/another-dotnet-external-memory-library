@@ -1,6 +1,7 @@
 ﻿using AnotherExternalMemoryLibrary.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using static AnotherExternalMemoryLibrary.Win32;
@@ -9,6 +10,10 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class CallProcessFunction
     {
+        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, object[] parameters)
+        {
+            throw new NotImplementedException();
+        }
         public static void Callx64(IntPtrEx Handle, IntPtrEx Address, object param0 = null, object param1 = null, object param2 = null, object param3 = null, int[] stack = null)
         {
             using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(256u))) // TODO change later
@@ -19,63 +24,8 @@ namespace AnotherExternalMemoryLibrary
                 main.AddRange(new byte[] { 0x48, 0x81, 0xEC, 0xE8, 0x00, 0x00, 0x00 }); // sub rsp,0xe8 
                 main.AddRange(new byte[] { 0x48, 0x8D, 0x6C, 0x24, 0x20 }); // lea rbp,[rsp+0x20]
 
-                if (param0 != null)
-                {
-                    if (param0 is int i)
-                    {
-                        main.AddRange(new byte[] { 0x48, 0xC7, 0xC1 }); // mov rcx,
-                        main.AddRange(BitConverter.GetBytes(i));
-                    }
-                    else if (param0 is float f)
-                    {
-                        main.AddRange(new byte[] { 0x48, 0xC7, 0xC1 }); // mov rcx,
-                        main.AddRange(BitConverter.GetBytes(f));
-                        main.AddRange(new byte[] { 0x66, 0x48, 0x0F, 0x6E, 0xC1 }); // movq xmm0,rcx
-                    }
 
-                }
-                if (param1 != null)
-                {
-                    if (param1 is int i)
-                    {
-                        main.AddRange(new byte[] { 0x48, 0xC7, 0xC2 }); // mov rdx,
-                        main.AddRange(BitConverter.GetBytes(i));
-                    }
-                    else if (param1 is float f)
-                    {
-                        main.AddRange(new byte[] { 0x48, 0xC7, 0xC2 }); // mov rdx,
-                        main.AddRange(BitConverter.GetBytes(f));
-                        main.AddRange(new byte[] { 0x66, 0x48, 0x0F, 0x6E, 0xCA }); // movq xmm1,rdx
-                    }
-                }
-                if (param2 != null)
-                {
-                    if (param2 is int i)
-                    {
-                        main.AddRange(new byte[] { 0x49, 0xC7, 0xC0 }); // mov r8,
-                        main.AddRange(BitConverter.GetBytes(i));
-                    }
-                    else if (param2 is float f)
-                    {
-                        main.AddRange(new byte[] { 0x49, 0xC7, 0xC0 }); // mov r8,
-                        main.AddRange(BitConverter.GetBytes(f));
-                        main.AddRange(new byte[] { 0x66, 0x49, 0x0F, 0x6E, 0xD0 }); // movq xmm2,r8
-                    }
-                }
-                if (param3 != null)
-                {
-                    if (param3 is int i)
-                    {
-                        main.AddRange(new byte[] { 0x49, 0xC7, 0xC1 }); // mov r9,
-                        main.AddRange(BitConverter.GetBytes(i));
-                    }
-                    else if (param3 is float f)
-                    {
-                        main.AddRange(new byte[] { 0x49, 0xC7, 0xC1 }); // mov r9,
-                        main.AddRange(BitConverter.GetBytes(f));
-                        main.AddRange(new byte[] { 0x66, 0x49, 0x0F, 0x6E, 0xD9 }); // movq xmm3,r9
-                    }
-                }
+                Assemblex64RegisterParameters(ref main, param0, param1, param2, param3);
                 if (stack != null)
                 {
                     for (int i = 0; i < stack.Length; i++)
@@ -98,6 +48,38 @@ namespace AnotherExternalMemoryLibrary
 
                 WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
                 CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
+            }
+        }
+
+        private static void Assemblex64RegisterParameters(ref List<byte> main, params object[] parameters)
+        {
+            if (parameters.Length > 4)
+            {
+                throw new ArgumentException($"{parameters.Length} is greater than the amount of parameter registers!", nameof(parameters));
+            }
+            int[] integerParameterRegistersValue = { 1, 2, 0, 1 };
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                byte regPrefix = 0x0;
+                if (i >= integerParameterRegistersValue.Length / 2)
+                {
+                    regPrefix = 0x49;
+                }
+                else
+                {
+                    regPrefix = 0x48;
+                }
+                main.Add(regPrefix);
+                main.Add(0xC7); // the mov opcode
+                byte currentRegister = (byte)(0xC0 + integerParameterRegistersValue[i]);
+                main.Add(currentRegister);
+                main.AddRange(parameters[i].ToByteArrayUnsafe());
+                if (parameters[i] is float || parameters[i] is double)
+                {
+                    byte floatRegister = currentRegister;
+                    floatRegister += (byte)(i << 3);
+                    main.AddRange(new byte[] { 0x66, regPrefix, 0x0F, 0x6E, floatRegister }); // movq floating-Point Register,currentRegister
+                }
             }
         }
 
