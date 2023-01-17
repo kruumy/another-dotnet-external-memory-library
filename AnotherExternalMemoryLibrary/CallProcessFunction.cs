@@ -10,11 +10,12 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class CallProcessFunction
     {
-        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, object[] parameters)
+        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
-            throw new NotImplementedException();
+            ExternalAlloc[] toDispose = LargeParametersToPointers(Handle, ref parameters);
+            Callx64(Handle, Address, parameters[0], parameters[1], parameters[2], parameters[3], parameters.Skip(4).ToByteArrayUnsafe().ToStructArray<long>());
         }
-        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, object param0 = null, object param1 = null, object param2 = null, object param3 = null, int[] stack = null)
+        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, object param0 = null, object param1 = null, object param2 = null, object param3 = null, long[] stack = null)
         {
             using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(256u))) // TODO change later
             {
@@ -28,12 +29,7 @@ namespace AnotherExternalMemoryLibrary
                 Assemblex64RegisterParameters(ref main, param0, param1, param2, param3);
                 if (stack != null)
                 {
-                    for (int i = 0; i < stack.Length; i++)
-                    {
-                        main.AddRange(new byte[] { 0xC7, 0x44, 0x24 }); //mov DWORD PTR [rsp+
-                        main.Add((byte)(0x20 + (i * 8)));
-                        main.AddRange(BitConverter.GetBytes(stack[i]));
-                    }
+                    // TODO
                 }
 
                 main.AddRange(new byte[] { 0x48, 0xb8 }); // movabs rax,
@@ -72,7 +68,7 @@ namespace AnotherExternalMemoryLibrary
                 main.Add(regPrefix);
                 byte currentRegister = (byte)(0xB8 + integerParameterRegistersValue[i]);
                 main.Add(currentRegister);
-                main.AddRange(parameters[i].ToByteArrayUnsafe().ToStruct<long>().ToByteArray());
+                main.AddRange(parameters[i].ToByteArrayUnsafe().ToStruct<long>().ToByteArray()); // for movabs
                 if (parameters[i] is float || parameters[i] is double)
                 {
                     byte floatRegister = (byte)(0xC0 + integerParameterRegistersValue[i]);
@@ -84,15 +80,15 @@ namespace AnotherExternalMemoryLibrary
 
         public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
-            ObjectToIntParameters(Handle, parameters, out int[] intParameters, out ExternalAlloc[] largeParameterAllocs);
-            Callx86(Handle, Address, intParameters);
+            ExternalAlloc[] largeParameterAllocs = LargeParametersToPointers(Handle, ref parameters);
+            Callx86(Handle, Address, parameters.ToByteArrayUnsafe().ToStructArray<int>());
             largeParameterAllocs.Dispose();
         }
 
         public static Task<int> Callx86(IntPtrEx Handle, IntPtrEx Address, uint maxReturnAttempts, params object[] parameters)
         {
-            ObjectToIntParameters(Handle, parameters, out int[] intParameters, out ExternalAlloc[] largeParameterAllocs);
-            Task<int> ret = Callx86(Handle, Address, maxReturnAttempts, intParameters);
+            ExternalAlloc[] largeParameterAllocs = LargeParametersToPointers(Handle, ref parameters);
+            Task<int> ret = Callx86(Handle, Address, maxReturnAttempts, parameters.ToByteArrayUnsafe().ToStructArray<int>());
             largeParameterAllocs.Dispose();
             return ret;
         }
@@ -153,8 +149,8 @@ namespace AnotherExternalMemoryLibrary
 
         public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
-            ObjectToIntParameters(Handle, parameters, out int[] intParameters, out ExternalAlloc[] largeParameterAllocs);
-            UserCallx86(Handle, Address, intParameters);
+            ExternalAlloc[] largeParameterAllocs = LargeParametersToPointers(Handle, ref parameters);
+            UserCallx86(Handle, Address, parameters.ToByteArrayUnsafe().ToStructArray<int>());
             largeParameterAllocs.Dispose();
         }
 
@@ -187,54 +183,30 @@ namespace AnotherExternalMemoryLibrary
         {
             return (uint)(parameters.Length * (sizeof(int) + 1));
         }
-
-        private static uint GetParametersSize(params int?[] parameters)
+        private static ExternalAlloc[] LargeParametersToPointers(IntPtrEx Handle, ref object[] parameters)
         {
-            uint size = 0;
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                if (parameters[i] != null)
-                {
-                    size += sizeof(int) + 1;
-                }
-            }
-            return size;
-        }
-
-        private static void ObjectToIntParameters(IntPtrEx Handle, object[] parameters, out int[] intParameters, out ExternalAlloc[] largeParameterAllocs)
-        {
-            intParameters = new int[parameters.Length];
-            largeParameterAllocs = Array.Empty<ExternalAlloc>();
             List<ExternalAlloc> largeParameterAllocs_l = new List<ExternalAlloc>();
             for (int i = 0; i < parameters.Length; i++)
             {
-                if (parameters[i] is int ip)
-                {
-                    intParameters[i] = ip;
-                }
-                else if (parameters[i] is ExternalAlloc ea)
+                if (parameters[i] is ExternalAlloc ea)
                 {
                     largeParameterAllocs_l.Add(ea);
-                    intParameters[i] = ea.Address;
+                    parameters[i] = ea.Address;
                 }
                 else if (parameters[i] is string sp)
                 {
-                    ExternalPointerArray<byte> ep = new ExternalPointerArray<byte>(Handle, sp.ToByteArray());
+                    ExternalPointerArray<byte> ep = new ExternalPointerArray<byte>(Handle, sp.ToByteArray(true));
                     largeParameterAllocs_l.Add(ep);
-                    intParameters[i] = ep.Address;
+                    parameters[i] = ep.Address;
                 }
-                else if (Marshal.SizeOf(parameters[i]) <= sizeof(int))
-                {
-                    intParameters[i] = parameters[i].ToByteArrayUnsafe().ToStruct<int>();
-                }
-                else
+                else if (Marshal.SizeOf(parameters[i]) > IntPtrEx.Size)
                 {
                     ExternalPointerArray<byte> ep = new ExternalPointerArray<byte>(Handle, parameters[i].ToByteArrayUnsafe());
                     largeParameterAllocs_l.Add(ep);
-                    intParameters[i] = ep.Address;
+                    parameters[i] = ep.Address;
                 }
-                largeParameterAllocs = largeParameterAllocs_l.ToArray();
             }
+            return largeParameterAllocs_l.ToArray();
         }
     }
 }
