@@ -70,13 +70,12 @@ namespace AnotherExternalMemoryLibrary
                     regPrefix = 0x48;
                 }
                 main.Add(regPrefix);
-                main.Add(0xC7); // the mov opcode
-                byte currentRegister = (byte)(0xC0 + integerParameterRegistersValue[i]);
+                byte currentRegister = (byte)(0xB8 + integerParameterRegistersValue[i]);
                 main.Add(currentRegister);
-                main.AddRange(parameters[i].ToByteArrayUnsafe());
+                main.AddRange(parameters[i].ToByteArrayUnsafe().ToStruct<long>().ToByteArray());
                 if (parameters[i] is float || parameters[i] is double)
                 {
-                    byte floatRegister = currentRegister;
+                    byte floatRegister = (byte)(0xC0 + integerParameterRegistersValue[i]);
                     floatRegister += (byte)(i << 3);
                     main.AddRange(new byte[] { 0x66, regPrefix, 0x0F, 0x6E, floatRegister }); // movq floating-Point Register,currentRegister
                 }
