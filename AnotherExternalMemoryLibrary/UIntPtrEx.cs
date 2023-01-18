@@ -12,13 +12,13 @@ namespace AnotherExternalMemoryLibrary
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public struct UIntPtrEx : ISerializable
+    public readonly struct UIntPtrEx : ISerializable
     {
         private readonly nuint_t value;
-        public static nuint_t Size = sizeof(nuint_t);
-        public static UIntPtrEx MaxValue = nuint_t.MaxValue;
-        public static UIntPtrEx MinValue = nuint_t.MinValue;
-        public static UIntPtrEx Zero = 0x0;
+        public readonly static nuint_t Size = sizeof(nuint_t);
+        public readonly static UIntPtrEx MaxValue = nuint_t.MaxValue;
+        public readonly static UIntPtrEx MinValue = nuint_t.MinValue;
+        public readonly static UIntPtrEx Zero = 0x0;
 
         public UIntPtrEx(nuint_t value)
         {
