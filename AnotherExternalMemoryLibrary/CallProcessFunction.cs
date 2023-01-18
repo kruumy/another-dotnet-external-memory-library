@@ -13,10 +13,10 @@ namespace AnotherExternalMemoryLibrary
         public static void Callx64(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
         {
             ExternalAlloc[] largeParameterAllocs = LargeParametersToPointers(Handle, ref parameters);
-            Callx64(Handle, Address, parameters[0], parameters[1], parameters[2], parameters[3], parameters.Skip(4).ToByteArrayUnsafe().ToStructArray<long>());
+            _Callx64(Handle, Address, parameters);
             largeParameterAllocs.Dispose();
         }
-        public static void Callx64(IntPtrEx Handle, IntPtrEx Address, object param0 = null, object param1 = null, object param2 = null, object param3 = null, long[] stack = null)
+        private static void _Callx64(IntPtrEx Handle, IntPtrEx Address, object[] parameters)
         {
             using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(256u))) // TODO change later
             {
@@ -26,12 +26,8 @@ namespace AnotherExternalMemoryLibrary
                 main.AddRange(new byte[] { 0x48, 0x81, 0xEC, 0xE8, 0x00, 0x00, 0x00 }); // sub rsp,0xe8 
                 main.AddRange(new byte[] { 0x48, 0x8D, 0x6C, 0x24, 0x20 }); // lea rbp,[rsp+0x20]
 
-
-                Assemblex64RegisterParameters(ref main, param0, param1, param2, param3);
-                if (stack != null)
-                {
-                    // TODO
-                }
+                Assemblex64RegisterParameters(ref main, parameters.Take(4).ToArray());
+                // TODO, handle stack
 
                 main.AddRange(new byte[] { 0x48, 0xb8 }); // movabs rax,
                 main.AddRange((byte[])Address);
@@ -48,7 +44,7 @@ namespace AnotherExternalMemoryLibrary
             }
         }
 
-        private static void Assemblex64RegisterParameters(ref List<byte> main, params object[] parameters)
+        private static void Assemblex64RegisterParameters(ref List<byte> main, object[] parameters)
         {
             if (parameters.Length > 4)
             {
