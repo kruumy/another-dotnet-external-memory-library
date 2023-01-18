@@ -5,8 +5,8 @@ namespace AnotherExternalMemoryLibrary
 {
     public class ExternalPointerArray<T> : ExternalAlloc where T : unmanaged
     {
-        public UIntPtr SizeOfItem { get; }
-        public UIntPtr Length { get; }
+        public UIntPtrEx SizeOfItem { get; }
+        public int Length { get; }
 
         public T[] Values
         {
@@ -14,22 +14,22 @@ namespace AnotherExternalMemoryLibrary
             set => WriteProcessMemory.Write<T>(Handle, Address, value);
         }
 
-        public ExternalPointerArray(IntPtrEx Handle, UIntPtr Length) : base(Handle, new UIntPtr((ulong)Marshal.SizeOf<T>() * Length.ToUInt64()))
+        public ExternalPointerArray(IntPtrEx Handle, int Length) : base(Handle, Marshal.SizeOf<T>() * Length)
         {
             this.Length = Length;
-            SizeOfItem = (UIntPtr)Marshal.SizeOf<T>();
+            SizeOfItem = Marshal.SizeOf<T>();
         }
-        public ExternalPointerArray(IntPtrEx Handle, params T[] Values) : base(Handle, new UIntPtr((uint)(Marshal.SizeOf<T>() * Values.Length)))
+        public ExternalPointerArray(IntPtrEx Handle, params T[] Values) : base(Handle, Marshal.SizeOf<T>() * Values.Length)
         {
-            this.Length = (UIntPtr)Values.Length;
-            SizeOfItem = (UIntPtr)Marshal.SizeOf<T>();
+            this.Length = Values.Length;
+            SizeOfItem = Marshal.SizeOf<T>();
             this.Values = Values;
         }
 
-        public ExternalPointerArray(IntPtrEx Handle, UIntPtr Length, IntPtrEx Address) : base(Handle, new UIntPtr((ulong)Marshal.SizeOf<T>() * Length.ToUInt64()), Address)
+        public ExternalPointerArray(IntPtrEx Handle, int Length, IntPtrEx Address) : base(Handle, Marshal.SizeOf<T>() * Length, Address)
         {
             this.Length = Length;
-            SizeOfItem = (UIntPtr)Marshal.SizeOf<T>();
+            SizeOfItem = Marshal.SizeOf<T>();
         }
     }
 }

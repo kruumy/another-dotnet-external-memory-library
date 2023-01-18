@@ -116,16 +116,16 @@ namespace AnotherExternalMemoryLibrary
         public static extern bool IsWow64Process([In] IntPtrEx processHandle, [Out, MarshalAs(UnmanagedType.Bool)] out bool wow64Process);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtrEx lpBaseAddress, [Out] byte[] lpBuffer, UIntPtr dwSize, out IntPtrEx lpNumberOfBytesRead);
+        public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtrEx lpBaseAddress, [Out] byte[] lpBuffer, UIntPtrEx dwSize, out IntPtrEx lpNumberOfBytesRead);
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool SetWindowPos(IntPtr hWnd, IntPtrEx hWndInsertAfter, int x, int y, int cx, int cy, SetWindowPosFlags uFlags);
 
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        public static extern IntPtrEx VirtualAllocEx(IntPtr hProcess, IntPtrEx lpAddress, UIntPtr dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
+        public static extern IntPtrEx VirtualAllocEx(IntPtr hProcess, IntPtrEx lpAddress, UIntPtrEx dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
 
         [DllImport("kernel32.dll")]
-        public static extern bool VirtualProtectEx(IntPtr hProcess, IntPtrEx lpAddress, UIntPtr dwSize, MemoryProtection flNewProtect, out MemoryProtection lpflOldProtect);
+        public static extern bool VirtualProtectEx(IntPtr hProcess, IntPtrEx lpAddress, UIntPtrEx dwSize, MemoryProtection flNewProtect, out MemoryProtection lpflOldProtect);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtrEx VirtualQueryEx(IntPtrEx hProcess, IntPtrEx lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, IntPtrEx dwLength);
@@ -134,13 +134,13 @@ namespace AnotherExternalMemoryLibrary
         public static extern IntPtrEx VirtualQueryEx(IntPtrEx hProcess, IntPtrEx lpAddress, out MEMORY_BASIC_INFORMATION64 lpBuffer, IntPtrEx dwLength);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtrEx lpBaseAddress, byte[] lpBuffer, int nSize, out IntPtrEx lpNumberOfBytesWritten);
+        public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtrEx lpBaseAddress, byte[] lpBuffer, UIntPtrEx nSize, out IntPtrEx lpNumberOfBytesWritten);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool CloseHandle(IntPtr hObject);
 
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtrEx lpAddress, UIntPtr dwSize, AllocationType dwFreeType);
+        public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtrEx lpAddress, UIntPtrEx dwSize, AllocationType dwFreeType);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct MEMORY_BASIC_INFORMATION

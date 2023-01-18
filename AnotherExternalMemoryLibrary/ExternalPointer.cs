@@ -10,14 +10,14 @@ namespace AnotherExternalMemoryLibrary
             get => ReadProcessMemory.Read<T>(Handle, Address);
             set => WriteProcessMemory.Write<T>(Handle, Address, value);
         }
-        public ExternalPointer(IntPtrEx Handle) : base(Handle, (UIntPtr)Marshal.SizeOf<T>())
+        public ExternalPointer(IntPtrEx Handle) : base(Handle, Marshal.SizeOf<T>())
         {
         }
-        public ExternalPointer(IntPtrEx Handle, T Value) : base(Handle, (UIntPtr)Marshal.SizeOf<T>())
+        public ExternalPointer(IntPtrEx Handle, T Value) : base(Handle, Marshal.SizeOf<T>())
         {
             this.Value = Value;
         }
-        public ExternalPointer(IntPtrEx Handle, IntPtrEx Address) : base(Handle, (UIntPtr)Marshal.SizeOf<T>(), Address)
+        public ExternalPointer(IntPtrEx Handle, IntPtrEx Address) : base(Handle, Marshal.SizeOf<T>(), Address)
         {
         }
     }

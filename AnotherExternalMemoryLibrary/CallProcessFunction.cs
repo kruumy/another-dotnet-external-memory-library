@@ -18,7 +18,7 @@ namespace AnotherExternalMemoryLibrary
         }
         private static void _Callx64(IntPtrEx Handle, IntPtrEx Address, object[] parameters)
         {
-            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(256u))) // TODO change later
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, 256u)) // TODO change later
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
                 main.Add(0x55); // push rbp
@@ -92,7 +92,7 @@ namespace AnotherExternalMemoryLibrary
 
         public static Task<int> Callx86(IntPtrEx Handle, IntPtrEx Address, uint maxReturnAttempts, params int[] stack)
         {
-            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(stack) + 20u)))
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(stack) + 20u))
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
                 main.Add(0x55); // push ebp
@@ -157,7 +157,7 @@ namespace AnotherExternalMemoryLibrary
             {
                 throw new ArgumentException($"{parameters.Length} is greater than the amount of registers!", nameof(parameters));
             }
-            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, new UIntPtr(GetParametersSize(parameters) + 12u)))
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(parameters) + 12u))
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
 

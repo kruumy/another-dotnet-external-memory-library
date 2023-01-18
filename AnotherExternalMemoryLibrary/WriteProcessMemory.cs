@@ -8,9 +8,9 @@ namespace AnotherExternalMemoryLibrary
     {
         private static void WriteProcessMemory_(IntPtrEx hProcess, IntPtrEx lpBaseAddress, byte[] bytes)
         {
-            Win32.VirtualProtectEx(hProcess, lpBaseAddress, new UIntPtr((uint)bytes.Length), Win32.MemoryProtection.ExecuteReadWrite, out Win32.MemoryProtection oldProtection);
+            Win32.VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, Win32.MemoryProtection.ExecuteReadWrite, out Win32.MemoryProtection oldProtection);
             Win32.WriteProcessMemory(hProcess, lpBaseAddress, bytes, bytes.Length, out IntPtrEx _);
-            Win32.VirtualProtectEx(hProcess, lpBaseAddress, new UIntPtr((uint)bytes.Length), oldProtection, out Win32.MemoryProtection _);
+            Win32.VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, oldProtection, out Win32.MemoryProtection _);
         }
         public static void Write<T>(IntPtrEx pHandle, IntPtrEx addr, T value) where T : unmanaged
         {

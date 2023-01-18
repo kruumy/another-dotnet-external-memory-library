@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
@@ -16,9 +15,10 @@ namespace AnotherExternalMemoryLibrary
     public readonly struct IntPtrEx : ISerializable
     {
         private readonly nint_t value;
-        public static int Size = sizeof(nint_t);
+        public static nint_t Size = sizeof(nint_t);
         public static IntPtrEx MaxValue = nint_t.MaxValue;
         public static IntPtrEx MinValue = nint_t.MinValue;
+        public static IntPtrEx Zero = 0x0;
 
         public IntPtrEx(nint_t value)
         {
