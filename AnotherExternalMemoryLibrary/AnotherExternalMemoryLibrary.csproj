@@ -22,24 +22,28 @@
 	  <NoWarn>1701;1702;1591</NoWarn>
 	  <DebugType>full</DebugType>
 	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+		<DefineConstants>PLATFORM_X86</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
 	  <NoWarn>1701;1702;1591</NoWarn>
 	  <DebugType>full</DebugType>
 	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+		<DefineConstants>PLATFORM_X86</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 	  <NoWarn>1701;1702;1591</NoWarn>
 	  <DebugType>full</DebugType>
 	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+		<DefineConstants>PLATFORM_X64</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 	  <NoWarn>1701;1702;1591</NoWarn>
 	  <DebugType>full</DebugType>
 	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+		<DefineConstants>PLATFORM_X64</DefineConstants>
 	</PropertyGroup>
 
 </Project>

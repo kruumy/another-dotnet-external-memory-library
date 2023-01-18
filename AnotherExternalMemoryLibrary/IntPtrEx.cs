@@ -1,158 +1,150 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+
+#if PLATFORM_X64
+using nint_t = System.Int64;
+#else
+using nint_t = System.Int32;
+#endif
 
 namespace AnotherExternalMemoryLibrary
 {
-    public readonly struct IntPtrEx
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly struct IntPtrEx : ISerializable
     {
-        private readonly IntPtr value;
-        public static int Size => IntPtr.Size;
-        public static bool Is64Bit => Size == sizeof(long);
-        public static IntPtrEx MaxValue => Is64Bit ? (IntPtrEx)long.MaxValue : (IntPtrEx)int.MaxValue;
-        public static IntPtrEx MinValue => Is64Bit ? (IntPtrEx)long.MinValue : (IntPtrEx)int.MinValue;
-        public static IntPtrEx Zero => IntPtr.Zero;
-        public IntPtrEx(IntPtr ip)
+        private readonly nint_t value;
+        public static int Size = sizeof(nint_t);
+        public static IntPtrEx MaxValue = nint_t.MaxValue;
+        public static IntPtrEx MinValue = nint_t.MinValue;
+
+        public IntPtrEx(nint_t value)
         {
-            value = ip;
+            this.value = value;
+        }
+        public unsafe IntPtrEx(void* value)
+        {
+            this.value = (nint_t)value;
         }
         public override string ToString()
         {
-            if (Is64Bit) return value.ToInt64().ToString($"X{IntPtr.Size * 2}");
-            else return value.ToInt32().ToString($"X{IntPtr.Size * 2}");
+            return value.ToString($"X{Size * 2}");
         }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info?.AddValue("value", value);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is IntPtrEx ex && value == ex.value;
+        }
+
         public override int GetHashCode()
         {
             return value.GetHashCode();
         }
-        public override bool Equals(object obj)
+
+        public static unsafe implicit operator IntPtrEx(void* ptr)
         {
-            return obj is IntPtrEx px && px == this;
+            return new IntPtrEx((nint_t)ptr);
         }
-        #region Operators
-        public static IntPtrEx operator +(IntPtrEx px, IntPtrEx pxo)
+        public static implicit operator IntPtrEx(int @int)
         {
-            if (Is64Bit) return px.value.ToInt64() + pxo.value.ToInt64();
-            else return px.value.ToInt32() + pxo.value.ToInt32();
+            return new IntPtrEx((nint_t)@int);
         }
-        public static IntPtrEx operator -(IntPtrEx px, IntPtrEx pxo)
+        public static implicit operator IntPtrEx(uint @uint)
         {
-            if (Is64Bit) return px.value.ToInt64() - pxo.value.ToInt64();
-            else return px.value.ToInt32() - pxo.value.ToInt32();
+            return new IntPtrEx((nint_t)@uint);
         }
-        public static IntPtrEx operator *(IntPtrEx px, IntPtrEx pxo)
+        public static implicit operator IntPtrEx(long @long)
         {
-            if (Is64Bit) return px.value.ToInt64() * pxo.value.ToInt64();
-            else return px.value.ToInt32() * pxo.value.ToInt32();
+            return new IntPtrEx((nint_t)@long);
         }
-        public static IntPtrEx operator /(IntPtrEx px, IntPtrEx pxo)
+        public static implicit operator IntPtrEx(ulong @ulong)
         {
-            if (Is64Bit) return px.value.ToInt64() / pxo.value.ToInt64();
-            else return px.value.ToInt32() / pxo.value.ToInt32();
+            return new IntPtrEx((nint_t)@ulong);
         }
-        public static IntPtrEx operator %(IntPtrEx px, IntPtrEx pxo)
+        public static implicit operator IntPtrEx(IntPtr @IntPtr)
         {
-            if (Is64Bit) return px.value.ToInt64() % pxo.value.ToInt64();
-            else return px.value.ToInt32() & pxo.value.ToInt32();
+            return new IntPtrEx((nint_t)@IntPtr);
         }
-        public static bool operator ==(IntPtrEx px, IntPtrEx pxo)
+        public static implicit operator IntPtrEx(UIntPtr @UIntPtr)
         {
-            return px.value == pxo.value;
+            return new IntPtrEx((nint_t)@UIntPtr);
         }
-        public static bool operator !=(IntPtrEx px, IntPtrEx pxo)
+
+        public static unsafe implicit operator void*(IntPtrEx IntPtrEx)
         {
-            return px.value != pxo.value;
+            return (void*)IntPtrEx.value;
         }
-        public static bool operator >(IntPtrEx px, IntPtrEx pxo)
+        public static implicit operator int(IntPtrEx IntPtrEx)
         {
-            if (Is64Bit) return px.value.ToInt64() > pxo.value.ToInt64();
-            else return px.value.ToInt32() > pxo.value.ToInt32();
+            return (int)IntPtrEx.value;
         }
-        public static bool operator <(IntPtrEx px, IntPtrEx pxo)
+        public static implicit operator uint(IntPtrEx IntPtrEx)
         {
-            if (Is64Bit) return px.value.ToInt64() < pxo.value.ToInt64();
-            else return px.value.ToInt32() < pxo.value.ToInt32();
+            return (uint)IntPtrEx.value;
         }
-        #endregion
-        #region Type Conversion
-        public static implicit operator IntPtr(IntPtrEx px)
+        public static implicit operator long(IntPtrEx IntPtrEx)
         {
-            return px.value;
+            return (long)IntPtrEx.value;
         }
-        public static implicit operator UIntPtr(IntPtrEx px)
+        public static implicit operator ulong(IntPtrEx IntPtrEx)
         {
-            if (Is64Bit) return new UIntPtr((ulong)px.value.ToInt64());
-            else return new UIntPtr((uint)px.value.ToInt32());
+            return (ulong)IntPtrEx.value;
         }
-        public static implicit operator IntPtrEx(IntPtr ip)
+        public static unsafe implicit operator IntPtr(IntPtrEx IntPtrEx)
         {
-            return new IntPtrEx(ip);
+            return new IntPtr((void*)IntPtrEx.value);
         }
-        public static implicit operator IntPtrEx(UIntPtr uip)
+        public static unsafe implicit operator UIntPtr(IntPtrEx IntPtrEx)
         {
-            if (Is64Bit) return new IntPtrEx(new IntPtr((long)(ulong)uip));
-            else return new IntPtrEx(new IntPtr((int)(uint)uip));
+            return new UIntPtr((void*)IntPtrEx.value);
         }
-        public static implicit operator byte(IntPtrEx px)
+        public static implicit operator byte[](IntPtrEx IntPtrEx)
         {
-            return (byte)px.value;
+            return BitConverter.GetBytes(IntPtrEx.value);
         }
-        public static implicit operator sbyte(IntPtrEx px)
+
+        public static IntPtrEx operator +(IntPtrEx left, IntPtrEx right)
         {
-            return (sbyte)px.value;
+            return left.value + right.value;
         }
-        public static implicit operator short(IntPtrEx px)
+        public static IntPtrEx operator -(IntPtrEx left, IntPtrEx right)
         {
-            return (short)px.value.ToInt32();
+            return left.value - right.value;
         }
-        public static implicit operator ushort(IntPtrEx px)
+        public static IntPtrEx operator *(IntPtrEx left, IntPtrEx right)
         {
-            return (ushort)(short)px.value.ToInt32();
+            return left.value * right.value;
         }
-        public static implicit operator int(IntPtrEx px)
+        public static IntPtrEx operator /(IntPtrEx left, IntPtrEx right)
         {
-            return px.value.ToInt32();
+            return left.value / right.value;
         }
-        public static implicit operator uint(IntPtrEx px)
+        public static IntPtrEx operator %(IntPtrEx left, IntPtrEx right)
         {
-            return (uint)px.value.ToInt32();
+            return left.value % right.value;
         }
-        public static implicit operator long(IntPtrEx px)
+        public static bool operator ==(IntPtrEx left, IntPtrEx right)
         {
-            return px.value.ToInt64();
+            return left.value == right.value;
         }
-        public static implicit operator ulong(IntPtrEx px)
+        public static bool operator !=(IntPtrEx left, IntPtrEx right)
         {
-            return (ulong)px.value.ToInt64();
+            return left.value != right.value;
         }
-        public static implicit operator IntPtrEx(int i)
+        public static bool operator >(IntPtrEx left, IntPtrEx right)
         {
-            return new IntPtrEx(new IntPtr(i));
+            return left.value > right.value;
         }
-        public static implicit operator IntPtrEx(uint ui)
+        public static bool operator <(IntPtrEx left, IntPtrEx right)
         {
-            return new IntPtrEx(new IntPtr((int)ui));
+            return left.value < right.value;
         }
-        public static implicit operator IntPtrEx(long l)
-        {
-            return new IntPtrEx(new IntPtr(l));
-        }
-        public static implicit operator IntPtrEx(ulong ul)
-        {
-            return new IntPtrEx(new IntPtr((long)ul));
-        }
-        public static unsafe implicit operator IntPtrEx(void* pointer)
-        {
-            return new IntPtrEx(new IntPtr(pointer));
-        }
-        public static unsafe implicit operator void*(IntPtrEx px)
-        {
-            return px.value.ToPointer();
-        }
-        public static implicit operator byte[](IntPtrEx px)
-        {
-            if (Is64Bit) return BitConverter.GetBytes((long)px);
-            else return BitConverter.GetBytes((int)px);
-        }
-        #endregion
     }
 }
-
