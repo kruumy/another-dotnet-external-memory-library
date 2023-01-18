@@ -12,7 +12,7 @@ namespace AnotherExternalMemoryLibrary
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct UIntPtrEx : ISerializable
+    public readonly struct UIntPtrEx : ISerializable, IFormattable
     {
         private readonly nuint_t value;
         public readonly static nuint_t Size = sizeof(nuint_t);
@@ -31,6 +31,14 @@ namespace AnotherExternalMemoryLibrary
         public override string ToString()
         {
             return value.ToString($"X{Size * 2}");
+        }
+        public string ToString(string format)
+        {
+            return value.ToString(format);
+        }
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            return value.ToString(format, formatProvider);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
