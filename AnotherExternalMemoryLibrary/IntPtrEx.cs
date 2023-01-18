@@ -35,7 +35,7 @@ namespace AnotherExternalMemoryLibrary
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info?.AddValue("value", value);
+            info?.AddValue(nameof(value), value);
         }
 
         public override bool Equals(object obj)
