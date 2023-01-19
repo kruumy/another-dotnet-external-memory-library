@@ -19,6 +19,11 @@ namespace AnotherExternalMemoryLibrary
             this.Address = Address;
         }
 
+        ~ExternalAlloc()
+        {
+            Dispose();
+        }
+
         public IntPtrEx Address { get; }
         public IntPtrEx Handle { get; }
         public UIntPtrEx Size { get; }
@@ -26,6 +31,7 @@ namespace AnotherExternalMemoryLibrary
         public void Dispose()
         {
             VirtualFreeEx(Handle, Address, Size, AllocationType.Release);
+            GC.SuppressFinalize(this);
         }
     }
 }
