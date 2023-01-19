@@ -42,14 +42,7 @@ namespace AnotherExternalMemoryLibrary
 
         public IntPtrEx GetAddressOfIndex(int index)
         {
-            if (index >= Length)
-            {
-                throw new System.IndexOutOfRangeException();
-            }
-            else
-            {
-                return Address + (IntPtrEx)(SizeOfItem * index);
-            }
+            return index >= Length ? throw new System.IndexOutOfRangeException() : Address + (IntPtrEx)(SizeOfItem * index);
         }
 
         public IEnumerator<T> GetEnumerator()
