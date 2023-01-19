@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary
 {
@@ -10,7 +9,7 @@ namespace AnotherExternalMemoryLibrary
 
         public T[] Values
         {
-            get => ReadProcessMemory.Read<T>(Handle, Address, (int)Length);
+            get => ReadProcessMemory.Read<T>(Handle, Address, Length);
             set => WriteProcessMemory.Write<T>(Handle, Address, value);
         }
 
@@ -30,6 +29,22 @@ namespace AnotherExternalMemoryLibrary
         {
             this.Length = Length;
             SizeOfItem = Marshal.SizeOf<T>();
+        }
+
+        public T this[int index]
+        {
+            get => Values[index];
+            set
+            {
+                if (index >= Length)
+                {
+                    throw new System.IndexOutOfRangeException();
+                }
+                else
+                {
+                    WriteProcessMemory.Write<T>(Handle, Address + (IntPtrEx)(SizeOfItem * index), value);
+                }
+            }
         }
     }
 }
