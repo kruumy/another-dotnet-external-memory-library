@@ -69,7 +69,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="end">Ending point</param>
         /// <param name="pattern">Pattern to search for</param>
         /// <returns>All matches</returns>
-        public static IntPtrEx[] Scan(this Process process, IntPtrEx start, IntPtrEx end, params byte[] pattern)
+        public static UIntPtrEx[] Scan(this Process process, UIntPtrEx start, UIntPtrEx end, params byte[] pattern)
         {
             return ScanProcessMemory.Scan(process.Handle, start, end, pattern);
         }

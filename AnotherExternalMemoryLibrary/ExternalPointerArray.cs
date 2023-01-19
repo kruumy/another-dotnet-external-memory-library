@@ -45,12 +45,22 @@ namespace AnotherExternalMemoryLibrary
 
         public T[] ReadFullArray()
         {
-            return ReadProcessMemory.Read<T>(Handle, Address, Length);
+            return ReadRange(0, Length);
+        }
+
+        public T[] ReadRange(int startIndex, int amount)
+        {
+            return ReadProcessMemory.Read<T>(Handle, GetAddressOfIndex(startIndex), amount);
         }
 
         public void WriteFullArray(T[] values)
         {
-            WriteProcessMemory.Write<T>(Handle, Address, values);
+            WriteRange(0, values);
+        }
+
+        public void WriteRange(int startIndex, T[] values)
+        {
+            WriteProcessMemory.Write<T>(Handle, GetAddressOfIndex(startIndex), values);
         }
     }
 }
