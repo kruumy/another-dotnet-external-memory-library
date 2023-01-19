@@ -22,13 +22,17 @@ namespace AnotherExternalMemoryLibrary
 
         public static T[] Read<T>(IntPtrEx pHandle, IntPtrEx addr, int NumOfItems) where T : unmanaged
         {
-            if (typeof(T) == typeof(byte)) { return ReadProcessMemory_(pHandle, addr, NumOfItems) as T[]; }
-
+            if (typeof(T) == typeof(byte))
+            {
+                return ReadProcessMemory_(pHandle, addr, NumOfItems) as T[];
+            }
             T[] arr = new T[NumOfItems];
             int size = Marshal.SizeOf<T>();
             IEnumerable<byte> data = ReadProcessMemory_(pHandle, addr, arr.Length * size);
             for (int i = 0; i < arr.Length; i++)
+            {
                 arr[i] = data.GetRange(i * size, size).ToArray().ToStruct<T>();
+            }
             return arr;
         }
 

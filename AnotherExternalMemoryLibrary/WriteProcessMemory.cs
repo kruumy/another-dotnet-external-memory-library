@@ -18,12 +18,17 @@ namespace AnotherExternalMemoryLibrary
         }
         public static void Write<T>(IntPtrEx pHandle, IntPtrEx addr, params T[] array) where T : unmanaged
         {
-            if (array is byte[] ba) { WriteProcessMemory_(pHandle, addr, ba); return; }
-
+            if (array is byte[] ba)
+            {
+                WriteProcessMemory_(pHandle, addr, ba);
+                return;
+            }
             int size = Marshal.SizeOf<T>();
             byte[] writeData = new byte[size * array.Length];
             for (int i = 0; i < array.Length; i++)
+            {
                 array[i].ToByteArray().CopyTo(writeData, i * size);
+            }
             WriteProcessMemory_(pHandle, addr, writeData);
         }
     }

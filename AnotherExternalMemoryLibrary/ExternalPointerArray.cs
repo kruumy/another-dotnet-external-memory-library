@@ -1,10 +1,9 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary
 {
-    public class ExternalPointerArray<T> : ExternalAlloc, IEnumerable<T> where T : unmanaged
+    public class ExternalPointerArray<T> : ExternalAlloc, IEnumerable where T : unmanaged
     {
         public ExternalPointerArray(IntPtrEx Handle, int Length) : base(Handle, Marshal.SizeOf<T>() * Length)
         {
@@ -16,7 +15,7 @@ namespace AnotherExternalMemoryLibrary
         {
             this.Length = Values.Length;
             SizeOfItem = Marshal.SizeOf<T>();
-            this.Values = Values;
+            WriteFullArray(Values);
         }
 
         public ExternalPointerArray(IntPtrEx Handle, int Length, IntPtrEx Address) : base(Handle, Marshal.SizeOf<T>() * Length, Address)
@@ -27,12 +26,6 @@ namespace AnotherExternalMemoryLibrary
 
         public int Length { get; }
         public UIntPtrEx SizeOfItem { get; }
-
-        private T[] Values
-        {
-            get => ReadProcessMemory.Read<T>(Handle, Address, Length);
-            set => WriteProcessMemory.Write<T>(Handle, Address, value);
-        }
 
         public T this[int index]
         {
@@ -45,14 +38,19 @@ namespace AnotherExternalMemoryLibrary
             return index >= Length ? throw new System.IndexOutOfRangeException() : Address + (IntPtrEx)(SizeOfItem * index);
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator GetEnumerator()
         {
-            return ((IEnumerable<T>)Values).GetEnumerator();
+            return ReadFullArray().GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public T[] ReadFullArray()
         {
-            return Values.GetEnumerator();
+            return ReadProcessMemory.Read<T>(Handle, Address, Length);
+        }
+
+        public void WriteFullArray(T[] values)
+        {
+            WriteProcessMemory.Write<T>(Handle, Address, values);
         }
     }
 }
