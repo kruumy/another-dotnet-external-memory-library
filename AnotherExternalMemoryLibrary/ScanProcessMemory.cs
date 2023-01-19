@@ -7,18 +7,18 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class ScanProcessMemory
     {
-        public static IntPtrEx[] Scan(IntPtrEx pHandle, IntPtrEx start, IntPtrEx end, params byte[] pattern)
+        public static UIntPtrEx[] Scan(IntPtrEx pHandle, UIntPtrEx start, UIntPtrEx end, params byte[] pattern)
         {
-            List<IntPtrEx> ret = new List<IntPtrEx>();
+            List<UIntPtrEx> ret = new List<UIntPtrEx>();
             MEMORY_BASIC_INFORMATION memInfo = new MEMORY_BASIC_INFORMATION();
-            IntPtrEx memInfoSize = Marshal.SizeOf(memInfo);
-            IntPtrEx lpAddress = start;
+            UIntPtrEx memInfoSize = Marshal.SizeOf(memInfo);
+            UIntPtrEx lpAddress = start;
             while (VirtualQueryEx(pHandle, lpAddress, out memInfo, memInfoSize) != 0 && lpAddress < end)
             {
                 lpAddress = memInfo.BaseAddress + memInfo.RegionSize;
 
                 int SplitNum = (int)((long)memInfo.RegionSize / int.MaxValue) + 1;
-                IntPtrEx readStart = lpAddress;
+                UIntPtrEx readStart = lpAddress;
                 int readLength = (int)((long)memInfo.RegionSize / SplitNum);
                 for (int i = 0; i < SplitNum; i++)
                 {
