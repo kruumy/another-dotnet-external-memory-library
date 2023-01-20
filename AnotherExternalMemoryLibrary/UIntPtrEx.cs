@@ -14,7 +14,7 @@ namespace AnotherExternalMemoryLibrary
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct UIntPtrEx : ISerializable, IFormattable
     {
-        private readonly nuint_t value;
+        public readonly nuint_t value;
         public readonly static nuint_t Size = sizeof(nuint_t);
         public readonly static UIntPtrEx MaxValue = nuint_t.MaxValue;
         public readonly static UIntPtrEx MinValue = nuint_t.MinValue;
@@ -28,6 +28,7 @@ namespace AnotherExternalMemoryLibrary
         {
             this.value = (nuint_t)value;
         }
+
         public override string ToString()
         {
             return value.ToString($"X{Size * 2}");
