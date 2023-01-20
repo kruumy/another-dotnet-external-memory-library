@@ -124,7 +124,9 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             IntPtrEx result = BaseAddress + BaseOffset;
             foreach (IntPtrEx offset in Offsets)
+            {
                 result = offset + ReadProcessMemory.Read<IntPtrEx>(process.Handle, result);
+            }
             return result;
         }
         /// <summary>

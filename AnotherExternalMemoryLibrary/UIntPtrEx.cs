@@ -59,7 +59,7 @@ namespace AnotherExternalMemoryLibrary
 
         public static unsafe implicit operator UIntPtrEx(void* ptr)
         {
-            return new UIntPtrEx((nuint_t)ptr);
+            return new UIntPtrEx(ptr);
         }
         public static implicit operator UIntPtrEx(int @int)
         {

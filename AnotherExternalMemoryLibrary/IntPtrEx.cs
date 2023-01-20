@@ -61,7 +61,7 @@ namespace AnotherExternalMemoryLibrary
 
         public static unsafe implicit operator IntPtrEx(void* ptr)
         {
-            return new IntPtrEx((nint_t)ptr);
+            return new IntPtrEx(ptr);
         }
         public static implicit operator IntPtrEx(int @int)
         {
