@@ -21,23 +21,17 @@ namespace AnotherExternalMemoryLibrary
             using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, 256u)) // TODO change later
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
-                main.Add(0x55); // push rbp
-                main.Add(0x57); // push rdi
-                main.AddRange(new byte[] { 0x48, 0x81, 0xEC, 0xE8, 0x00, 0x00, 0x00 }); // sub rsp,0xe8 
-                main.AddRange(new byte[] { 0x48, 0x8D, 0x6C, 0x24, 0x20 }); // lea rbp,[rsp+0x20]
+                byte stackAllocationAmount = (byte)((parameters.Length * sizeof(long)) + 40);
+                main.AddRange(new byte[] { 0x48, 0x83, 0xEC, stackAllocationAmount }); // sub rsp, stackAllocationAmount
 
                 Assemblex64RegisterParameters(ref main, parameters.Take(4).ToArray());
-                // TODO, handle stack
+                Assemblex64StackParameters(ref main, parameters.Skip(4).ToArray());
 
                 main.AddRange(new byte[] { 0x48, 0xb8 }); // movabs rax,
                 main.AddRange((byte[])Address);
                 main.AddRange(new byte[] { 0xFF, 0xD0 }); // call rax
-                main.AddRange(new byte[] { 0x48, 0x8D, 0xA5, 0xC8, 0x00, 0x00, 0x00 }); // lea rsp,[rbp+0xc8] 
-                main.Add(0x5f); // pop rdi 
-                main.Add(0x5d); // pop rbp
+                main.AddRange(new byte[] { 0x48, 0x83, 0xC4, stackAllocationAmount }); // add rsp, stackAllocationAmount
                 main.Add(0xc3); // ret
-
-                main.ForEach(v => Console.Write($"\\x{v.ToString("X")}"));
 
                 WriteProcessMemory.Write(Handle, mainAlloc.Address, main.ToArray());
                 CreateRemoteThread(Handle, 0, 0, mainAlloc.Address, 0, 0, out _);
@@ -65,13 +59,25 @@ namespace AnotherExternalMemoryLibrary
                 main.Add(regPrefix);
                 byte currentRegister = (byte)(0xB8 + integerParameterRegistersValue[i]);
                 main.Add(currentRegister);
-                main.AddRange(parameters[i].ToByteArrayUnsafe().ToStruct<long>().ToByteArray()); // for movabs
+                main.AddRange(BitConverter.GetBytes(parameters[i].ToByteArrayUnsafe().ToStruct<long>())); // for movabs
                 if (parameters[i] is float || parameters[i] is double)
                 {
                     byte floatRegister = (byte)(0xC0 + integerParameterRegistersValue[i]);
                     floatRegister += (byte)(i << 3);
                     main.AddRange(new byte[] { 0x66, regPrefix, 0x0F, 0x6E, floatRegister }); // movq floating-Point Register,currentRegister
                 }
+            }
+        }
+
+        private static void Assemblex64StackParameters(ref List<byte> main, object[] parameters)
+        {
+            int regOffset = 0x20;
+            foreach (object param in parameters)
+            {
+                main.AddRange(new byte[] { 0xC7, 0x84, 0x24 }); // mov DWORD PTR [rsp+
+                main.AddRange(BitConverter.GetBytes(regOffset));
+                main.AddRange(BitConverter.GetBytes(param.ToByteArrayUnsafe().ToStruct<int>()));
+                regOffset += sizeof(long);
             }
         }
 
