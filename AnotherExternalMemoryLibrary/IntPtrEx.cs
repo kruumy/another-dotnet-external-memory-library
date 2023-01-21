@@ -14,7 +14,7 @@ namespace AnotherExternalMemoryLibrary
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct IntPtrEx : ISerializable, IFormattable
     {
-        public readonly nint_t value;
+        private readonly nint_t value;
         public readonly static nint_t Size = sizeof(nint_t);
         public readonly static IntPtrEx MaxValue = nint_t.MaxValue;
         public readonly static IntPtrEx MinValue = nint_t.MinValue;

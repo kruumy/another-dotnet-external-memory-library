@@ -74,16 +74,6 @@ namespace AnotherExternalMemoryLibrary.Extensions
             return ScanProcessMemory.Scan(process.Handle, start, end, pattern);
         }
         /// <summary>
-        /// Create a thread to call a function in the process memory.
-        /// </summary>
-        /// <param name="process">Target process</param>
-        /// <param name="address">Address of function</param>
-        /// <param name="parameters">All parameters to pass to the function if any</param>
-        public static void UserCall(this Process process, IntPtrEx address, params object[] parameters)
-        {
-            CallProcessFunction.UserCallx86(process.Handle, address, parameters);
-        }
-        /// <summary>
         /// Load a dll into the process.
         /// </summary>
         /// <param name="process">Target process</param>

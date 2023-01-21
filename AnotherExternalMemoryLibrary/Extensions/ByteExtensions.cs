@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -62,6 +63,22 @@ namespace AnotherExternalMemoryLibrary.Extensions
         public static bool Contains(this byte[] bytes, params byte[] checkBytes)
         {
             return bytes.IndexOf(checkBytes, 1, nullAsBlank: false).Length > 0;
+        }
+
+        public static byte[] EnforceLength(this byte[] bytes, int newLength)
+        {
+            if (bytes.Length == newLength)
+            {
+                return bytes;
+            }
+            else
+            {
+                byte[] ret = new byte[newLength];
+                int amountToCopy = ret.Length > bytes.Length ? bytes.Length : ret.Length;
+                Buffer.BlockCopy(bytes, 0, ret, 0, amountToCopy);
+                return ret;
+            }
+
         }
     }
 }
