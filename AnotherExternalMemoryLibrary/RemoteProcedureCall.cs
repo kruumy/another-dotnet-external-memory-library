@@ -12,7 +12,7 @@ namespace AnotherExternalMemoryLibrary
     {
         public static void Callx64(IntPtrEx Handle, IntPtrEx Address, params ValueType[] parameters)
         {
-            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, 256u)) // TODO change later
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(parameters, 15) + 12u)) // TODO change later
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
                 byte stackAllocationAmount = (byte)((parameters.Length * sizeof(long)) + 40);
@@ -86,9 +86,24 @@ namespace AnotherExternalMemoryLibrary
             }
         }
 
+        public static void Callx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
+        {
+            AllocateNonValueTypes(Handle, parameters, out ValueType[] newParameters, out IDisposable[] allocs);
+            Callx86(Handle, Address, newParameters);
+            allocs.Dispose();
+        }
+
+        public static Task<int> Callx86(IntPtrEx Handle, IntPtrEx Address, uint maxReturnAttempts, params object[] parameters)
+        {
+            AllocateNonValueTypes(Handle, parameters, out ValueType[] newParameters, out IDisposable[] allocs);
+            Task<int> ret = Callx86(Handle, Address, maxReturnAttempts, newParameters);
+            allocs.Dispose();
+            return ret;
+        }
+
         public static Task<int> Callx86(IntPtrEx Handle, IntPtrEx Address, uint maxReturnAttempts, params ValueType[] stack)
         {
-            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(stack) + 20u))
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(stack, 1) + 20u))
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
                 main.Add(0x55); // push ebp
@@ -140,13 +155,20 @@ namespace AnotherExternalMemoryLibrary
             _ = Callx86(Handle, Address, 0u, parameters);
         }
 
+        public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
+        {
+            AllocateNonValueTypes(Handle, parameters, out ValueType[] newParameters, out IDisposable[] allocs);
+            UserCallx86(Handle, Address, newParameters);
+            allocs.Dispose();
+        }
+
         public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params ValueType[] parameters)
         {
             if (parameters.Length > 8)
             {
                 throw new ArgumentException($"{parameters.Length} is greater than the amount of registers!", nameof(parameters));
             }
-            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(parameters) + 12u))
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(parameters, 1) + 12u))
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
 
