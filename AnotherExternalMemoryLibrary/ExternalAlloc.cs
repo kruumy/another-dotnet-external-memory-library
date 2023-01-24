@@ -5,6 +5,8 @@ namespace AnotherExternalMemoryLibrary
 {
     public class ExternalAlloc : IDisposable
     {
+        private bool disposedValue;
+
         public ExternalAlloc(IntPtrEx Handle, UIntPtrEx Size)
         {
             this.Handle = Handle;
@@ -21,7 +23,7 @@ namespace AnotherExternalMemoryLibrary
 
         ~ExternalAlloc()
         {
-            Dispose();
+            Dispose(disposing: false);
         }
 
         public IntPtrEx Address { get; }
@@ -30,8 +32,22 @@ namespace AnotherExternalMemoryLibrary
 
         public void Dispose()
         {
-            VirtualFreeEx(Handle, Address, Size, AllocationType.Release);
+            Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // Nothing managed to dispose
+                }
+                VirtualFreeEx(Handle, Address, Size, AllocationType.Release);
+                GC.SuppressFinalize(this);
+                disposedValue = true;
+            }
         }
     }
 }

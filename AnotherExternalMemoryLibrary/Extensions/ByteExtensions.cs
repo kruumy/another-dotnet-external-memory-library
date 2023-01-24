@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary.Extensions
@@ -60,6 +61,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
             }
             return result.ToArray();
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Contains(this byte[] bytes, params byte[] checkBytes)
         {
             return bytes.IndexOf(checkBytes, 1, nullAsBlank: false).Length > 0;

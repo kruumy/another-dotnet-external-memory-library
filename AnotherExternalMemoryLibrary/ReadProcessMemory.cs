@@ -30,7 +30,7 @@ namespace AnotherExternalMemoryLibrary
             return arr;
         }
 
-        public static string ReadString(IntPtrEx pHandle, IntPtrEx addr, int maxLength = 1023, int buffSize = 256)
+        public static string ReadString(IntPtrEx pHandle, IntPtrEx addr, int maxLength = 1023, int buffSize = 64)
         {
             byte[] buffer;
             byte[] rawString = new byte[maxLength + 1];

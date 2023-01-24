@@ -21,6 +21,8 @@ namespace AnotherExternalMemoryLibrary
                 Assemblex64RegisterParameters(ref main, parameters.Take(4).ToArray());
                 Assemblex64StackParameters(ref main, parameters.Skip(4).ToArray());
 
+                // TODO: read xmm0 & rax for return value
+
                 main.AddRange(new byte[] { 0x48, 0xb8 }); // movabs rax,
                 main.AddRange((byte[])Address);
                 main.AddRange(new byte[] { 0xFF, 0xD0 }); // call rax

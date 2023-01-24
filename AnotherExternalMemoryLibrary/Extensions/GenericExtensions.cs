@@ -1,21 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary.Extensions
 {
     public static class GenericExtensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> GetRange<T>(this IEnumerable<T> source, int start, int end)
         {
             return source.Skip(start).Take(end);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToByteArray<T>(this T value) where T : unmanaged
         {
             return value.ToByteArrayUnsafe();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToByteArray<T>(this T[] values) where T : unmanaged
         {
             return values.ToByteArrayUnsafe();
