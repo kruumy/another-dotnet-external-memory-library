@@ -1,23 +1,17 @@
 ﻿using AnotherExternalMemoryLibrary.Extensions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace AnotherExternalMemoryLibrary
 {
     public static class ReadProcessMemory
     {
-        private static byte[] ReadProcessMemory_(IntPtrEx hProcess, IntPtrEx lpBaseAddress, int NumOfBytes)
-        {
-            byte[] data = new byte[NumOfBytes];
-            Win32.ReadProcessMemory(hProcess, lpBaseAddress, data, NumOfBytes, out UIntPtrEx _);
-            return data;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Read<T>(IntPtrEx pHandle, IntPtrEx addr) where T : unmanaged
         {
-            int size = Marshal.SizeOf<T>();
-            byte[] data = ReadProcessMemory_(pHandle, addr, size);
-            return data.ToStruct<T>();
+            return ReadProcessMemory_(pHandle, addr, Marshal.SizeOf<T>()).ToStruct<T>();
         }
 
         public static T[] Read<T>(IntPtrEx pHandle, IntPtrEx addr, int NumOfItems) where T : unmanaged
@@ -55,6 +49,14 @@ namespace AnotherExternalMemoryLibrary
                 bytesRead += buffSize;
             }
             return rawString.GetString();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static byte[] ReadProcessMemory_(IntPtrEx hProcess, IntPtrEx lpBaseAddress, int NumOfBytes)
+        {
+            byte[] data = new byte[NumOfBytes];
+            Win32.ReadProcessMemory(hProcess, lpBaseAddress, data, NumOfBytes, out UIntPtrEx _);
+            return data;
         }
     }
 }
