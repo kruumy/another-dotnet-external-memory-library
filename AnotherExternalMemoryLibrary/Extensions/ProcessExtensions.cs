@@ -167,18 +167,5 @@ namespace AnotherExternalMemoryLibrary.Extensions
         {
             WriteProcessMemory.Write<T>(process.Handle, address, values);
         }
-
-        /// <summary>
-        /// Write an array to the process memory. No Generic Typing Constraint.
-        /// </summary>
-        /// <typeparam name="T">Type of value to write</typeparam>
-        /// <param name="process">Target process</param>
-        /// <param name="address">Address to write to</param>
-        /// <param name="value">What to write</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteUnsafe<T>(this Process process, IntPtrEx address, T value)
-        {
-            WriteProcessMemory.WriteUnsafe<T>(process.Handle, address, value);
-        }
     }
 }

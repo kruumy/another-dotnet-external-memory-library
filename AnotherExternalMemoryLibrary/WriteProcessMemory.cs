@@ -29,12 +29,6 @@ namespace AnotherExternalMemoryLibrary
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteUnsafe<T>(IntPtrEx pHandle, IntPtrEx addr, T value)
-        {
-            WriteProcessMemory_(pHandle, addr, value.ToByteArrayUnsafe());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void WriteProcessMemory_(IntPtrEx hProcess, IntPtrEx lpBaseAddress, byte[] bytes)
         {
             Win32.VirtualProtectEx(hProcess, lpBaseAddress, bytes.Length, Win32.MemoryProtection.ExecuteReadWrite, out Win32.MemoryProtection oldProtection);
