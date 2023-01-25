@@ -134,12 +134,13 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <param name="start">Starting point</param>
         /// <param name="end">Ending point</param>
+        /// <param name="nullAsWildCard">If 0x00 should be treated as an unknown value in the scan</param>
         /// <param name="pattern">Pattern to search for</param>
         /// <returns>All matches</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UIntPtrEx[] Scan(this Process process, UIntPtrEx start, UIntPtrEx end, params byte[] pattern)
+        public static UIntPtrEx[] Scan(this Process process, UIntPtrEx start, UIntPtrEx end, bool nullAsWildCard, params byte[] pattern)
         {
-            return ScanProcessMemory.Scan(process.Handle, start, end, pattern);
+            return ScanProcessMemory.Scan(process.Handle, start, end, nullAsWildCard, pattern);
         }
 
         /// <summary>

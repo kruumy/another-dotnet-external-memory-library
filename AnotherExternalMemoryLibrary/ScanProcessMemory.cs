@@ -7,7 +7,8 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class ScanProcessMemory
     {
-        public static UIntPtrEx[] Scan(IntPtrEx pHandle, UIntPtrEx start, UIntPtrEx end, params byte[] pattern)
+        // TODO: make this acually good, implement a multithreaded aob scan
+        public static UIntPtrEx[] Scan(IntPtrEx pHandle, UIntPtrEx start, UIntPtrEx end, bool nullAsWildCard, params byte[] pattern)
         {
             List<UIntPtrEx> ret = new List<UIntPtrEx>();
             MEMORY_BASIC_INFORMATION memInfo = new MEMORY_BASIC_INFORMATION();
@@ -23,7 +24,7 @@ namespace AnotherExternalMemoryLibrary
                 for (int i = 0; i < SplitNum; i++)
                 {
                     byte[] data = ReadProcessMemory.Read<byte>(pHandle, readStart, readLength);
-                    int[] searchResults = data.IndexOf(pattern);
+                    int[] searchResults = data.IndexOf(pattern, nullAsWildCard: nullAsWildCard);
                     if (searchResults.Length > 0)
                     {
                         foreach (int num in searchResults)

@@ -25,6 +25,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
             return values.ToByteArrayUnsafe();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToByteArrayUnsafe<T>(this T value)
         {
             int size = Marshal.SizeOf(value);
@@ -36,6 +37,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
             return data;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToByteArrayUnsafe<T>(this T[] values)
         {
             int size = Marshal.SizeOf(values[0]);

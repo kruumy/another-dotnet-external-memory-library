@@ -16,6 +16,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ToStruct<T>(this byte[] data)
         {
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -24,15 +25,18 @@ namespace AnotherExternalMemoryLibrary.Extensions
             return val;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T[] ToStructArray<T>(this byte[] data, int? size = null) where T : unmanaged
         {
             int sizeOfResultType = size == null ? Marshal.SizeOf<T>() : (int)size;
             T[] result = new T[data.Length / sizeOfResultType];
             for (int i = 0; i < data.Length; i += sizeOfResultType)
+            {
                 result[i / sizeOfResultType] = (data.GetRange(i, sizeOfResultType).ToArray().ToStruct<T>());
+            }
             return result;
         }
-        public static int[] IndexOf(this byte[] bytes, byte[] searchBytes, int maxResults = int.MaxValue, int start = 0, int? end = null, bool nullAsBlank = false)
+        public static int[] IndexOf(this byte[] bytes, byte[] searchBytes, int maxResults = int.MaxValue, int start = 0, int? end = null, bool nullAsWildCard = false)
         {
             List<int> result = new List<int>();
             if (end == null)
@@ -44,7 +48,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
                 bool isFullPattern = true;
                 for (int j = 0; j < searchBytes.Length; j++)
                 {
-                    if (nullAsBlank && searchBytes[j] == 0x0)
+                    if (nullAsWildCard && searchBytes[j] == 0x0)
                         continue;
                     if (searchBytes[j] != bytes[i + j])
                     {
@@ -64,7 +68,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Contains(this byte[] bytes, params byte[] checkBytes)
         {
-            return bytes.IndexOf(checkBytes, 1, nullAsBlank: false).Length > 0;
+            return bytes.IndexOf(checkBytes, 1, nullAsWildCard: false).Length > 0;
         }
 
         public static byte[] EnforceLength(this byte[] bytes, int newLength)
