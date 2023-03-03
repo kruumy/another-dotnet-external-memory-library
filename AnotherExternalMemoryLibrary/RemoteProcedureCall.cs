@@ -105,19 +105,20 @@ namespace AnotherExternalMemoryLibrary
 
         public static Task<int> Callx86(IntPtrEx Handle, IntPtrEx Address, uint maxReturnAttempts, params ValueType[] stack)
         {
-            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(stack, 1) + 20u))
+            using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(stack, 1) + 26u))
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
                 main.Add(0x55); // push ebp
                 main.AddRange(new byte[] { 0x89, 0xE5 }); //  mov ebp,esp
+                main.AddRange(new byte[] { 0x83, 0xec, 0x08 }); //  sub esp,0x8
                 for (int i = stack.Length - 1; i >= 0; i--)
                 {
                     main.Add(0x68); // push
                     main.AddRange(stack[i].ToByteArrayUnsafe().EnforceLength(sizeof(int)));
                 }
-                main.Add(0xb8); // mov eax,
+                main.AddRange(new byte[] { 0xc7, 0x45, 0xfc }); // mov DWORD PTR [ebp-0x4],
                 main.AddRange((byte[])Address);
-                main.AddRange(new byte[] { 0xFF, 0xD0 }); // call eax
+                main.AddRange(new byte[] { 0xff, 0x55, 0xfc }); // call DWORD PTR [ebp-0x4]
 
                 Task<int> returnTask = null;
                 if (maxReturnAttempts > 0)
@@ -142,6 +143,7 @@ namespace AnotherExternalMemoryLibrary
                     });
                 }
 
+                main.AddRange(new byte[] { 0x83, 0xc4, 0x08 }); //  add esp,0x8
                 main.AddRange(new byte[] { 0x89, 0xEC }); //  mov esp,ebp
                 main.Add(0x5d); // pop ebp
                 main.Add(0xC3); // ret
