@@ -1,41 +1,53 @@
-﻿using AnotherExternalMemoryLibrary.Extensions;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using static AnotherExternalMemoryLibrary.Win32;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace AnotherExternalMemoryLibrary
 {
     public static class ScanProcessMemory
     {
-        // TODO: make this acually good, implement a multithreaded aob scan
-        public static UIntPtrEx[] Scan(IntPtrEx pHandle, UIntPtrEx start, UIntPtrEx end, bool nullAsWildCard, params byte[] pattern)
+        public static IEnumerable<IntPtrEx> Scan( IntPtrEx pHandle, ProcessModule processModule, bool nullAsWildCard, params byte[] pattern )
         {
-            List<UIntPtrEx> ret = new List<UIntPtrEx>();
-            MEMORY_BASIC_INFORMATION memInfo = new MEMORY_BASIC_INFORMATION();
-            UIntPtrEx memInfoSize = Marshal.SizeOf(memInfo);
-            UIntPtrEx lpAddress = start;
-            while (VirtualQueryEx(pHandle, lpAddress, out memInfo, memInfoSize) != 0 && lpAddress < end)
+            IntPtrEx address = processModule.BaseAddress;
+            IntPtrEx endAddress = address + processModule.ModuleMemorySize;
+            while ( address < endAddress )
             {
-                lpAddress = memInfo.BaseAddress + memInfo.RegionSize;
-
-                int SplitNum = (int)((long)memInfo.RegionSize / int.MaxValue) + 1;
-                UIntPtrEx readStart = lpAddress;
-                int readLength = (int)((long)memInfo.RegionSize / SplitNum);
-                for (int i = 0; i < SplitNum; i++)
+                byte[] buffer = ReadProcessMemory.Read<byte>(pHandle, address, pattern.Length);
+                if ( ByteArrayCompare(buffer, pattern, nullAsWildCard) )
                 {
-                    byte[] data = ReadProcessMemory.Read<byte>(pHandle, readStart, readLength);
-                    int[] searchResults = data.IndexOf(pattern, nullAsWildCard: nullAsWildCard);
-                    if (searchResults.Length > 0)
+                    yield return address;
+                }
+                address += 1;
+            }
+            yield return IntPtrEx.Zero;
+        }
+
+        private static bool ByteArrayCompare( byte[] a1, byte[] a2, bool nullAsWildCard )
+        {
+            if ( a1.Length != a2.Length )
+            {
+                return false;
+            }
+
+            for ( int i = 0; i < a1.Length; i++ )
+            {
+                if ( a1[ i ] != a2[ i ] )
+                {
+                    if ( nullAsWildCard )
                     {
-                        foreach (int num in searchResults)
+                        if ( a2[ i ] != 0x00 )
                         {
-                            ret.Add(readStart + num);
+                            return false;
                         }
                     }
-                    readStart += readLength;
+                    else
+                    {
+                        return false;
+                    }
+
                 }
             }
-            return ret.ToArray();
+
+            return true;
         }
     }
 }

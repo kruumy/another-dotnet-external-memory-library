@@ -15,7 +15,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="Offsets">Offsets to read from that point to the absolute address</param>
         /// <returns>Absolute address</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtrEx CalculatePointer(this Process process, IntPtrEx BaseOffset, params IntPtrEx[] Offsets)
+        public static IntPtrEx CalculatePointer( this Process process, IntPtrEx BaseOffset, params IntPtrEx[] Offsets )
         {
             return process.CalculatePointer(process.MainModule.BaseAddress, BaseOffset, Offsets);
         }
@@ -29,10 +29,10 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="Offsets">Offsets to read from that point to the absolute address</param>
         /// <returns>Absolute address</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtrEx CalculatePointer(this Process process, IntPtrEx BaseAddress, IntPtrEx BaseOffset, params IntPtrEx[] Offsets)
+        public static IntPtrEx CalculatePointer( this Process process, IntPtrEx BaseAddress, IntPtrEx BaseOffset, params IntPtrEx[] Offsets )
         {
             IntPtrEx result = BaseAddress + BaseOffset;
-            foreach (IntPtrEx offset in Offsets)
+            foreach ( IntPtrEx offset in Offsets )
             {
                 result = offset + ReadProcessMemory.Read<IntPtrEx>(process.Handle, result);
             }
@@ -48,7 +48,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="Offsets">Offsets to read from that point to the absolute address</param>
         /// <returns>Absolute address</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtrEx CalculatePointer(this Process process, string ModuleName, IntPtrEx ModuleOffset, params IntPtrEx[] Offsets)
+        public static IntPtrEx CalculatePointer( this Process process, string ModuleName, IntPtrEx ModuleOffset, params IntPtrEx[] Offsets )
         {
             return process.CalculatePointer(process.Modules.GetByName(ModuleName).BaseAddress, ModuleOffset, Offsets);
         }
@@ -59,7 +59,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <returns>enum</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Architecture GetArchitecture(this Process process)
+        public static Architecture GetArchitecture( this Process process )
         {
             Win32.IsWow64Process(process.Handle, out bool IsWow64);
             return (Architecture)Convert.ToInt32(!IsWow64);
@@ -71,7 +71,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <returns>WindowController object</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static WindowController GetMainWindow(this Process process)
+        public static WindowController GetMainWindow( this Process process )
         {
             return new WindowController(process.MainWindowHandle);
         }
@@ -82,7 +82,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <param name="dllPath">Path of dll</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LoadLibraryA(this Process process, string dllPath)
+        public static void LoadLibraryA( this Process process, string dllPath )
         {
             LoadLibrary.LoadLibraryA(process.Handle, dllPath);
         }
@@ -95,7 +95,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="address">Address to read from</param>
         /// <returns>value</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Read<T>(this Process process, IntPtrEx address) where T : unmanaged
+        public static T Read<T>( this Process process, IntPtrEx address ) where T : unmanaged
         {
             return ReadProcessMemory.Read<T>(process.Handle, address);
         }
@@ -109,7 +109,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="NumOfItems">Number of items to read</param>
         /// <returns>values</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T[] Read<T>(this Process process, IntPtrEx address, int NumOfItems) where T : unmanaged
+        public static T[] Read<T>( this Process process, IntPtrEx address, int NumOfItems ) where T : unmanaged
         {
             return ReadProcessMemory.Read<T>(process.Handle, address, NumOfItems);
         }
@@ -123,24 +123,9 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="buffSize">Amount of characters to read each loop</param>
         /// <returns>A managed string of characters. Does not contain the null terminate character.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string ReadString(this Process process, IntPtrEx address, int maxLength = 1023, int buffSize = 64)
+        public static string ReadString( this Process process, IntPtrEx address, int maxLength = 1023, int buffSize = 64 )
         {
             return ReadProcessMemory.ReadString(process.Handle, address, maxLength, buffSize);
-        }
-
-        /// <summary>
-        /// Scan the process memory.
-        /// </summary>
-        /// <param name="process">Target process</param>
-        /// <param name="start">Starting point</param>
-        /// <param name="end">Ending point</param>
-        /// <param name="nullAsWildCard">If 0x00 should be treated as an unknown value in the scan</param>
-        /// <param name="pattern">Pattern to search for</param>
-        /// <returns>All matches</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UIntPtrEx[] Scan(this Process process, UIntPtrEx start, UIntPtrEx end, bool nullAsWildCard, params byte[] pattern)
-        {
-            return ScanProcessMemory.Scan(process.Handle, start, end, nullAsWildCard, pattern);
         }
 
         /// <summary>
@@ -151,7 +136,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="address">Address to write to</param>
         /// <param name="value">What to write</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Write<T>(this Process process, IntPtrEx address, T value) where T : unmanaged
+        public static void Write<T>( this Process process, IntPtrEx address, T value ) where T : unmanaged
         {
             WriteProcessMemory.Write<T>(process.Handle, address, value);
         }
@@ -164,7 +149,7 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="address">Address to write to</param>
         /// <param name="values">What to write</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Write<T>(this Process process, IntPtrEx address, params T[] values) where T : unmanaged
+        public static void Write<T>( this Process process, IntPtrEx address, params T[] values ) where T : unmanaged
         {
             WriteProcessMemory.Write<T>(process.Handle, address, values);
         }
