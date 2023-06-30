@@ -1,11 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace AnotherExternalMemoryLibrary
 {
     public static class ScanProcessMemory
     {
+        public static IEnumerable<Task<IntPtrEx>> ScanAsync( IntPtrEx pHandle, ProcessModule processModule, bool nullAsWildCard, params byte[] pattern )
+        {
+            IEnumerable<IntPtrEx> enumRet = Scan(pHandle, processModule, nullAsWildCard, pattern);
+            foreach ( IntPtrEx item in enumRet )
+            {
+                yield return Task.Run(() => item);
+            }
+        }
         public static IEnumerable<IntPtrEx> Scan( IntPtrEx pHandle, ProcessModule processModule, bool nullAsWildCard, params byte[] pattern )
         {
             int bufferSize = CalculateBufferSize(processModule.ModuleMemorySize);
