@@ -82,9 +82,9 @@ namespace AnotherExternalMemoryLibrary.Extensions
         /// <param name="process">Target process</param>
         /// <param name="dllPath">Path of dll</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LoadLibraryA( this Process process, string dllPath )
+        public static IntPtrEx LoadLibraryA( this Process process, string dllPath )
         {
-            LoadLibrary.LoadLibraryA(process.Handle, dllPath);
+            return LoadLibrary.LoadLibraryA(process.Handle, dllPath);
         }
 
         /// <summary>
