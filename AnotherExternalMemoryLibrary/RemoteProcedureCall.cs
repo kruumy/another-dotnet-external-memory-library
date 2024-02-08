@@ -159,27 +159,28 @@ namespace AnotherExternalMemoryLibrary
             _ = Callx86(Handle, Address, 0u, parameters);
         }
 
-        public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params object[] parameters)
+        public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, object EAX = null, object ECX = null, object EDX = null, object EBX = null, object ESP = null, object EBP = null, object ESI = null, object EDI = null)
         {
+            object[] parameters = { EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI };
             AllocateNonValueTypes(Handle, parameters, out ValueType[] newParameters, out IDisposable[] allocs);
-            UserCallx86(Handle, Address, newParameters);
+            UserCallx86(Handle, Address, newParameters[0], newParameters[1], newParameters[2], newParameters[3], newParameters[4], newParameters[5], newParameters[6], newParameters[7]);
             allocs.Dispose();
         }
 
-        public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, params ValueType[] parameters)
+        public static void UserCallx86(IntPtrEx Handle, IntPtrEx Address, ValueType EAX = null, ValueType ECX  = null, ValueType EDX = null, ValueType EBX = null, ValueType ESP = null, ValueType EBP = null, ValueType ESI = null, ValueType EDI = null)
         {
-            if (parameters.Length > 8)
-            {
-                throw new ArgumentException($"{parameters.Length} is greater than the amount of registers!", nameof(parameters));
-            }
+            ValueType[] parameters = { EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI };
             using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(parameters, 1) + 12u))
             {
                 List<byte> main = new List<byte>((int)mainAlloc.Size);
 
                 for (int i = 0; i < parameters.Length; i++)
                 {
-                    main.Add((byte)(0xb8 + i)); // mov register,
-                    main.AddRange(parameters[i].ToByteArrayUnsafe().EnforceLength(sizeof(int)));
+                    if (parameters[i] != null)
+                    {
+                        main.Add((byte)(0xb8 + i)); // mov register,
+                        main.AddRange(parameters[i].ToByteArrayUnsafe().EnforceLength(sizeof(int)));
+                    }
                 }
 
                 main.AddRange(new byte[] { 0xC7, 0x45, 0xFC }); // mov DWORD PTR [ebp-0x4],
@@ -196,7 +197,10 @@ namespace AnotherExternalMemoryLibrary
             uint ret = 0;
             foreach (ValueType item in parameters)
             {
-                ret += (uint)Marshal.SizeOf(item) + additionalPer;
+                if(item != null)
+                {
+                    ret += (uint)Marshal.SizeOf(item) + additionalPer;
+                }
             }
             return ret;
         }
@@ -207,7 +211,11 @@ namespace AnotherExternalMemoryLibrary
             List<IDisposable> allocation_l = new List<IDisposable>();
             foreach (object oParam in oldParameters)
             {
-                if (oParam is ValueType v)
+                if (oParam is null )
+                {
+                    newParameters_l.Add(null);
+                }
+                else if (oParam is ValueType v)
                 {
                     newParameters_l.Add(v);
                 }

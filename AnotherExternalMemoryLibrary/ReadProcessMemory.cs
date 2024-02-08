@@ -9,42 +9,42 @@ namespace AnotherExternalMemoryLibrary
     public static class ReadProcessMemory
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Read<T>(IntPtrEx pHandle, IntPtrEx addr) where T : unmanaged
+        public static T Read<T>( IntPtrEx pHandle, IntPtrEx addr ) where T : unmanaged
         {
             return ReadProcessMemory_(pHandle, addr, Marshal.SizeOf<T>()).ToStruct<T>();
         }
 
-        public static T[] Read<T>(IntPtrEx pHandle, IntPtrEx addr, int NumOfItems) where T : unmanaged
+        public static T[] Read<T>( IntPtrEx pHandle, IntPtrEx addr, int NumOfItems ) where T : unmanaged
         {
-            if (typeof(T) == typeof(byte))
+            if ( typeof(T) == typeof(byte) )
             {
                 return ReadProcessMemory_(pHandle, addr, NumOfItems) as T[];
             }
-            T[] arr = new T[NumOfItems];
+            T[] arr = new T[ NumOfItems ];
             int size = Marshal.SizeOf<T>();
             IEnumerable<byte> data = ReadProcessMemory_(pHandle, addr, arr.Length * size);
-            for (int i = 0; i < arr.Length; i++)
+            for ( int i = 0; i < arr.Length; i++ )
             {
-                arr[i] = data.GetRange(i * size, size).ToArray().ToStruct<T>();
+                arr[ i ] = data.GetRange(i * size, size).ToArray().ToStruct<T>();
             }
             return arr;
         }
 
-        public static string ReadString(IntPtrEx pHandle, IntPtrEx addr, int maxLength = 1023, int buffSize = 64)
+        public static string ReadString( IntPtrEx pHandle, IntPtrEx addr, int maxLength = 1023, int buffSize = 64 )
         {
             byte[] buffer;
-            byte[] rawString = new byte[maxLength + 1];
+            byte[] rawString = new byte[ maxLength + 1 ];
             int bytesRead = 0;
-            while (bytesRead < maxLength)
+            while ( bytesRead < maxLength )
             {
                 buffer = ReadProcessMemory_(pHandle, addr + bytesRead, buffSize);
-                for (int i = 0; i < buffer.Length && i + bytesRead < maxLength; i++)
+                for ( int i = 0; i < buffer.Length && i + bytesRead < maxLength; i++ )
                 {
-                    if (buffer[i] == 0)
+                    if ( buffer[ i ] == 0 )
                     {
                         return rawString.GetString();
                     }
-                    rawString[bytesRead + i] = buffer[i];
+                    rawString[ bytesRead + i ] = buffer[ i ];
                 }
                 bytesRead += buffSize;
             }
@@ -52,9 +52,9 @@ namespace AnotherExternalMemoryLibrary
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static byte[] ReadProcessMemory_(IntPtrEx hProcess, IntPtrEx lpBaseAddress, int NumOfBytes)
+        private static byte[] ReadProcessMemory_( IntPtrEx hProcess, IntPtrEx lpBaseAddress, int NumOfBytes )
         {
-            byte[] data = new byte[NumOfBytes];
+            byte[] data = new byte[ NumOfBytes ];
             Win32.ReadProcessMemory(hProcess, lpBaseAddress, data, NumOfBytes, out UIntPtrEx _);
             return data;
         }
