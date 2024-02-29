@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LiteEngine"
         mc:Ignorable="d"
-        Style="{StaticResource CustomWindowStyle}"
         Title="LiteEngine" Height="450" Width="800" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}" >
 
     <Grid>
