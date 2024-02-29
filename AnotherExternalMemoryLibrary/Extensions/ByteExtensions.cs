@@ -17,6 +17,15 @@ namespace AnotherExternalMemoryLibrary.Extensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static object ToStruct( this byte[] data, Type type )
+        {
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            object val = Marshal.PtrToStructure(handle.AddrOfPinnedObject(), type);
+            handle.Free();
+            return val;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ToStruct<T>(this byte[] data)
         {
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);

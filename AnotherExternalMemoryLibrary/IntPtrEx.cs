@@ -19,6 +19,7 @@ namespace AnotherExternalMemoryLibrary
         public readonly static IntPtrEx MaxValue = nint_t.MaxValue;
         public readonly static IntPtrEx MinValue = nint_t.MinValue;
         public readonly static IntPtrEx Zero = 0x0;
+        public string Hexadecimal => "0x" + this.ToString();
 
         public IntPtrEx(nint_t value)
         {

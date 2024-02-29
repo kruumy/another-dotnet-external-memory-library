@@ -7,23 +7,31 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class ScanProcessMemory
     {
-        public static IEnumerable<Task<IntPtrEx>> ScanAsync( IntPtrEx pHandle, ProcessModule processModule, bool nullAsWildCard, params byte[] pattern )
-        {
-            IEnumerable<IntPtrEx> enumRet = Scan(pHandle, processModule, nullAsWildCard, pattern);
-            foreach ( IntPtrEx item in enumRet )
-            {
-                yield return Task.Run(() => item);
-            }
-        }
         public static IEnumerable<IntPtrEx> Scan( IntPtrEx pHandle, ProcessModule processModule, bool nullAsWildCard, params byte[] pattern )
+        {
+            return Scan( pHandle, processModule, nullAsWildCard, progressCallBack: null, pattern );
+        }
+        public static IEnumerable<IntPtrEx> Scan( IntPtrEx pHandle, ProcessModule processModule, bool nullAsWildCard, Action<float> progressCallBack, params byte[] pattern )
         {
             int bufferSize = CalculateBufferSize(processModule.ModuleMemorySize);
             IntPtrEx address = processModule.BaseAddress;
             IntPtrEx endAddress = address + processModule.ModuleMemorySize;
 
+            float totalMemory = processModule.ModuleMemorySize;
+            float oldProgress = 0;
 
             while ( address < endAddress )
             {
+                if ( progressCallBack != null )
+                {
+                    float progress = (int)(address - processModule.BaseAddress) / totalMemory;
+                    if ( progress - oldProgress > 0.01f )
+                    {
+                        oldProgress = progress;
+                        progressCallBack(progress);
+                    }
+                }
+
                 int remainingBytes = (int)(endAddress - address);
                 int bytesToRead = Math.Min(bufferSize, remainingBytes);
 
@@ -42,7 +50,10 @@ namespace AnotherExternalMemoryLibrary
                 address += buffer.Length;
             }
 
-            yield return IntPtrEx.Zero;
+            if ( progressCallBack != null )
+            {
+                progressCallBack(1f);
+            }
         }
 
         private static int CalculateBufferSize( int moduleSize )

@@ -19,7 +19,7 @@ namespace AnotherExternalMemoryLibrary
         public readonly static UIntPtrEx MaxValue = nuint_t.MaxValue;
         public readonly static UIntPtrEx MinValue = nuint_t.MinValue;
         public readonly static UIntPtrEx Zero = 0x0;
-
+        public string Hexadecimal => "0x" + this.ToString();
         public UIntPtrEx(nuint_t value)
         {
             this.value = value;
