@@ -1,5 +1,6 @@
 ﻿using AnotherExternalMemoryLibrary;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -92,27 +93,28 @@ namespace LiteEngine
             {
                 if ( ChooseCallingMethodComboBox.SelectedItem is ComboBoxItem comboBoxItem && comboBoxItem.Content is string callTypeName )
                 {
+                    ExecuteCallButton.IsEnabled = false;
                     switch ( callTypeName )
                     {
                         case "Callx86":
                             {
-                                ExecuteCallButton.IsEnabled = false;
                                 int returninfo = await HandleCallx86();
                                 MessageBox.Show(returninfo.ToString(), "Callx86 Return Information");
-                                ExecuteCallButton.IsEnabled = true;
-                                return;
+                                break;
                             }
                         case "Callx64":
                             {
                                 HandleCallx64();
-                                return;
+                                break;
                             }
                         case "UserCallx86":
                             {
                                 HandleUserCallx86();
-                                return;
+                                break;
                             }
                     }
+                    await Task.Delay(1000);
+                    ExecuteCallButton.IsEnabled = true;
                 }
             }
             catch(Win32Exception)
@@ -146,26 +148,51 @@ namespace LiteEngine
 
                 return await RemoteProcedureCall.Callx86(process.Handle, address, maxReturnAttempts: 5, parameters: parameters.ToArray());
             }
-
-
-
-            
         }
         private void HandleCallx64()
         {
             Process process = MainWindow.Instance.SelectedProcessComboBox.SelectedItem as Process;
 
 
-
+            throw new NotImplementedException();
             //RemoteProcedureCall.Callx64(process.Handle);
         }
         private void HandleUserCallx86()
         {
             Process process = MainWindow.Instance.SelectedProcessComboBox.SelectedItem as Process;
+            IntPtrEx address = Convert.ToInt32(CallingAddressTextBox.Text.Replace("0x", string.Empty), 16);
 
+            Dictionary<string, object> parameters = new Dictionary<string, object>()
+            {
+                [ "EAX" ] = null,
+                [ "ECX" ] = null,
+                [ "EDX" ] = null,
+                [ "EBX" ] = null,
+                [ "ESP" ] = null,
+                [ "EBP" ] = null,
+                [ "ESI" ] = null,
+                [ "EDI" ] = null
+            };
+            foreach ( var gridobj in ParameterStackPanel.Children )
+            {
+                Grid grid = gridobj as Grid;
+                ComboBox dataTypeComboBox = grid.Children[ 0 ] as ComboBox;
+                ComboBox registerComboBox = grid.Children[ 1 ] as ComboBox;
+                TextBox parameterInputTextBox = grid.Children[ 2 ] as TextBox;
+                Type dataType = dataTypeComboBox.SelectedItem as Type;
+                string register = registerComboBox.SelectedItem as string;
 
-
-            //RemoteProcedureCall.UserCallx86(process.Handle);
+                parameters[ register ] = Convert.ChangeType(parameterInputTextBox.Text, dataType);
+            }
+            RemoteProcedureCall.UserCallx86(process.Handle, address, 
+                parameters[ "EAX" ], 
+                parameters[ "ECX" ], 
+                parameters[ "EDX" ], 
+                parameters[ "EBX" ], 
+                parameters[ "ESP" ],
+                parameters[ "EBP" ],
+                parameters[ "ESI" ], 
+                parameters[ "EDI" ]);
         }
 
         
