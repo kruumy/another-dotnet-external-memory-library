@@ -110,5 +110,14 @@ namespace LiteEngine
         {
             SelectedModuleComboBox.SelectedIndex = 0;
         }
+
+        private void OpenRPCWindowButton_Click( object sender, RoutedEventArgs e )
+        {
+            if(SelectedProcessComboBox.SelectedItem is Process process)
+            {
+                RPCWindow rPCWindow = new RPCWindow();
+                rPCWindow.ShowDialog();
+            }
+        }
     }
 }

@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:LiteEngine"
         mc:Ignorable="d"
         Title="LiteEngine" Height="450" Width="800" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}" >
-
+    <Window.Resources>
+        <local:EqualityConverter x:Key="EqualityConverter"></local:EqualityConverter>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
@@ -82,16 +84,10 @@
 
             </GridSplitter>
 
-            <Grid Grid.Column="2">
+            <StackPanel Grid.Column="2">
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"></RowDefinition>
-                    <RowDefinition Height="auto"></RowDefinition>
-                    <RowDefinition Height="auto"></RowDefinition>
-                    <RowDefinition Height="auto"></RowDefinition>
-                </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="auto"></ColumnDefinition>
@@ -117,7 +113,7 @@
                 </Grid>
 
 
-                <Grid Grid.Row="1">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -144,7 +140,25 @@
                     
                 </Grid>
 
-            </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="OpenRPCWindowButton"
+                            Content="Open RPC Window"
+                            Margin="3"
+                            Click="OpenRPCWindowButton_Click">
+                        
+                    </Button>
+                    
+                </Grid>
+                
+
+            </StackPanel>
             
         </Grid>
             
