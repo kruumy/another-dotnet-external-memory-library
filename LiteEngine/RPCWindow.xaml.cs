@@ -146,16 +146,32 @@ namespace LiteEngine
                     parameters.Add(Convert.ChangeType(parameterInputTextBox.Text,dataType));
                 }
 
-                return await RemoteProcedureCall.Callx86(process.Handle, address, maxReturnAttempts: 5, parameters: parameters.ToArray());
+                return await RemoteProcedureCall.Callx86(process.Handle, address, maxReturnAttempts: 10, parameters: parameters.ToArray());
             }
         }
         private void HandleCallx64()
         {
             Process process = MainWindow.Instance.SelectedProcessComboBox.SelectedItem as Process;
+            IntPtrEx address = Convert.ToInt64(CallingAddressTextBox.Text.Replace("0x", string.Empty), 16);
+            if ( ParameterStackPanel.Children.Count <= 0 )
+            {
+                RemoteProcedureCall.Callx64(process.Handle, address, Array.Empty<ValueType>());
+            }
+            else
+            {
+                List<object> parameters = new List<object>(ParameterStackPanel.Children.Count);
+                foreach ( var gridobj in ParameterStackPanel.Children )
+                {
+                    Grid grid = gridobj as Grid;
+                    ComboBox dataTypeComboBox = grid.Children[ 0 ] as ComboBox;
+                    TextBox parameterInputTextBox = grid.Children[ 2 ] as TextBox;
+                    Type dataType = dataTypeComboBox.SelectedItem as Type;
 
+                    parameters.Add(Convert.ChangeType(parameterInputTextBox.Text, dataType));
+                }
 
-            throw new NotImplementedException();
-            //RemoteProcedureCall.Callx64(process.Handle);
+                RemoteProcedureCall.Callx64(process.Handle, address, parameters.ToArray());
+            }
         }
         private void HandleUserCallx86()
         {

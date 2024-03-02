@@ -10,6 +10,12 @@ namespace AnotherExternalMemoryLibrary
 {
     public static class RemoteProcedureCall
     {
+        public static void Callx64( IntPtrEx Handle, IntPtrEx Address, params object[] parameters )
+        {
+            AllocateNonValueTypes(Handle, parameters, out ValueType[] newParameters, out IDisposable[] allocs);
+            Callx64(Handle, Address, newParameters);
+            allocs.Dispose();
+        }
         public static void Callx64(IntPtrEx Handle, IntPtrEx Address, params ValueType[] parameters)
         {
             using (ExternalAlloc mainAlloc = new ExternalAlloc(Handle, GetParametersSize(parameters, 15) + 12u)) // TODO change later
