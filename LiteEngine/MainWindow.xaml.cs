@@ -1,5 +1,6 @@
 ﻿using AnotherExternalMemoryLibrary;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -44,7 +45,8 @@ namespace LiteEngine
             typeof(long),
             typeof(ulong),
             typeof(short), 
-            typeof(ushort), 
+            typeof(ushort),
+            typeof(byte[])
         };
 
         private ScanInstance scanInstance;
