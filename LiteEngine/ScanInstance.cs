@@ -28,7 +28,7 @@ namespace LiteEngine
                     return ScanProcessMemory.Scan(
                         MainWindow.Instance.Dispatcher.Invoke(() => MainWindow.Instance.SelectedProcessComboBox.SelectedItem as Process).Handle,
                         MainWindow.Instance.Dispatcher.Invoke(() => MainWindow.Instance.SelectedProcessComboBox.SelectedItem as Process).MainModule,
-                        false,
+                        value.GetType() == typeof(byte[]),
                         ( float progress ) => { MainWindow.Instance.Dispatcher.Invoke(() => { MainWindow.Instance.MainProgressBar.Value = progress; });  },
                         value.ToByteArrayUnsafe()).ToList();
                 });
